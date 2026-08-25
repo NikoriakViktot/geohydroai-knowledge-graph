@@ -1,0 +1,38 @@
+
+version: "3.9"
+
+services:
+
+  # ─────────────────────────────────────────
+  # Neo4j — графова БД
+  # ─────────────────────────────────────────
+  neo4j:
+    image: neo4j:5
+    container_name: course-neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: neo4j/python2024
+    ports:
+      - "7474:7474"    # Neo4j Browser (HTTP веб-інтерфейс)
+      - "7473:7473"    # Neo4j Browser (HTTPS)
+      - "7687:7687"    # Bolt protocol (драйвер Python)
+    volumes:
+      - neo4jdata:/data
+
+  # ─────────────────────────────────────────
+  # GROBID — PDF → structured XML/JSON
+  # ─────────────────────────────────────────
+  grobid:
+    image: grobid/grobid:0.9.0-full
+    container_name: grobid
+    restart: unless-stopped
+    ports:
+      - "8070:8070"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+
+volumes:
+  neo4jdata:

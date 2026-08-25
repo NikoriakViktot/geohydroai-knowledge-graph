@@ -1,0 +1,84 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+.env/
+.env/
+
+.hf_cache/
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data — PDFs and large files are not committed
+data/
+data/literature/*.pdf
+data/literature/*.PDF
+*.tif
+*.nc
+*.h5
+*.parquet
+*.pdf
+
+# Vector store (auto-generated, can be large)
+.chromadb/
+
+# Outputs — CSV results are not committed by default
+outputs/*.csv
+
+# Logs
+*.log
+rag_pipeline.log
+
+# Model cache (sentence-transformers downloads here)
+.cache/
+models/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.local
+
+
+src/ingestion/.hf_cache/
+
+.hf_cache
+
+src/paper_audit/
+paper_my/
+notebooks/
+figures/
+outputs/
+debug/
+
+flood_mapping_eda.ipynb
+flood_rag_analysis.ipynb
+references_validation.csv
+references_validated.bib
+neo4j_schema.cypher
+.pipeline_stop
+=4.0
+=23.0
+.chromadb
+.chromadb_backup_20260520
+.claude
