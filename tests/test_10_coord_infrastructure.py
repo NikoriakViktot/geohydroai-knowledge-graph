@@ -254,6 +254,47 @@ class TestFloatChunks(unittest.TestCase):
         self.assertIsNone(form_chunks[0].bbox)
 
 
+class TestSentenceChunkIdUniqueness(unittest.TestCase):
+    """Sentence chunk_ids must be unique per document.
+
+    Sentence keys index within a paragraph, so a running header repeated at
+    the same position in two paragraphs of one section collides.  ChromaDB
+    rejects the whole upsert batch on duplicate IDs (observed on 14/119 papers
+    in the 2026-09-18 paper_3 run), so the chunker must dedupe.
+    """
+
+    def _doc(self):
+        from src.document.models import Paragraph, Section, Sentence, TEIDocument
+
+        header = Sentence(xml_id="s0", text="ISSN 1992-4224 Journal running header.",
+                          coords=None, citations=())
+        body_a = Sentence(xml_id="s1", text="First unique body sentence of paragraph A.",
+                          coords=None, citations=())
+        body_b = Sentence(xml_id="s2", text="Second unique body sentence of paragraph B.",
+                          coords=None, citations=())
+        section = Section(
+            title="Results", level=1, n="",
+            paragraphs=[Paragraph(sentences=(header, body_a)),
+                        Paragraph(sentences=(header, body_b))],
+            subsections=[],
+        )
+        doc = MagicMock(spec=TEIDocument)
+        doc.paper_id = "papDup"
+        doc.abstract = ""
+        doc.sections = [section]
+        doc.figures = doc.tables = doc.formulas = []
+        return doc
+
+    def test_repeated_sentence_at_same_index_yields_unique_ids(self):
+        from src.document.chunker import LayoutAwareChunker
+        chunks = LayoutAwareChunker(strategy="sentence", min_text_length=1).chunk(self._doc())
+        ids = [c.chunk_id for c in chunks]
+        self.assertEqual(len(ids), len(set(ids)))
+        # the repeated header survives once; both unique sentences survive
+        self.assertEqual(len(chunks), 3)
+        self.assertEqual(sum("running header" in c.text for c in chunks), 1)
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Phase 2 — entity_grounder
 # ─────────────────────────────────────────────────────────────────────────────

@@ -135,7 +135,19 @@ class LayoutAwareChunker:
         chunks.extend(self._table_chunks(doc))
         chunks.extend(self._formula_chunks(doc))
 
-        return [c for c in chunks if len(c.text) >= self._min_len]
+        # Sentence keys index within a paragraph, so a sentence repeated at
+        # the same position in two paragraphs of one section (running headers,
+        # journal footers) yields the same chunk_id.  ChromaDB rejects a batch
+        # with duplicate IDs, so keep the first occurrence only — identical
+        # text under one id is what an upsert would collapse to anyway.
+        seen: set[str] = set()
+        unique: list[DocumentChunk] = []
+        for c in chunks:
+            if len(c.text) < self._min_len or c.chunk_id in seen:
+                continue
+            seen.add(c.chunk_id)
+            unique.append(c)
+        return unique
 
     # ── Abstract ──────────────────────────────────────────────────────────────
 

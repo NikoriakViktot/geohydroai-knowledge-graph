@@ -60,6 +60,7 @@ Architecture:
     ├── SpacyActor      (1 instance, ~300 MB with en_core_web_sm)
     ├── EmbeddingActor  (1 instance, ~600 MB)
     ├── OllamaActor     (1 instance, max_concurrency=2)
+    ├── VectorStoreActor (1 instance, ~4.5 GB — the only ChromaDB client)
     └── process_paper   (≤ MAX_IN_FLIGHT tasks active at once)
 """
 
@@ -79,6 +80,7 @@ from tqdm import tqdm
 from src.actors.embedding_actor import EmbeddingActor
 from src.actors.spacy_actor import SpacyActor
 from src.actors.ollama_actor import OllamaActor
+from src.actors.vectorstore_actor import VectorStoreActor
 from src.config.settings import XML_DIR, OUT_DIR, RAY_MAX_CONCURRENT, SPACY_MODEL
 from src.ingestion.pipeline import json_safe
 from src.orchestration.process_paper import process_paper
@@ -172,12 +174,14 @@ def run_distributed(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # ── 2. Create actors ONCE — shared by all tasks ───────────────────────
-    embedding_actor = EmbeddingActor.remote()
-    spacy_actor     = SpacyActor.remote()
-    ollama_actor    = OllamaActor.remote()
+    embedding_actor   = EmbeddingActor.remote()
+    spacy_actor       = SpacyActor.remote()
+    ollama_actor      = OllamaActor.remote()
+    vectorstore_actor = VectorStoreActor.remote()
 
     log.info(
-        "Actors ready: EmbeddingActor | SpacyActor (model=%s) | OllamaActor",
+        "Actors ready: EmbeddingActor | SpacyActor (model=%s) | OllamaActor "
+        "| VectorStoreActor",
         SPACY_MODEL,
     )
 
@@ -253,6 +257,7 @@ def run_distributed(
             ollama_actor,
             str(out_dir),   # passed as string — Ray serialises task args
             overwrite,
+            vectorstore_actor=vectorstore_actor,
         )
         pending[ref] = xml_path
         log.info("[%d in-flight] submitted: %s", len(pending), xml_path.name)

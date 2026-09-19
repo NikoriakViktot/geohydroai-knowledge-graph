@@ -91,6 +91,19 @@ def _save_normalized(paper: dict) -> None:
         log.warning("[normalize] failed to save normalized paper: %s", exc)
 
 
+def _log_mem(tag: str, xml_name: str) -> None:
+    """Log this worker's RSS at a checkpoint (diagnostic only; never raises)."""
+    try:
+        import psutil
+        rss = psutil.Process().memory_info().rss / 1024**2
+        msg = f"[mem] {tag:<24} rss={rss:7.0f} MB — {xml_name}"
+        log.info(msg)
+        # worker loggers are unconfigured; stdout is forwarded by Ray to the driver
+        print(msg, flush=True)
+    except Exception:
+        pass
+
+
 # ── P1-T4: regions.parquet helpers ───────────────────────────────────────────
 
 def _load_regions(paper_id: str) -> list[dict] | None:
@@ -267,7 +280,13 @@ def _make_encode_fn(embedding_actor):
 # Ray task
 # ─────────────────────────────────────────────────────────────────────────────
 
-@ray.remote
+# memory= is scheduler admission control (not a hard limit).  Measured
+# 2026-09-18: a worker peaks at ~1 GB before Chroma; the ~4.5 GB HNSW load
+# now lives in VectorStoreActor, so 3 GiB leaves headroom for the lazily
+# loaded normalization model (embedding_matcher) and lets 2–3 tasks
+# co-schedule on a 15.5 GB node.  max_calls=1 recycles the worker after each
+# paper so retained native memory (torch) cannot accumulate across papers.
+@ray.remote(num_cpus=1, memory=3 * 1024**3, max_calls=1)
 def process_paper(
     xml_path: str,
     embedding_actor,
@@ -275,6 +294,7 @@ def process_paper(
     ollama_actor,
     out_dir: str = "",
     overwrite: bool = False,
+    vectorstore_actor=None,
 ) -> dict:
     """
     Distributed Ray task: process a single TEI XML paper.
@@ -289,6 +309,9 @@ def process_paper(
                          Falls back to settings.OUT_DIR when empty.
         overwrite:       When False (default), skip if .paper.json exists.
                          When True, reprocess unconditionally.
+        vectorstore_actor: Ray actor handle — VectorStoreActor (single ChromaDB
+                         writer).  When None, the task opens ChromaDB itself
+                         (legacy path; costs ~4.5 GB RSS per worker).
 
     Returns:
         Fully extracted, validated, JSON-serialisable paper dict, or
@@ -324,10 +347,12 @@ def process_paper(
         return {"_status": "SKIPPED", "paper_id": paper_id}
 
     log.info("[process_paper] start — %s", xml_path.name)
+    _log_mem("start", xml_path.name)
 
     # ── 1. Parse TEI; submit NER immediately so it overlaps with cleanup ──
     doc       = TEIParser().parse_file(xml_path, paper_id)
     full_text = doc.body_text()
+    _log_mem("after_parse", xml_path.name)
 
     # coordinate validation runs inline — cheap, non-fatal
     try:
@@ -382,6 +407,8 @@ def process_paper(
         ner_entities=ner_entities,
     )
 
+    _log_mem("after_build_paper_json", xml_path.name)
+
     # ── P1-T5 / P2: SODB extraction (numeric facts, formulas, tables) ──────
     # All three run while doc is still alive; SODBWriter handles atomic writes.
     from src.document.sodb_manifest import SODBManifest
@@ -411,13 +438,28 @@ def process_paper(
     # ── 5. Layout-aware chunking → ChromaDB (while doc is still alive) ───
     try:
         from src.document import LayoutAwareChunker
-        from src.vectorstore.chroma_store import VectorStore
 
         chunks = LayoutAwareChunker(strategy="sentence").chunk(doc)
+        _log_mem(f"after_chunking n={len(chunks)}", xml_path.name)
         if chunks:
             chunk_texts = [c.text for c in chunks]
             chunk_vecs  = np.array(encode_fn(chunk_texts), dtype=np.float32)
-            VectorStore().upsert_document_chunks(chunks, chunk_vecs)
+            _log_mem("after_chunk_embeddings", xml_path.name)
+            if vectorstore_actor is not None:
+                from src.orchestration.retry import retry_call
+                retry_call(
+                    lambda: ray_get(
+                        vectorstore_actor.upsert_document_chunks.remote(
+                            chunks, chunk_vecs.tolist()),
+                        label="VectorStoreActor.upsert"),
+                    label="vectorstore_upsert",
+                )
+            else:
+                from src.vectorstore.chroma_store import VectorStore
+                _vs = VectorStore()
+                _log_mem("after_vectorstore_init", xml_path.name)
+                _vs.upsert_document_chunks(chunks, chunk_vecs)
+            _log_mem("after_vectorstore_add", xml_path.name)
             log.info("[process_paper] chunked %d chunks → ChromaDB — %s",
                      len(chunks), xml_path.name)
     except Exception as exc:
@@ -433,7 +475,8 @@ def process_paper(
     paper = _normalize_paper_entities(paper)
     _validate_normalized_schema(paper)   # sets provenance.normalized_schema_valid; never raises
     _save_normalized(paper)
-    unmatched_count = len(paper.get("provenance", {}).get("unmatched_entities", []))
+    _log_mem("after_normalization", xml_path.name)
+    unmatched_count =len(paper.get("provenance", {}).get("unmatched_entities", []))
     schema_valid    = paper.get("provenance", {}).get("normalized_schema_valid", None)
     log.info(
         "[process_paper] normalization done (unmatched=%d, schema_valid=%s) — %s",

@@ -56,7 +56,8 @@ def _run_distributed_mocked(xml_dir, out_dir, **kwargs):
     with patch("src.orchestration.pipeline_runner.ray", mock_ray), \
          patch("src.orchestration.pipeline_runner.EmbeddingActor", _mock_actor()), \
          patch("src.orchestration.pipeline_runner.SpacyActor", _mock_actor()), \
-         patch("src.orchestration.pipeline_runner.OllamaActor", _mock_actor()):
+         patch("src.orchestration.pipeline_runner.OllamaActor", _mock_actor()), \
+         patch("src.orchestration.pipeline_runner.VectorStoreActor", _mock_actor()):
         try:
             result = run_distributed(xml_dir=xml_dir, out_dir=out_dir, **kwargs)
         except Exception:
