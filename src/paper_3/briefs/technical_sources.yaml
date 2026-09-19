@@ -162,3 +162,52 @@
   status: url_needed
   mandatory: false
   note: "Indexed in OpenAlex, so it is also a candidate positive control for T08/T10 (theses.yaml, unread). The harvest resolves its PDF by DOI."
+
+# ── Sources supplied by the author on 2026-09-19 that retrieval can never
+#    recover on its own: a manuscript still under review (no DOI) and an
+#    institutional report. Listed here so they can be cited, never as controls.
+
+- id: SHUMILOVA_FAREWELL_TO_A_DAM
+  source_type: curated_paper
+  title: "A Farewell to a Dam: ecological impacts of the Kakhovka Reservoir ravaging by warfare in Ukraine"
+  identifier: "submitted manuscript adn8655 (67 pp., template revised November 2023)"
+  issuer: "Shumilova O., Sukhodolov A., Osadcha N., Oreshchenko A., Constantinescu G., Afanasyev S., et al."
+  bears_on: [hydrodynamic_modelling, roughness, ecological_impact]
+  draft_citation: "Shumilova et al. (under review) — A Farewell to a Dam, hydrodynamic computation with Manning n = 0.035"
+  formal_citation: "Shumilova, O., Sukhodolov, A., Osadcha, N., Oreshchenko, A., Constantinescu, G., Afanasyev, S., et al. (under review). A Farewell to a Dam: ecological impacts of the Kakhovka Reservoir ravaging by warfare in Ukraine. Manuscript adn8655."
+  url: ""
+  status: url_needed
+  mandatory: false
+  note: >-
+    Read 2026-09-19; full text ingested into the corpus as
+    `shumilova_farewell_to_a_dam_adn8655` (881 chunks) so it is retrievable,
+    but it CANNOT be a positive control: no DOI, so retrieval could never
+    recover it unaided. Flow-3D shallow-water computation with a SINGLE
+    Manning n = 0.035 and an inflow ramped to 29 000 m3/s over 50 minutes —
+    the contrast case for the Paper 2 argument that the roughness of this
+    surface is neither single-valued nor constant in time. Also reports
+    899 km2 of reed belts and 648 km2 of silty sand. Replace this entry with
+    the DOI once it is published.
+
+- id: UHMI_2023_FLOODED_SETTLEMENTS
+  source_type: curated_paper
+  title: "«Доля» населених пунктів, затоплених внаслідок будівництва Каховського водосховища"
+  identifier: "report of 7 September 2023, 28 paragraphs + 1 table, figs. 1-7"
+  issuer: "Український гідрометеорологічний інститут ДСНС України та НАН України"
+  bears_on: [historical_baseline, pre_impoundment_land_cover]
+  draft_citation: "УкрГМІ (2023) — доля населених пунктів, затоплених при будівництві Каховського водосховища"
+  formal_citation: "Український гідрометеорологічний інститут ДСНС України та НАН України (2023). «Доля» населених пунктів, затоплених внаслідок будівництва Каховського водосховища. Звіт від 07.09.2023."
+  url: ""
+  status: url_needed
+  mandatory: false
+  note: >-
+    Supplied by the author 2026-09-19 as .docx; not ingested (GROBID does not
+    read .docx and it is grey literature without a DOI). Value for the
+    manuscripts: the pre-impoundment state of the same surface, from
+    1:100 000 topographic maps of 1947-48 and 1958 compared against modern
+    imagery — 70 settlements affected, 68 villages and the towns Kakhovka and
+    Beryslav, about 25 villages effectively gone; the valley before flooding
+    carried "трав'яна та чагарникова рослинність, а також рідколісся" with a
+    dense hydrographic network. That is the reference state the exposed bed is
+    reverting towards (Paper 2, Section 6.9) and an independent historical
+    source beside the monograph for Paper 1.
