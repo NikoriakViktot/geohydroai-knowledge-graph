@@ -1009,6 +1009,22 @@
       source_of_control: external_search
       manually_checked: false
       note: "Tutova et al. 2025, Studia Biologica — afforestation and ecosystem-service recovery through willow/poplar communities (SRC-20; in corpus)."
+    - doi: "10.26565/1992-4224-2026-45-07"
+      role: holdout
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: external_search
+      manually_checked: false
+      note: "2026 — Sentinel-2 spatio-temporal transformation of the Kakhovka reservoir after dam destruction: the closest competitor to the Paper 2 surface series; found 2026-09-19 by OpenAlex discovery."
+    - doi: "10.15421/032510"
+      role: development
+      relevance: analogue
+      expected_stage: semantic_retrieval
+      difficulty: hard
+      source_of_control: external_search
+      manually_checked: false
+      note: "2025 — floodplain forests of Khortytsia island under the post-catastrophic hydrological regime (Kakhovka-adjacent, not OA)."
   expected_relations: [SUPPORTS, ANALOGUE, METHOD_RELEVANT]
   manuscript_anchor: "6.9 Vegetation succession on the exposed bed"
   numeric_anchor: "84 %"
@@ -1368,6 +1384,22 @@
       source_of_control: external_search
       manually_checked: false
       note: "Box, Järvelä & Västilä 2022 — emergent-to-submerged resistance formulas."
+    - doi: "10.1007/s13280-010-0120-6"
+      role: development
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: external_search
+      manually_checked: false
+      note: "Makaske et al. 2011, Ambio — influence of floodplain vegetation succession on hydraulic roughness (Dutch embanked Rhine floodplains); the closest precedent for the succession → roughness → flood-level argument. Found 2026-09-19."
+    - doi: "10.1002/rra.778"
+      role: holdout
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: hard
+      source_of_control: external_search
+      manually_checked: false
+      note: "2004, River Research and Applications — cyclic floodplain rejuvenation on the Rhine: effects on flood levels and biodiversity (not OA)."
   expected_relations: [SUPPORTS, ANALOGUE]
   manuscript_anchor: "7.6 Conveyance implications"
   numeric_anchor: "0.032 → 0.063"
