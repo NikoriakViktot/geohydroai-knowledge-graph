@@ -1015,8 +1015,36 @@
       expected_stage: semantic_retrieval
       difficulty: easy
       source_of_control: external_search
-      manually_checked: false
-      note: "2026 — Sentinel-2 spatio-temporal transformation of the Kakhovka reservoir after dam destruction: the closest competitor to the Paper 2 surface series; found 2026-09-19 by OpenAlex discovery."
+      manually_checked: true
+      quote: "результати мають індикативний характер"
+      supports_what: >
+        That Sentinel-2 NDWI/NDVI show the post-breach transformation of the
+        Kakhovka bed qualitatively, and that a multi-year series with S1, MNDWI,
+        moisture indices, classification and a DEM is the stated next step.
+      does_not_support: >
+        Any area figure or rate: three scenes (25.05, 25.06, 03.10.2023), visual
+        interpretation and one NDVI histogram in a selected window; the authors
+        state there is no vector mask, no area computation and no validation.
+      note: "Maksymenko & Bezsonnyi 2026 (SRC-22). READ 2026-09-19: NOT a competitor to the Paper 2 series — it establishes date priority and names our design as the desirable next step. The competitor is Lischenko et al. 2025 below."
+    - doi: "10.36023/ujrs.2025.12.4.296"
+      role: holdout
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: citation
+      manually_checked: true
+      quote: "never water 41.62 %, ... always water 6 %"
+      section: "Results, water frequency classes of the bed"
+      supports_what: >
+        Water-frequency mapping of the drained Kakhovka bed from 12 cloud-free
+        Sentinel-2 scenes (2023-06-20..2024-09-26, binary NDWI in GEE, six
+        frequency classes): never water 41.62 %, 1-25 % 20.62 %, 25-50 % 23.71 %,
+        50-75 % 5.76 %, 75-99 % 2.5 %, always water 6 %; water surface 37 % of the
+        bed in May 2024 falling to 8.2 % in September 2024.
+      does_not_support: >
+        Surface classes beyond water/non-water, roughness, any 2025-2026 state, or
+        any statement about the 2017-2022 baseline.
+      note: "Lischenko, Kozlova & Andreiev 2025, Ukr. J. Remote Sensing 12(4) (SRC-23). THE nearest competitor to the Paper 2 surface series; found via the reference list of SRC-22 and read 2026-09-19."
     - doi: "10.15421/032510"
       role: development
       relevance: analogue

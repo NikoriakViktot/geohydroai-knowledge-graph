@@ -198,3 +198,34 @@ def test_supplement_only_theses_exist_and_stay_in_block_k(theses):
     by_id = {t.id: t for t in theses}
     for tid in SUPPLEMENT_ONLY_THESES:
         assert by_id[tid].block == "K"
+
+
+def test_flat_supports_what_is_read_like_quote(theses):
+    """The loader documents flat keys as accepted; supports_what silently vanished
+    while the validator demanded it, which made a verified control unrepresentable."""
+    from src.paper_3.theses import load_theses
+    import tempfile, yaml
+    from pathlib import Path
+    t = theses[0]
+    entry = {"id": "T01", "block": t.block, "statement": t.statement, "rationale": "r",
+             "search_queries": list(t.search_queries), "openalex_queries": list(t.openalex_queries),
+             "key_terms": [list(f) for f in t.key_terms], "negative_terms": [],
+             "expected_relations": list(t.expected_relations),
+             "manuscript_anchor": t.manuscript_anchor,
+             "positive_controls": [{"doi": "10.1/flat", "manually_checked": True,
+                                    "quote": "q", "supports_what": "S", "does_not_support": "D"}]}
+    with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False, encoding="utf-8") as fh:
+        yaml.safe_dump([entry], fh, allow_unicode=True)
+        path = Path(fh.name)
+    c = load_theses(path)[0].positive_controls[0]
+    assert c.supports_what == "S" and c.does_not_support == "D" and c.verified
+
+
+def test_t25_records_what_the_read_precedents_do_not_support(theses):
+    """Read 2026-09-19: Maksymenko 2026 has no areas to compare; Lischenko 2025 has."""
+    t25 = {c.doi: c for c in get_thesis("T25", theses).positive_controls}
+    mak = t25["10.26565/1992-4224-2026-45-07"]
+    assert mak.verified and "no area computation" in mak.does_not_support.lower() \
+        or "area figure" in mak.does_not_support.lower()
+    lis = t25["10.36023/ujrs.2025.12.4.296"]
+    assert lis.verified and "41.62" in lis.supports_what

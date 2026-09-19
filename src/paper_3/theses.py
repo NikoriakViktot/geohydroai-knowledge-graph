@@ -293,8 +293,10 @@ def load_theses(path: Path | str = THESES_PATH) -> list[Thesis]:
                 quote=(ev.get("quote") or c.get("quote") or "").strip(),
                 section=(ev.get("section") or c.get("section") or "").strip(),
                 page=str(ev.get("page") or c.get("page") or "").strip(),
-                supports_what=(ev.get("supports_what") or "").strip(),
-                does_not_support=(ev.get("does_not_support") or "").strip(),
+                supports_what=(ev.get("supports_what")
+                               or c.get("supports_what") or "").strip(),
+                does_not_support=(ev.get("does_not_support")
+                                  or c.get("does_not_support") or "").strip(),
                 note=(c.get("note") or "").strip(),
                 excluded=bool(c.get("excluded", False)),
                 exclusion_reason=(c.get("exclusion_reason") or "").strip(),
