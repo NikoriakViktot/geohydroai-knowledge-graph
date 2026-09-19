@@ -18,6 +18,7 @@ imports:
   - table: outputs/tables/manuscript_evidence_matrix.csv
     family: legacy_matrix
     status_map: matrix
+    paper: 1
     columns:
       id: claim_id
       statement: claim
@@ -32,6 +33,7 @@ imports:
   - table: audit_runs/20260918T175108Z/claim_evidence_matrix.csv
     family: audit_C
     status_map: audit
+    paper: 1
     columns:
       id: claim_id
       statement: claim_text
@@ -43,6 +45,7 @@ imports:
 claims:
   # ── vertical-reference provenance (from the 2026-09-18 article audit) ────────
   - id: G1
+    paper: 1
     family: vertical_reference
     claim_type: provenance
     statement: >
@@ -65,6 +68,7 @@ claims:
     remaining_action: none
     blocks_submission: "no"
   - id: G2
+    paper: 1
     family: vertical_reference
     claim_type: provenance
     statement: >
@@ -81,6 +85,7 @@ claims:
 
   # ── S1: vegetation succession on the former water surface ─────────────────
   - id: S1.1
+    paper: 2
     family: vegetation
     claim_type: area_series
     statement: >
@@ -107,6 +112,7 @@ claims:
     remaining_action: "label validation_sample_design_2025.csv before any accuracy or area-error statement"
     blocks_submission: "no"
   - id: S1.1a
+    paper: 2
     family: vegetation
     claim_type: area_series
     statement: "Vegetated share of the former water surface in the first leaf-on season (2023)."
@@ -123,6 +129,7 @@ claims:
     table_id: T6
     blocks_submission: "no"
   - id: S1.1b
+    paper: 2
     family: vegetation
     claim_type: area_series
     statement: "Vegetated share of the former water surface in 2024."
@@ -139,6 +146,7 @@ claims:
     table_id: T6
     blocks_submission: "no"
   - id: S1.2
+    paper: 2
     family: vegetation
     claim_type: class_areas
     statement: >
@@ -160,6 +168,7 @@ claims:
     scientific_caveat: "Area with ≥2 leaf-on observations shrinks to 1 258 km² in 2025 (12 dates but partial coverage)."
     blocks_submission: "no"
   - id: S1.2a
+    paper: 2
     family: vegetation
     claim_type: class_areas
     statement: "Mode-class areas of the former water surface in 2023 (first exposure)."
@@ -175,6 +184,7 @@ claims:
     table_id: T6
     blocks_submission: "no"
   - id: S1.2b
+    paper: 2
     family: vegetation
     claim_type: class_areas
     statement: "Mode-class areas of the former water surface in 2024 (reed maximum)."
@@ -190,6 +200,7 @@ claims:
     table_id: T6
     blocks_submission: "no"
   - id: S1.5
+    paper: 2
     family: vegetation
     claim_type: domain_definition
     statement: "The analysis domain is the former water surface: pool polygon ∧ pre-breach mode water."
@@ -205,6 +216,7 @@ claims:
     blocks_submission: "no"
 
   - id: S1.3
+    paper: 2
     family: vegetation
     claim_type: transition_matrix
     statement: >
@@ -225,6 +237,7 @@ claims:
     scientific_caveat: "Mode classes on leaf-on dates; area with ≥2 observations in both years only."
     blocks_submission: "no"
   - id: S1.4
+    paper: 2
     family: vegetation
     claim_type: first_event_timing
     statement: >
@@ -246,6 +259,7 @@ claims:
 
   # ── W1: woody encroachment (Dynamic World) ────────────────────────────────
   - id: W1.1
+    paper: 2
     family: woody
     claim_type: land_cover_probability
     statement: >
@@ -269,6 +283,7 @@ claims:
     remaining_action: "DW 2025/2026 frames once EE quota allows"
     blocks_submission: "no"
   - id: W1.2
+    paper: 2
     family: woody
     claim_type: layer_statistics
     statement: "ICESat-2 20 m canopy_ok segments over the former pool multiply after the breach."
@@ -284,6 +299,7 @@ claims:
 
   # ── H1: ICESat-2 ATL08 layers ─────────────────────────────────────────────
   - id: H1.1
+    paper: 2
     family: atl08
     claim_type: layer_statistics
     statement: >
@@ -301,6 +317,7 @@ claims:
     scientific_caveat: "Distribution per year only; no change claim (H1.2)."
     blocks_submission: "no"
   - id: H1.2
+    paper: 2
     family: atl08
     claim_type: negative_result
     statement: >
@@ -322,6 +339,8 @@ claims:
 
   # ── K1: channel widening below the dam ────────────────────────────────────
   - id: K1.1
+    paper: 2
+    role: model_validation
     family: channel
     claim_type: width_series
     statement: >
@@ -345,6 +364,8 @@ claims:
     scientific_caveat: "Water contour ≠ geomorphic bank; bank displacement at the 40 m detection limit; arms counted along transects (no RivGraph)."
     blocks_submission: "no"
   - id: K1.1a
+    paper: 2
+    role: model_validation
     family: channel
     claim_type: width_series
     statement: "Pre-breach reference width (2019, six dates)."
@@ -360,6 +381,8 @@ claims:
     figure_id: F9
     blocks_submission: "no"
   - id: K1.1b
+    paper: 2
+    role: model_validation
     family: channel
     claim_type: width_series
     statement: "Breach-year width and braiding (2023, thirteen dates)."
@@ -375,6 +398,7 @@ claims:
     figure_id: F9
     blocks_submission: "no"
   - id: K1.2
+    paper: 2
     family: channel
     claim_type: geometry
     statement: "Transect geometry of the channel-width analysis."
@@ -390,6 +414,7 @@ claims:
 
   # ── N1: Manning roughness translation ─────────────────────────────────────
   - id: N1.1
+    paper: 2
     family: roughness
     claim_type: roughness_transition
     statement: >
@@ -414,6 +439,7 @@ claims:
     remaining_action: "hydraulic calibration against observed stages (HEC-RAS sensitivity design exists, not run)"
     blocks_submission: "no"
   - id: N1.1a
+    paper: 2
     family: roughness
     claim_type: roughness_transition
     statement: "Roughness step at first exposure (BREACH_2023 → FIRST_EXPOSURE_2023)."
@@ -429,6 +455,7 @@ claims:
     table_id: T5
     blocks_submission: "no"
   - id: N1.1b
+    paper: 2
     family: roughness
     claim_type: roughness_transition
     statement: "Roughness step with the 2024 reed expansion (FIRST_EXPOSURE_2023 → STATE_2024)."
@@ -444,6 +471,7 @@ claims:
     table_id: T5
     blocks_submission: "no"
   - id: N1.2
+    paper: 2
     family: roughness
     claim_type: class_areas
     statement: "Roughness-class areas of the former pool in the 2025 state (reed and young woody dominate)."
@@ -461,6 +489,7 @@ claims:
     table_id: T6
     blocks_submission: "no"
   - id: N1.2a
+    paper: 2
     family: roughness
     claim_type: class_areas
     statement: "Roughness-class areas of the former pool at the breach state (almost entirely open water)."
@@ -475,6 +504,7 @@ claims:
     table_id: T6
     blocks_submission: "no"
   - id: N1.3
+    paper: 2
     family: roughness
     claim_type: roughness_transition
     statement: "The floodway below the dam (ZONE_4) also gains roughness from the breach state to 2026."
@@ -491,6 +521,7 @@ claims:
     scientific_caveat: "Only ~1 000 km² of the 10 348 km² ZONE_4 frame is valid after the breach; BREACH_2023 row covers 6 918 km²."
     blocks_submission: "no"
   - id: N1.4
+    paper: 2
     family: roughness
     claim_type: prior_table
     statement: "Manning n prior for reed / tall herbaceous cover (WSP 2339, Chow, HEC-RAS, Järvelä)."
@@ -507,6 +538,7 @@ claims:
     scientific_caveat: "validation_ref = none; literature prior."
     blocks_submission: "no"
   - id: N1.4a
+    paper: 2
     family: roughness
     claim_type: prior_table
     statement: "Manning n prior for dense young woody cover."
@@ -524,6 +556,7 @@ claims:
 
   # ── B2: bed DEMs of the downstream zones (p28) ────────────────────────────
   - id: B2.1
+    paper: 1
     family: bed_dem_zones
     claim_type: cross_validation
     statement: "ZONE_2 (Kherson delta) pre-breach bed: soundings-only interpolation is the selected arm."
@@ -541,6 +574,7 @@ claims:
     scientific_caveat: "Constrained arms (S2 shoreline soft, p18 pseudo-points) are worse (audit C-16 CONTRADICTED); POST-breach bed is a data gap."
     blocks_submission: "no"
   - id: B2.2
+    paper: 1
     family: bed_dem_zones
     claim_type: cross_validation
     statement: "ZONE_3 (Dnipro–Buh estuary) pre-breach bed."
@@ -557,6 +591,7 @@ claims:
     table_id: T7
     blocks_submission: "no"
   - id: B2.3
+    paper: 1
     family: bed_dem_zones
     claim_type: cross_validation
     statement: "ZONE_4 (dam-to-Kherson floodway) pre-breach bed."
@@ -575,6 +610,7 @@ claims:
 
   # ── B3: multi-level contour bathymetry — negative result ──────────────────
   - id: B3.1
+    paper: 1
     family: bed_dem_contours
     claim_type: negative_result
     statement: >
@@ -593,6 +629,7 @@ claims:
     scientific_caveat: "A negative result the manuscript keeps: no contour is licensed for cross-stage transfer (hist31)."
     blocks_submission: "no"
   - id: B3.2
+    paper: 1
     family: bed_dem_contours
     claim_type: licence_table
     statement: "Only the H3 (14.2 m) contour has direct sounding support; no stage is licensed for cross-stage transfer."
@@ -610,6 +647,7 @@ claims:
 
   # ── I1: Sentinel-2 shoreline uncertainty budget ───────────────────────────
   - id: I1.1
+    paper: 1
     family: indices
     claim_type: uncertainty_budget
     statement: "Shoreline elevation uncertainty budget for ZONE_2 from Sentinel-1 contours."
@@ -626,6 +664,7 @@ claims:
     table_id: T7
     blocks_submission: "no"
   - id: I1.2
+    paper: 1
     family: indices
     claim_type: uncertainty_budget
     statement: "Shoreline elevation uncertainty budget for ZONE_4 from Sentinel-1 contours."
@@ -644,6 +683,7 @@ claims:
 
   # ── R1: Sentinel-1 flood-water classifier study (P31/P38) ─────────────────
   - id: R1.1
+    paper: 2
     family: sar_classifier
     claim_type: method_comparison
     statement: "The terrain-veto variant (VT) removes false water far from persistent water in ZONE_1 without losing open-water recall."
@@ -659,6 +699,7 @@ claims:
     scientific_caveat: "Methods/negative-results block; M3 remains the baseline; change-detection variants fail the recall guard in all zones."
     blocks_submission: "no"
   - id: R1.2
+    paper: 2
     family: sar_classifier
     claim_type: method_comparison
     statement: "A random-forest rejection stage reaches several-fold higher precision than M3 at matched new-water recall (ZONE_4 pilot, leave-one-orbit-out)."
@@ -674,6 +715,7 @@ claims:
     scientific_caveat: "3 of 5 orbit folds low-confidence; cross-orbit generalisation within one event, not to the next flood."
     blocks_submission: "no"
   - id: R1.3
+    paper: 2
     family: sar_classifier
     claim_type: error_analysis
     statement: "M3 false water on never-wet land is land-cover conditioned (ZONE_4, Dynamic World classes)."
@@ -690,6 +732,7 @@ claims:
 
   # ── G3: sea posts 2023 (UkrHMI yearbooks) ─────────────────────────────────
   - id: G3.1
+    paper: 1
     family: gauges
     claim_type: in_situ_record
     statement: "The breach surge reached the Dnipro–Buh estuary posts (Ochakiv 98022) in June 2023."
@@ -707,6 +750,19 @@ claims:
 
 overrides:
   C-15: {audit_status: REQUIRES_REANALYSIS}
+  # Paper 1 produces the observed and reconstructed physical basis; Paper 2 uses it
+  # as a fixed input and never re-derives or re-sells it.
+  M1.1: {role: primary_result, reuse_in_paper_2: validation_target}
+  M1.2: {role: primary_result, reuse_in_paper_2: validation_target}
+  M2.1: {role: primary_result, reuse_in_paper_2: validation_target}
+  V10.3: {role: primary_result, downstream_use: "paper 2: hydraulic_model_terrain (ZONE_1 bed, hist14 OK 250 m)"}
+  V10.1: {role: primary_result}
+  B2.1: {role: primary_result, downstream_use: "paper 2: hydraulic_model_terrain (ZONE_2 bed, p28 canonical)"}
+  B2.2: {role: primary_result, downstream_use: "paper 2: hydraulic_model_terrain (ZONE_3 bed, p28 canonical)"}
+  B2.3: {role: primary_result, downstream_use: "paper 2: hydraulic_model_terrain (ZONE_4 bed, p28 canonical)"}
+  V1.1: {role: framework, reuse_in_paper_2: inherited_framework}
+  V6.1: {role: validation, reuse_in_paper_2: calibration_context}
+  V7.1: {role: validation, reuse_in_paper_2: calibration_source (Table 20 backwater profiles)}
   V10.1:
     scientific_caveat: "DRAFT v1 (2026-09-10) still quotes the P20-era 12.38 % / −0.57 pp; hist17 rerun 2026-09-13 (b3255e4, registry domain) gives 12.77 % / −0.18 pp (audit CHK-006 FAIL). The 0.2 pp agreement is inside the ±1.14 pp datum band (C-12) and must not be quoted as precision."
     remaining_action: "replace 12.38/−0.57 everywhere in the draft; requote with a datum-propagated band"
@@ -721,6 +777,7 @@ overrides:
 
 article_theses:
   - id: AT1
+    paper: 1
     scope: main
     thesis: "A hydraulic regime transition occurred within the former reservoir footprint: per-overpass longitudinal slope near-zero → persistently positive (~+3.3 cm/km), present during drawdown and persisting through 2025."
     claims: [M1.1, M1.2, M1.3, M1.4, V7.2]
@@ -729,6 +786,7 @@ article_theses:
     tables: "T3"
     publication_readiness: "ready with limitation wording; P1 channel control"
   - id: AT2
+    paper: 1
     scope: main
     thesis: "Water-surface geometry (slope + within-overpass heterogeneity) is a stronger indicator than water area; extent-based fragmentation contrasts are coverage-confounded."
     claims: [M2.1, M3.1, M3.2, C-02, C-03]
@@ -737,6 +795,7 @@ article_theses:
     tables: "T3"
     publication_readiness: "ready if fragmentation is descriptive without counts"
   - id: AT3
+    paper: 1
     scope: main
     thesis: "SWOT and ICESat-2 agree at the cm level only under close temporal collocation; SWOT enters only downstream at Kherson; the 2023 surge is recorded by the estuary posts."
     claims: [V2.1, V3.1, V4.1, V4.2, G3.1]
@@ -745,6 +804,7 @@ article_theses:
     tables: "T2;T1"
     publication_readiness: "ready as validation block"
   - id: AT4
+    paper: 1
     scope: main
     thesis: "Cross-sensor interpretation requires explicit vertical-reference harmonisation: one EPSG:9902 grid, EGG2015, permanent tide handled, station correctors that do not transfer."
     claims: [V1.1, V1.2, V1.3, G1, G2, C-11, V5.1, V6.2]
@@ -753,6 +813,7 @@ article_theses:
     tables: "T2"
     publication_readiness: "blocked by G2 citation"
   - id: AT5
+    paper: 1
     scope: main
     thesis: "Legacy soundings and design documentation constrain both ends: the 1970 free surface bounds pre-breach slopes; the bed reconstruction (ZONE_1 hist14; ZONE_2/3/4 p28 soundings-only) reproduces the historical drawdown exposure within a datum band; shoreline-contour constraints do not help."
     claims: [V6.1, V6.2, V7.1, V7.2, V10.1, V10.2, V10.3, V10.4, V10.5, V11.1, X1.1, X2.1, B2.1, B2.2, B2.3, B3.1, B3.2, I1.1, I1.2, C-04, C-05, C-16]
@@ -761,6 +822,7 @@ article_theses:
     tables: "T3;T7"
     publication_readiness: "P0: update exposure numbers, regenerate V12/V13/V15, propagate datum band"
   - id: AT6
+    paper: 1
     scope: main_limitation
     thesis: "The slope–discharge relationship after the breach is NOT TESTABLE (no 2024–2025 discharge overlap)."
     claims: [C-14]
@@ -769,6 +831,7 @@ article_theses:
     tables: ""
     publication_readiness: "limitation statement only"
   - id: AT7
+    paper: 1
     scope: main_blocked
     thesis: "Literature positioning in three layers (Kakhovka novelty / physical precedent / method validity)."
     claims: []
@@ -777,6 +840,7 @@ article_theses:
     tables: "T4"
     publication_readiness: "blocked: acceptance gate NOT READY"
   - id: AT8
+    paper: 2
     scope: main
     thesis: "The exposed bed revegetated within two seasons (27 → 72 → 84 % of the former water surface), with reed peaking in 2024 and woody cover emerging by 2024–2025; ICESat-2 gives canopy-height distributions but no change."
     claims: [S1.1, S1.1a, S1.1b, S1.2, S1.2a, S1.2b, S1.3, S1.4, S1.5, W1.1, W1.2, H1.1, H1.2]
@@ -785,6 +849,7 @@ article_theses:
     tables: "T6;T1"
     publication_readiness: "ready as area/transition series; no accuracy statement (T27)"
   - id: AT9
+    paper: 2
     scope: main
     thesis: "The channel below the dam is wider after the breach at matched stage (+~100 m, main arm 500 → 560 m) with transient braiding in June 2023."
     claims: [K1.1, K1.1a, K1.1b, K1.2]
@@ -793,6 +858,7 @@ article_theses:
     tables: "T3"
     publication_readiness: "ready with contour≠bank caveat"
   - id: AT10
+    paper: 2
     scope: main_secondary
     thesis: "Translated through literature priors, the mapped surface classes of the former pool imply roughly twice the area-weighted flow resistance by 2025 (a derived roughness layer, not a calibrated Manning coefficient); the floodway also roughens; no hydraulic calibration exists."
     claims: [N1.1, N1.1a, N1.1b, N1.2, N1.2a, N1.3, N1.4, N1.4a]
@@ -801,6 +867,7 @@ article_theses:
     tables: "T5;T6"
     publication_readiness: "ready as translation; calibration = P2"
   - id: AT11
+    paper: 2
     scope: supplement_only
     thesis: "Over freshly exposed sediment an anchored single-date SAR discriminant is the usable baseline; change detection fails recall; false water is land-cover conditioned and needs a rejection stage."
     claims: [R1.1, R1.2, R1.3, C-17, C-18, C-19, C-20, C-21, C-22]
@@ -808,3 +875,55 @@ article_theses:
     figures: "S-P31"
     tables: ""
     publication_readiness: "supplement_only / future RS paper — methods and negative results"
+
+  # ── Paper 2 theses that exist only as targets until HEC-RAS results exist ──
+  - id: P2-AT01
+    paper: 2
+    scope: main
+    status: NOT_YET_SUPPORTED
+    thesis: "Current terrain (Paper 1 bed) with observed land-cover-derived roughness reproduces the observed post-breach longitudinal WSE geometry (per-overpass slope ~+3.3 cm/km, Paper 1 M1.1) within uncertainty — validation, never calibration, on the satellite profiles."
+    claims: []
+    literature_layers: "T: LT1.2; D: LD1.1"
+    figures: "P2-F3"
+    tables: "P2-T2"
+    publication_readiness: "PENDING: HEC-RAS current-state run; calibration on Table 20 / Kherson / historical levels only"
+  - id: P2-AT02
+    paper: 2
+    scope: main
+    status: NOT_YET_SUPPORTED
+    thesis: "Vegetation succession materially changes hydraulic resistance relative to bare/exposed-bed conditions."
+    claims: [N1.1, N1.1b, S1.1]
+    literature_layers: "T: LT2.1; D: LD2.1"
+    figures: "P2-F2"
+    tables: "P2-T1"
+    publication_readiness: "PENDING: roughness layer exists (derived); the hydraulic effect needs the model runs"
+  - id: P2-AT03
+    paper: 2
+    scope: main
+    status: NOT_YET_SUPPORTED
+    thesis: "The current channel/floodplain configuration changes conveyance and stage relative to the pre-breach state under matched discharges."
+    claims: []
+    literature_layers: "T: LT1.1"
+    figures: "P2-F4"
+    tables: "P2-T3"
+    publication_readiness: "PENDING: pre-breach HEC-RAS (DniproGES1D = MODEL_COMPARISON_ONLY) and current HEC-RAS; post-2023 discharge not yet recovered (C-14)"
+  - id: P2-AT04
+    paper: 2
+    scope: main
+    status: NOT_YET_SUPPORTED
+    thesis: "Modelled wetted width below the dam is consistent with the observed channel widening (K1)."
+    claims: [K1.1, K1.1a, K1.1b, K1.2]
+    literature_layers: "T: LT2.1"
+    figures: "P2-F5"
+    tables: ""
+    publication_readiness: "PENDING: 2D model wetted width at matched Kherson stage"
+  - id: P2-AT05
+    paper: 2
+    scope: main
+    status: NOT_YET_SUPPORTED
+    thesis: "Roughness uncertainty (n_low / n_base / n_high per class) produces a bounded stage and conveyance response."
+    claims: [N1.4, N1.4a]
+    literature_layers: "D: LD2.1"
+    figures: "P2-F6"
+    tables: "P2-T1"
+    publication_readiness: "PENDING: manning_n_scenarios.csv (make_manning_scenarios.py written, never run) + sensitivity runs"

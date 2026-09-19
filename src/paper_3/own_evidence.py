@@ -59,6 +59,7 @@ COLUMNS = [
     "time_period", "spatial_domain", "figure_id", "table_id",
     "literature_thesis_ids", "literature_claim_ids",
     "scientific_caveat", "remaining_action", "blocks_submission",
+    "paper", "role", "reuse_in_paper_2", "downstream_use",
 ]
 
 #: ``{col}`` or ``{col:fmt}``; dots allowed because summary.json is flattened
@@ -156,6 +157,7 @@ def build_imports(spec: dict, snapshot_dir: Path) -> list[dict]:
                   "table_id", "scientific_caveat", "remaining_action"):
             if row[k] == "nan":
                 row[k] = ""
+        row["paper"] = str(spec.get("paper", ""))
         rows.append(row)
     return rows
 
@@ -187,6 +189,9 @@ def build_claim(spec: dict, snapshot_dir: Path) -> dict:
     for k in ("literature_thesis_ids", "literature_claim_ids", "article_thesis"):
         v = spec.get(k, "")
         row[k] = ";".join(v) if isinstance(v, list) else v
+    if isinstance(spec.get("downstream_use"), dict):
+        row["downstream_use"] = json.dumps(spec["downstream_use"])
+    row["paper"] = str(spec.get("paper", ""))
     return row
 
 
@@ -224,7 +229,8 @@ def build(snapshot_dir: Path = snapshot.SNAPSHOT_DIR,
             raise KeyError(f"{at['id']}: claims not in registry: {missing}")
         sub = evidence[evidence.claim_id.isin(at["claims"])]
         at_rows.append({
-            "article_thesis_id": at["id"], "scope": at.get("scope", "main"), "thesis": at["thesis"],
+            "article_thesis_id": at["id"], "paper": at.get("paper", 1), "scope": at.get("scope", "main"),
+            "status": at.get("status", "from_claims"), "thesis": at["thesis"],
             "claim_ids": ";".join(at["claims"]),
             "literature_layers": at.get("literature_layers", ""),
             "n_claims": len(sub),

@@ -73,7 +73,7 @@ def test_section_7_8_is_inserted_and_open_items_parse():
 
 def test_shipped_templates_reference_only_known_placeholders():
     import re
-    for p in asm.template_order():
+    for p in [t for paper in asm.PAPERS for t in asm.template_order(asm.template_dir(paper))]:
         for m in asm._PH.finditer(p.read_text(encoding="utf-8")):
             assert m.group(1) in ("claim", "cite", "section", "table", "pending"), p.name
         assert not re.search(r"\{\{(?!claim:|cite:|section:|table:|pending:)", p.read_text(encoding="utf-8")), p.name

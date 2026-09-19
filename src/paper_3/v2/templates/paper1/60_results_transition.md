@@ -1,4 +1,4 @@
-# 6. HYDRAULIC AND SURFACE TRANSFORMATION RESULTS
+# 6. HYDRAULIC TRANSITION RESULTS
 
 ## 6.1 Pre-breach water-surface geometry
 
@@ -34,16 +34,6 @@ Classified residual water bodies sit below the adjacent channel stem: {{claim:M3
 
 Every post-breach overpass from January 2024 to November 2025 carries a positive per-overpass slope; the 14/14 sign consistency and the effect size, not the p-value, are the evidence that the new state persists beyond the drainage transient.
 
-## 6.9 Surface transformation and its hydraulic consequence
+## 6.9 Downstream geometry
 
-The former water surface — the pool polygon intersected with pre-breach mode water, {{claim:S1.5}} — was classified on every leaf-on Sentinel-2 date into ten surface classes. Median class shares moved from {{claim:S1.1a}} through {{claim:S1.1b}} to {{claim:S1.1}} ({{claim:S1.1.unc}}); in mode-class areas the first season was dominated by open water and dry bare sediment ({{claim:S1.2a}}), by 2024 reed and flooded vegetation covered the largest area ({{claim:S1.2b}}) and by 2025 dense herbaceous cover had expanded while open water and bare sediment collapsed ({{claim:S1.2}}). The transition matrices show where the vegetation came from — {{claim:S1.3}} — and the interval-censored first-event analysis shows how fast: {{claim:S1.4}}. Because the spectral indices cannot separate shrub or tree cover from herbaceous cover, woody encroachment was followed with Dynamic World probabilities on the same surface: {{claim:W1.1}}. These are measured class shares and areas without an accuracy assessment: the 320-point stratified reference sample designed for that purpose is not yet labelled, and no error-adjusted area or per-class accuracy is claimed.
-
-{{table:T6}}
-
-The hydraulic consequence follows from translating the class maps state by state through published roughness priors (Table 5). For the former pool the area-weighted roughness moved from {{claim:N1.1}}, with {{claim:N1.1.unc}}; the step at exposure was small ({{claim:N1.1a}}) and the large step came with the 2024 reed expansion ({{claim:N1.1b}}). In the 2025 state the largest classes are {{claim:N1.2}}, against a breach state that was {{claim:N1.2a}}; the floodway below the dam roughens too ({{claim:N1.3}}). These values are a hydraulically interpreted roughness layer derived from mapped surface classes — no hydraulic observation has calibrated them, and they are reported as a consequence of the transformation, not as measured Manning coefficients.
-
-{{table:T5}}
-
-## 6.10 Channel widening below the dam
-
-On {{claim:K1.2}}, the wetted width of the channel between the dam and Kherson was measured on every usable Sentinel-1/-2 date from 2017 to 2026. On comparable late-summer dates at Kherson stages within 0.5 m, the width is larger after the breach: {{claim:K1.1}} against the pre-breach {{claim:K1.1a}}. The breach year shows transient braiding: {{claim:K1.1b}}. The water contour is not the geomorphic bank, and bank displacement relative to the September 2023 reference stays at the 40 m detection limit, so the widening is a statement about the wetted surface at matched stage. The ATL08 canopy layer over the zones ({{claim:H1.1}}) is reported for completeness; canopy-height change is not identifiable from ICESat-2 with the current track geometry (Section 7.10).
+The channel between the dam and Kherson has also changed geometry — its wetted width on comparable dates is larger after the breach — but that result, its method and its figure belong to the companion paper, where it serves as a validation target for the two-dimensional model.

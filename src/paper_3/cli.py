@@ -209,6 +209,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="screening depth per thesis for the metadata pass "
                              "(a screening budget, not a completeness criterion)")
     parser.add_argument("--tag", default="", help="label recorded in the manifest")
+    parser.add_argument("--paper", type=int, choices=(1, 2), default=1,
+                        help="which manuscript assemble/translate/docx act on")
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--dry-run", action="store_true",
                         help="list the steps that would run, write nothing")
@@ -482,20 +484,20 @@ def main(argv: list[str] | None = None) -> int:
 
             elif step == "assemble":
                 from src.paper_3.v2 import assemble
-                if _step(step, out_dir / assemble.MANUSCRIPT_EN, args.force):
-                    assemble.assemble(out_dir=out_dir)
+                if _step(step, out_dir / assemble.manuscript_name(args.paper, "en"), args.force):
+                    assemble.assemble(out_dir=out_dir, paper=args.paper)
 
             elif step == "translate":
-                from src.paper_3.v2 import translate
-                if _step(step, out_dir / translate.MANUSCRIPT_UK, args.force):
-                    translate.run(out_dir=out_dir)
+                from src.paper_3.v2 import assemble, translate
+                if _step(step, out_dir / assemble.manuscript_name(args.paper, "uk"), args.force):
+                    translate.run(out_dir=out_dir, paper=args.paper)
 
             elif step == "docx":
-                from src.paper_3.v2 import assemble, translate
-                md = out_dir / assemble.MANUSCRIPT_EN
+                from src.paper_3.v2 import assemble
+                md = out_dir / assemble.manuscript_name(args.paper, "en")
                 if _step(step, md.with_suffix(".docx"), args.force):
                     assemble.to_docx(md)
-                uk = out_dir / translate.MANUSCRIPT_UK
+                uk = out_dir / assemble.manuscript_name(args.paper, "uk")
                 if uk.exists() and _step(step, uk.with_suffix(".docx"), args.force):
                     assemble.to_docx(uk)
 

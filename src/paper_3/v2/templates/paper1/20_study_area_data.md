@@ -12,15 +12,15 @@ Six reservoir gauges share a zero of 12.000 m BS-77 and the Kherson post 80805 s
 
 ## 3.2 ICESat-2 ATL13 and ATL08
 
-ATL13 v7 water-surface heights (ITRF2020, tide-free) are used in three samples that must not be confused: the slope sample (14 pre-breach, 5 drawdown and 14 post-breach overpasses with a chainage span of at least 20 km), the heterogeneity sample (all ATL13 dates in the footprint, 192 pre and 23 post) and the exposed-bed sample (28 tracks). ATL08 terrain and canopy segments at 100 m and 20 m were layered over all four zones ({{claim:H1.1.n}}).
+ATL13 v7 water-surface heights (ITRF2020, tide-free) are used in three samples that must not be confused: the slope sample (14 pre-breach, 5 drawdown and 14 post-breach overpasses with a chainage span of at least 20 km), the heterogeneity sample (all ATL13 dates in the footprint, 192 pre and 23 post) and the exposed-bed sample (28 tracks). 
 
 ## 3.3 SWOT
 
 SWOT PIXC and RiverSP granules over Kherson (cycles 482, 511 and 521, April–May 2023) supply the cross-sensor and gauge validation. The Ukraine-clipped LakeSP archive exists but is not used here: a lake-averaged product is physically inappropriate for a sloping, fragmenting water body.
 
-## 3.4 Sentinel-2 and Sentinel-1
+## 3.4 Sentinel-2 water masks
 
-Sentinel-2 L2A scenes were processed on a 20 m registry grid (EPSG:32636) with the BOA additive offset applied, into seven indices (NDVI, NDWI, MNDWI, NDMI, BSI, AWEIsh, NDTI), a ten-class surface classification and regime composites per zone; 53 dates cover the former pool. Sentinel-1 RTC γ⁰ (VV, VH) supplies the water masks for the channel transects (Section 4.7; Supplementary Methods S2). Dynamic World annual composites for 2022–2024 and FABDEM-derived slope and height-above-nearest-water complete the surface layers.
+Sentinel-2 L2A scenes processed on a 20 m registry grid (EPSG:32636) with the BOA additive offset applied supply the coverage-gated water masks of the planform analysis (Section 4.7) and the shoreline contours used to test the bed reconstruction; 53 dates cover the former pool. The full surface classification and the Sentinel-1 masks are the subject of the companion paper.
 
 ## 3.5 Legacy hydrography
 
@@ -28,6 +28,6 @@ Eight photographed pages of the Dnipro reservoirs monograph (Tables 19–21, Fig
 
 ## 3.6 Geodetic reference data
 
-{{claim:G1}} The EGG2015 quasigeoid grid used for the ICESat-2 and SWOT branches is the 1′×1′ raster whose provenance is discussed in Section 7.10.
+{{claim:G1}} The EGG2015 quasigeoid grid used for the ICESat-2 and SWOT branches is the 1′×1′ raster whose provenance is discussed in Section 7.9.
 
 {{pending:TAB01|Table 1 — data sources (machine-generated from the snapshot inventories; must state the three ICESat-2 samples and the single full-coverage pre-breach Sentinel-2 date)|backs=V1.3,M1.1,M2.1,M3.1,S1.5|section=3 Data|produces=knoweledg_graf src/paper_3/v2/assemble.py TABLE_SPECS T1|status=not_started|blocks_submission=yes}}

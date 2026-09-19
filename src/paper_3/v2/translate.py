@@ -24,7 +24,7 @@ import yaml
 
 from src.paper_3._utils import OUT_DIR, resolve_gemini_key
 from src.paper_3.v2 import markers
-from src.paper_3.v2.assemble import MANUSCRIPT_EN
+from src.paper_3.v2.assemble import MANUSCRIPT_EN, manuscript_name
 
 logger = logging.getLogger(__name__)
 
@@ -133,15 +133,17 @@ def translate_text(text: str, glossary: dict[str, str], call: Callable[[str], st
     return "\n\n".join(out) + "\n", failed
 
 
-def run(out_dir: Path = OUT_DIR, call: Callable[[str], str | None] | None = None) -> Path:
-    src = (out_dir / MANUSCRIPT_EN).read_text(encoding="utf-8")
+def run(out_dir: Path = OUT_DIR, call: Callable[[str], str | None] | None = None,
+        paper: int = 1) -> Path:
+    src_name, uk_name = manuscript_name(paper, "en"), manuscript_name(paper, "uk")
+    src = (out_dir / src_name).read_text(encoding="utf-8")
     if call is None:
         key = resolve_gemini_key()
         if not key:
             raise RuntimeError("GEMINI_API_KEY / GOOGLE_API_KEY not set")
         call = lambda p: call_gemini(p, key)  # noqa: E731
     text, failed = translate_text(src, load_glossary(), call)
-    target = out_dir / MANUSCRIPT_UK
+    target = out_dir / uk_name
     target.write_text(text, encoding="utf-8")
-    logger.info("translated %s → %s (%d paragraph(s) rejected)", MANUSCRIPT_EN, MANUSCRIPT_UK, len(failed))
+    logger.info("translated %s → %s (%d paragraph(s) rejected)", src_name, uk_name, len(failed))
     return target

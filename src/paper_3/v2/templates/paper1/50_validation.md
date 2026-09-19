@@ -56,4 +56,4 @@ In the delta, estuary and floodway the soundings-only arm wins in every zone: {{
 
 ## 5.14 Validation synthesis
 
-Six independent checks were performed before any hydraulic or surface result was interpreted; one (the 5 April 2023 anomaly) failed and is reported as failed. The surface-class maps of Section 6.9 have no accuracy assessment yet — the 320-point stratified sample is unlabelled — and the roughness layer has no hydraulic calibration; both are stated as such wherever they are used, and the Sentinel-1 classifier study is confined to Supplementary Methods S2.
+Six independent checks were performed before any hydraulic or surface result was interpreted; one (the 5 April 2023 anomaly) failed and is reported as failed. The reconstructed bed carries a cross-validated point accuracy and a validated area statistic; it carries no rate of change and no accuracy beyond 250 m, and it is released with those limits stated.

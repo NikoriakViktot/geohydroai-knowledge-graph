@@ -2,7 +2,7 @@
 
 ## S1. Machine tables and open items
 
-Tables 1–7 are generated from `OWN_EVIDENCE.csv`; every number in the main text carries a claim id that points at a snapshot table row (`SNAPSHOT_MANIFEST.json`). Outstanding items are listed in `V2_OPEN_ITEMS.md`, parsed from the [PENDING] markers of this document.
+Tables are generated from `OWN_EVIDENCE.csv`; every number in the main text carries a claim id that points at a snapshot table row. Outstanding items are listed in `PAPER2_OPEN_ITEMS.md`, parsed from the [PENDING] markers of this document.
 
 ## S2. Sentinel-1 water masks: baseline and rejected variants
 
@@ -10,6 +10,3 @@ This study is confined to the supplement because it is a methods result about SA
 
 {{claim:R1.1}}. Every change-detection variant fails the new-water recall guard in all four zones because the pre-event reference over bare sediment is itself dark. {{claim:R1.2}}. {{claim:R1.3}}. The chronic false-water object over the Oleshky sands is a land-cover-conditioned error that no cut on the backscatter axis removes; a rejection stage informed by land cover or terrain is required. These results are offered as a methods note for a future remote-sensing paper (theses T35–T36, article thesis AT11, scope `supplement_only`).
 
-## S3. Multi-level contour bathymetry (negative result)
-
-The hist21–hist31 experiment tested whether optical and SAR waterlines at three pre-breach levels could constrain the shallow bed. {{claim:B3.1}} {{claim:B3.2}} The result is kept as a negative result: optical shorelines sit at the edge of the emergent-vegetation belt, so the signal of level change is smaller than the position bias.

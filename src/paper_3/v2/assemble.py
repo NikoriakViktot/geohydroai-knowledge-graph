@@ -37,9 +37,25 @@ from src.paper_3.v2.reference_registry import REGISTRY_CSV
 
 logger = logging.getLogger(__name__)
 
-TEMPLATE_DIR = Path(__file__).with_name("templates")
-MANUSCRIPT_EN = "v2_manuscript_en.md"
-OPEN_ITEMS = "V2_OPEN_ITEMS.md"
+TEMPLATE_ROOT = Path(__file__).with_name("templates")
+PAPERS = (1, 2)
+
+
+def template_dir(paper: int = 1) -> Path:
+    return TEMPLATE_ROOT / f"paper{paper}"
+
+
+def manuscript_name(paper: int = 1, lang: str = "en") -> str:
+    return f"paper{paper}_manuscript_{lang}.md"
+
+
+def open_items_name(paper: int = 1) -> str:
+    return f"PAPER{paper}_OPEN_ITEMS.md"
+
+
+TEMPLATE_DIR = template_dir(1)                 # backwards-compatible defaults
+MANUSCRIPT_EN = manuscript_name(1, "en")
+OPEN_ITEMS = open_items_name(1)
 PATCHES = "v2_patches.csv"
 
 RENDERABLE = {"SUPPORTED", "SUPPORTED_WITH_LIMITATION", "REVISE_UNCERTAINTY", "NOT_TESTABLE"}
@@ -56,7 +72,7 @@ assert set(FORBIDDEN_NOVELTY_WORDS) >= {"novel", "unprecedented", "unique", "pio
 #: Machine tables: id → (title, claim-id filter, columns shown)
 TABLE_SPECS: dict[str, dict] = {
     "T3": {"title": "Table 3. Hydraulic-state comparison, pre- and post-breach.",
-           "claims": ["M1.1", "M1.3", "M1.2", "M1.4", "M2.1", "M3.1", "M3.2", "V10.1", "K1.1", "N1.1"],
+           "claims": ["M1.1", "M1.3", "M1.2", "M1.4", "M2.1", "M3.1", "M3.2", "V10.1"],
            "columns": ["claim_id", "claim_text", "value_resolved", "uncertainty_resolved", "n_resolved", "audit_status"]},
     "T5": {"title": "Table 5. Manning roughness priors per surface class (literature-supported, not calibrated).",
            "claims": ["N1.4", "N1.4a"],
@@ -167,7 +183,8 @@ def render_pending(spec: str) -> str:
     parts = spec.split("|")
     mid, title = parts[0].strip(), parts[1].strip() if len(parts) > 1 else "pending"
     fields = dict(p.split("=", 1) for p in parts[2:] if "=" in p)
-    return _marker(mid, title, **fields)
+    # block quote: must start its own line to be machine-visible, even mid-paragraph
+    return "\n\n" + _marker(mid, title, **fields) + "\n\n"
 
 
 def paragraph_claims(par: str) -> list[str]:
@@ -270,17 +287,24 @@ def template_order(template_dir: Path = TEMPLATE_DIR) -> list[Path]:
     return sorted(p for p in template_dir.glob("*.md") if not p.name.startswith("_"))
 
 
-def assemble(out_dir: Path = OUT_DIR, template_dir: Path = TEMPLATE_DIR) -> Path:
+def assemble(out_dir: Path = OUT_DIR, paper: int = 1, template_dir: Path | None = None) -> Path:
+    tdir = template_dir or template_dir_for(paper)
     inputs = load_inputs(out_dir)
     used: set[str] = set()
     cited: set[str] = set()
-    parts = [render_template(p.read_text(encoding="utf-8"), inputs, used, cited) for p in template_order(template_dir)]
+    parts = [render_template(p.read_text(encoding="utf-8"), inputs, used, cited) for p in template_order(tdir)]
     body = "\n".join(parts)
     text = body + "\n" + render_references(inputs["references"], cited)
-    (out_dir / MANUSCRIPT_EN).write_text(text, encoding="utf-8")
-    (out_dir / OPEN_ITEMS).write_text(open_items(text), encoding="utf-8")
-    unused = sorted(set(inputs["evidence"].index) - used)
-    pd.DataFrame({"claim_id": sorted(used)}).to_csv(out_dir / "v2_claims_used.csv", index=False)
-    logger.info("assembled %s: %d claims used, %d unused, %d citations, %d markers",
-                MANUSCRIPT_EN, len(used), len(unused), len(cited), len(markers.find_marker_ids(text)))
-    return out_dir / MANUSCRIPT_EN
+    target = out_dir / manuscript_name(paper, "en")
+    target.write_text(text, encoding="utf-8")
+    (out_dir / open_items_name(paper)).write_text(open_items(text), encoding="utf-8")
+    ev = inputs["evidence"]
+    foreign = sorted(c for c in used if "paper" in ev.columns and str(ev.loc[c, "paper"]) not in ("", str(paper)))
+    pd.DataFrame({"claim_id": sorted(used)}).to_csv(out_dir / f"paper{paper}_claims_used.csv", index=False)
+    logger.info("assembled %s: %d claims used (%d reused from the other paper), %d citations, %d markers",
+                target.name, len(used), len(foreign), len(cited), len(markers.find_marker_ids(text)))
+    return target
+
+
+def template_dir_for(paper: int) -> Path:
+    return template_dir(paper)
