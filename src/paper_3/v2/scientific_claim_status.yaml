@@ -31,6 +31,34 @@ B3.1:
 B3.2:
   audit_status: SUPPORTED
   note: 'manual: outputs/tables/hist31_dem_constraints.csv'
+B4.1:
+  audit_status: SUPPORTED
+  findings:
+  - ICESat-2 ground returns over sparsely vegetated sediment carry their own bias;
+    the comparison is of a 2019-22 sounding surface against a 2023-24 surface, so
+    real bed change is inside the residual.
+  note: 'manual: outputs/tables/p52_pool_dem_vs_icesat2.csv'
+B4.2:
+  audit_status: SUPPORTED
+  note: 'manual: outputs/tables/p52_pool_dem_vs_icesat2.csv'
+B4.2a:
+  audit_status: SUPPORTED
+  note: 'manual: outputs/tables/p52_pool_dem_vs_icesat2.csv'
+B4.3:
+  audit_status: SUPPORTED
+  note: 'manual: outputs/tables/p52_fabdem_datum_offset.csv'
+B6.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Only a fifth of the estuary is within sounding support; the remainder is carried
+    by EMODnet bathymetry and is not independently validated here.
+  note: 'manual: outputs/tables/p53_bed_v2_summary.csv'
+B7.1:
+  audit_status: SUPPORTED
+  findings:
+  - 'Accuracy is strongly land-cover dependent: cropland RMSE 0.52 m against 3.16
+    m under tree cover, where the residual is canopy, not terrain error.'
+  note: 'manual: outputs/tables/p57_dem_accuracy_night.csv'
 C-01:
   audit_status: SUPPORTED
   findings:
@@ -362,6 +390,18 @@ C-35:
   - repeat in 2026 with taller canopies and DW 2025/2026 frames; add S1 VV-VH and
     per-date NDMI features
   note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+D1.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Node counts per date are small (1-3) and some dates rest on a single node; the
+    series is a sequence of snapshots, not a gauged hydrograph.
+  note: 'manual: outputs/tables/p60_swot_outlet_drawdown.csv'
+D2.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Bins are unequally populated and the pre-breach reference is a single low-flow
+    profile.
+  note: 'manual: outputs/tables/p59_swot_peak_wse_profile.csv'
 G1:
   audit_status: SUPPORTED
   findings:
@@ -501,6 +541,15 @@ N1.4:
 N1.4a:
   audit_status: SUPPORTED_WITH_LIMITATION
   note: 'manual: audit_runs/20260918T175108Z/roughness_class_table.csv'
+N2.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - A literature prior per mapped class, not a hydraulically calibrated coefficient;
+    the mapped classes themselves carry no accuracy assessment yet.
+  note: 'manual: outputs/tables/p58_manning_mosaic_summary.csv'
+N2.1a:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: outputs/tables/p58_manning_mosaic_summary.csv'
 R1.1:
   audit_status: SUPPORTED_WITH_LIMITATION
   findings:

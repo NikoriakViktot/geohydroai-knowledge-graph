@@ -1,5 +1,8 @@
 # 7. DISCUSSION
 
+
+Reaches released from an impoundment adjust in ways that are neither uniform nor immediate ({{cite:nichols2017}}), and incisional channels formed after dam removal widen and narrow through migrating fronts rather than settling monotonically ({{cite:cantelli2004}}; {{cite:cantelli2007}}).
+
 ## 7.1 From a reservoir-like to a river-dominated regime
 
 Before the breach the sign of the per-overpass slope was indistinguishable from a coin flip and the surface varied by centimetres over tens of kilometres; after it, every overpass shows water rising upstream at a few centimetres per kilometre, with metre-scale variability, and the change was already present during drainage. The comparison with reservoir-to-river transitions documented elsewhere belongs to Section 7.8 and is withheld until the literature retrieval has been validated.

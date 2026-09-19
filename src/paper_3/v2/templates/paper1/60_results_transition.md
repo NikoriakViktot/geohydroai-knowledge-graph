@@ -8,6 +8,10 @@ Before the breach the impounded pool was near-level. Per-reach ICESat-2 slopes (
 
 The five overpasses of July–September 2023 already carry the post-breach gradient: {{claim:M1.2}} (n = {{claim:M1.2.n}}). The structural change is therefore visible during the transient drainage itself, not only once the system had settled.
 
+## 6.2.1 The drawdown and the flood wave from orbit
+
+That SWOT caught this event is not a new observation: the flood below the dam has been described from the same mission and used to test outburst-flood models ({{cite:lehnigk2026}}). What is added here is the outlet itself, carried in the same vertical frame as the gauges and the bed. Because the calibration orbit repeated daily over the outlet, the emptying of the pool was recorded directly rather than inferred: {{claim:D1.1}} (n = {{claim:D1.1.n}}). Below the dam the same passes describe the wave that carried that water away, rising {{claim:D2.1}} and decaying downstream to about two metres by 80 km. Both series are snapshots from a handful of nodes per date ({{claim:D1.1.caveat}}), so they are read as a sequence of observed water surfaces, not as a hydrograph.
+
 ## 6.3 Post-breach longitudinal gradient
 
 Across the 14 pre-breach and 14 post-breach overpasses with a chainage span of at least 20 km, the per-overpass Theil–Sen slope moved from {{claim:M1.1}}; the difference has a 95 % bootstrap confidence interval of {{claim:M1.1.unc}}. Every one of the 14 post-breach overpasses is positive. The result is estimator-robust: ordinary least squares gives {{claim:M1.3}} ({{claim:M1.3.unc}}). Each per-overpass slope is a fit through the six beam-median points of one pass over roughly 20–70 km of a reservoir-axis centreline; the claim is about the distribution of these local slopes across dates, not about a single whole-reservoir gradient.

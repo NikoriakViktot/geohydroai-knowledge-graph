@@ -1,0 +1,5 @@
+slice_id,worldwide_count,n_candidates,n_off_topic,n_screened,n_fulltext,n_abstract_only,screened_fraction,on_topic_fraction,channelisation_n,dam_transition_n,datum_resolved_n,gauge_comparison_n,harmonises_datum_n,historical_as_target_n,historical_validation_n,in_situ_only_n,permanent_tide_n,quantitative_validation_n,reports_bathymetry_n,reports_extent_n,reports_morphology_n,reports_vegetation_n,reports_wse_n,reports_wse_slope_n,satellite_observed_n,satellite_or_dem_n,spatially_varying_offset_n
+S1_kakhovka_status_quo,1051,481,235,226,17,209,0.215,0.4699,0,0,0,0,1,0,31,0,0,0,7,82,25,135,29,0,0,0,0
+S2_altimetry_vertical_datum,2274,496,122,361,11,350,0.1588,0.7278,0,0,0,183,51,0,0,0,1,0,0,0,0,0,0,17,0,0,1
+S3_hydraulic_transition_from_space,1102,495,314,180,30,150,0.1633,0.3636,38,180,0,0,0,0,0,18,0,0,0,0,0,0,0,4,59,0,0
+S4_historical_data_as_validation,51304,499,489,9,0,9,0.0002,0.018,0,0,0,0,0,9,0,0,0,3,0,0,0,0,0,0,0,3,0

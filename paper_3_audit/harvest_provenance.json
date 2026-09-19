@@ -1,0 +1,12 @@
+{
+  "queryset_version": "1.1.0",
+  "queries_sha256": "eb2837fd5b322fb45842a6cb51e02180ea8ea2f527e78a318d24e51ef13fc50c",
+  "boolean_slices_sha256": "f642c9432d24f83539e92bfdc05eea080b9dc2d57f42f69205458a572ee0fc82",
+  "n_queries": 148,
+  "n_boolean_slices": 4,
+  "openalex_search_mode": "works?search= (boolean AND/OR/NOT, quoted phrases; title+abstract+fulltext)",
+  "generated_at": "2026-09-17T12:04:12+00:00",
+  "n_queries_run": 148,
+  "n_seed_dois": 6,
+  "run_at": "2026-09-17"
+}

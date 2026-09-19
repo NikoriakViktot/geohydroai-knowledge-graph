@@ -22,6 +22,11 @@ For the former pool the area-weighted roughness moved from {{claim:N1.1}}, with 
 
 On comparable late-summer dates at Kherson stages within 0.5 m, the wetted width is larger after the breach: {{claim:K1.1}} against the pre-breach {{claim:K1.1a}}; the breach year shows transient braiding: {{claim:K1.1b}}. The water contour is not the geomorphic bank, and bank displacement relative to the September 2023 reference stays at the 40 m detection limit.
 
+
+## 5.4.1 The same translation over the whole mapped surface
+
+Restricted to the pool the roughness change is a statement about one water body; carried across the pool, the floodway and the delta on one grid it is a statement about the system the models will run on. There the area-weighted base value moves from {{claim:N2.1a}} to {{claim:N2.1}} ({{claim:N2.1.unc}}). The mosaic is resolution-insensitive: the 20 m and 50 m grids agree to the fourth decimal. It remains a prior, not a calibrated coefficient ({{claim:N2.1.caveat}}).
+
 ## 5.5 Pre-breach model
 
 {{pending:OPEN63|Pre-breach HEC-RAS results: calibration on Table 20 backwater profiles at nine discharges, 1970 field curve, reservoir gauges|backs=P2-AT03|section=5.5 Pre-breach model|produces=HEC-RAS pre-breach project (legacy DniproGES1D = comparison only)|blocks_submission=yes}}

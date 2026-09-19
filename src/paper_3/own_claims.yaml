@@ -748,6 +748,207 @@ claims:
     scientific_caveat: "Levels are cm above the post zero; BS-77 → EVRF2019 via EPSG:9902 is the manuscript's step, not the yearbook's."
     blocks_submission: "no"
 
+  # ── 2026-09-19 pilots p52-p61. Until now the bed reconstruction was tested
+  #    only against its own soundings and the historical exposure statistic;
+  #    p52 tests it against ICESat-2 photons on the dry bed, which is an
+  #    independent observation of the same surface. p59-p61 add the SWOT
+  #    series over the pool itself, which the draft still denies exists.
+  - id: B4.1
+    paper: 1
+    family: bed_dem
+    claim_type: validation
+    statement: >
+      The reconstructed reservoir bed, built from legacy soundings alone, is tested
+      against ICESat-2 ground returns acquired over the dry exposed bed after the
+      breach — an observation independent of every input to the reconstruction.
+    table: p52_pool_dem_vs_icesat2.csv
+    select: {set: "ALL 2023-07..2024-12, dry bed"}
+    value: "RMSE {RMSE:.3f} m, bias {bias:+.3f} m, NMAD {NMAD:.3f} m"
+    uncertainty: "P05 {P05:.2f} m, P95 {P95:.2f} m"
+    n: "{N} points on {n_rgt:.0f} reference ground tracks"
+    unit: m
+    status_source: manual
+    audit_status: SUPPORTED
+    manuscript_section: "5.9.1 Independent validation of the reconstructed bed"
+    article_thesis: AT6
+    literature_thesis_ids: [T29, T30]
+    figure_id: F13
+    table_id: T7
+    time_period: "2023-07 .. 2024-12"
+    spatial_domain: "dry exposed bed, ZONE_1"
+    scientific_caveat: "ICESat-2 ground returns over sparsely vegetated sediment carry their own bias; the comparison is of a 2019-22 sounding surface against a 2023-24 surface, so real bed change is inside the residual."
+    blocks_submission: "no"
+  - id: B4.2
+    paper: 1
+    family: bed_dem
+    claim_type: validation
+    statement: >
+      The error of the reconstructed bed grows with distance from the nearest
+      sounding, which is the support the interpolation actually had.
+    table: p52_pool_dem_vs_icesat2.csv
+    select: {set: "dist to sounding 2000-99999 m"}
+    value: "RMSE {RMSE:.2f} m beyond 2 km from a sounding"
+    n: "{N} points"
+    unit: m
+    status_source: manual
+    audit_status: SUPPORTED
+    manuscript_section: "5.9.1"
+    article_thesis: AT6
+    literature_thesis_ids: [T29]
+    figure_id: F13
+    blocks_submission: "no"
+  - id: B4.2a
+    paper: 1
+    family: bed_dem
+    claim_type: validation
+    statement: "Error of the reconstructed bed within 250 m of a sounding."
+    table: p52_pool_dem_vs_icesat2.csv
+    select: {set: "dist to sounding 0-250 m"}
+    value: "RMSE {RMSE:.3f} m, bias {bias:+.3f} m"
+    n: "{N} points"
+    status_source: manual
+    audit_status: SUPPORTED
+    manuscript_section: "5.9.1"
+    article_thesis: AT6
+    blocks_submission: "no"
+  - id: B4.3
+    paper: 1
+    family: bed_dem
+    claim_type: datum
+    statement: >
+      FABDEM, reduced to EVRF2019 and sampled on stable bare land, agrees with
+      ICESat-2 to within a decimetre, which bounds the datum error of the
+      terrain the bed is seamed into.
+    table: p52_fabdem_datum_offset.csv
+    select: {set: "FABDEM - ICESat2_EVRF2019, stable bare land, ZONE_1_KAKHOVKA_LOWER_DNIPRO"}
+    value: "bias {bias:+.3f} m, NMAD {NMAD:.3f} m"
+    n: "{N} points"
+    unit: m
+    status_source: manual
+    audit_status: SUPPORTED
+    manuscript_section: "5.9.2 Datum of the surrounding terrain"
+    article_thesis: AT6
+    blocks_submission: "no"
+  - id: B6.1
+    paper: 1
+    family: bed_dem
+    claim_type: validation
+    statement: >
+      The downstream zone beds are reconstructed on the same rules; their blocked
+      cross-validation error and the share of area actually supported by soundings
+      are reported together, because the second governs the first.
+    table: p53_bed_v2_summary.csv
+    select: {zone: "ZONE_3_DNIPRO_BUG_ESTUARY"}
+    value: "CV RMSE {cv_rmse_snd_only:.2f} m over {water_km2:.0f} km², {sounding_supported_share:.1%} of it sounding-supported"
+    n: "{soundings} soundings, {emodnet_points} EMODnet points"
+    unit: m
+    status_source: manual
+    audit_status: SUPPORTED_WITH_LIMITATION
+    manuscript_section: "5.10 Downstream zone beds"
+    article_thesis: AT6
+    scientific_caveat: "Only a fifth of the estuary is within sounding support; the remainder is carried by EMODnet bathymetry and is not independently validated here."
+    blocks_submission: "no"
+  - id: B7.1
+    paper: 1
+    family: bed_dem
+    claim_type: validation
+    statement: >
+      The seamless terrain delivered as the companion paper's model input is
+      accuracy-assessed against night-time ICESat-2 returns over the whole domain.
+    table: p57_dem_accuracy_night.csv
+    select: {set: "C seamless DEM (p55) -- ALL night points (land below dam + exposed bed)"}
+    value: "RMSE {RMSE:.3f} m, LE90 {LE90:.3f} m, NMAD {NMAD:.3f} m"
+    uncertainty: "LE95 {LE95:.3f} m"
+    n: "{N} night points"
+    unit: m
+    status_source: manual
+    audit_status: SUPPORTED
+    manuscript_section: "5.11 The delivered terrain"
+    article_thesis: AT7
+    figure_id: F14
+    table_id: T7
+    scientific_caveat: "Accuracy is strongly land-cover dependent: cropland RMSE 0.52 m against 3.16 m under tree cover, where the residual is canopy, not terrain error."
+    blocks_submission: "no"
+  - id: D1.1
+    paper: 1
+    family: swot_drawdown
+    claim_type: time_series
+    statement: >
+      SWOT observed the reservoir outlet through the drawdown itself: during the
+      fast-sampling calibration orbit the outlet water surface fell from the
+      impounded level to the residual river within a fortnight.
+    table: p60_swot_outlet_drawdown.csv
+    select: {date: "2023-06-13"}
+    value: "outlet {H_outlet:.2f} m EVRF2019 on 13 June, from 17.53 m on 31 May"
+    n: "{swot_n} SWOT nodes on the date"
+    unit: m EVRF2019
+    status_source: manual
+    audit_status: SUPPORTED_WITH_LIMITATION
+    manuscript_section: "6.2 The drawdown seen from orbit"
+    article_thesis: AT3
+    literature_thesis_ids: [T06]
+    figure_id: F15
+    time_period: "2023-05-31 .. 2023-06-13"
+    spatial_domain: "reservoir outlet, chainage 0 km"
+    scientific_caveat: "Node counts per date are small (1-3) and some dates rest on a single node; the series is a sequence of snapshots, not a gauged hydrograph."
+    blocks_submission: "no"
+  - id: D2.1
+    paper: 1
+    family: swot_drawdown
+    claim_type: profile
+    statement: >
+      Below the dam the same orbit recorded the flood wave as a longitudinal rise
+      profile that decays downstream and arrives later with distance.
+    table: p59_swot_peak_wse_profile.csv
+    select: {bin_km: "15"}
+    value: "rise {rise_m:.2f} m at 15 km (peak {H_peak:.2f} m on {peak_date})"
+    n: "{n_peak} nodes in the bin"
+    unit: m
+    status_source: manual
+    audit_status: SUPPORTED_WITH_LIMITATION
+    manuscript_section: "6.2"
+    article_thesis: AT3
+    figure_id: F15
+    spatial_domain: "dam-to-Kherson floodway, 0-85 km"
+    scientific_caveat: "Bins are unequally populated and the pre-breach reference is a single low-flow profile."
+    blocks_submission: "no"
+  - id: N2.1
+    paper: 2
+    family: roughness
+    claim_type: transition
+    statement: >
+      Carried across the whole mapped surface rather than the pool alone, the
+      area-weighted base roughness roughly doubles between the breach and the
+      current state.
+    table: p58_manning_mosaic_summary.csv
+    select: {cell_m: "20", state: "CURRENT_2026"}
+    value: "area-weighted n {n_base_area_weighted:.4f} over {km2_total:.0f} km²"
+    uncertainty: "class spread p10 {n_base_p10:.3f} - p90 {n_base_p90:.3f}"
+    status_source: manual
+    audit_status: SUPPORTED_WITH_LIMITATION
+    manuscript_section: "5.4 Roughness of the mapped surface"
+    article_thesis: AT10
+    literature_thesis_ids: [T33, T34]
+    figure_id: P2-F4
+    table_id: P2-T1
+    spatial_domain: "pool + floodway + delta mosaic"
+    scientific_caveat: "A literature prior per mapped class, not a hydraulically calibrated coefficient; the mapped classes themselves carry no accuracy assessment yet."
+    blocks_submission: "no"
+  - id: N2.1a
+    paper: 2
+    family: roughness
+    claim_type: transition
+    statement: "Area-weighted base roughness of the same surface at the breach."
+    table: p58_manning_mosaic_summary.csv
+    select: {cell_m: "20", state: "BREACH_2023"}
+    value: "area-weighted n {n_base_area_weighted:.4f} over {km2_total:.0f} km²"
+    status_source: manual
+    audit_status: SUPPORTED_WITH_LIMITATION
+    manuscript_section: "5.4"
+    article_thesis: AT10
+    literature_thesis_ids: [T33]
+    blocks_submission: "no"
+
 overrides:
   C-15: {audit_status: REQUIRES_REANALYSIS}
   # Paper 1 produces the observed and reconstructed physical basis; Paper 2 uses it

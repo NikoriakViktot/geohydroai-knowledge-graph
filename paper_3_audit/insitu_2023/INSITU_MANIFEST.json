@@ -1,0 +1,394 @@
+{
+  "extracted_at": "2026-09-17T08:23:06+00:00",
+  "git_commit": "c3ec671",
+  "year": 2023,
+  "sources": {
+    "v229_seas": {
+      "file": "Інв_№229_Щорічні_дані_про_режим_та_ресурси_вод_морів_і_морських.pdf",
+      "sha256": "05ffef8454abc93a0b1be49d67aaadfabc9045f2e25d6a3c64e1699a16e2ba05",
+      "label": "Інв. №229 — Том 2 (моря)",
+      "printed_title": "Щорічні дані про режим та ресурси вод морів і морських гирл річок, 2023, Том 2"
+    },
+    "v230_mouths": {
+      "file": "Інв_№230_Щорічні_дані_про_режим_та_ресурси_вод_морів_і_морських.pdf",
+      "sha256": "bf74c22a69bb0f08f38f573a8f2d649b7474f543ee69ad9460c44d4da0ef8298",
+      "label": "Інв. №230 — Том 2(2) (морські гирла річок)",
+      "printed_title": "Щорічні дані про режим та ресурси вод морів і морських гирл річок, 2023, Том 2(2)"
+    }
+  },
+  "tables": {
+    "stations": {
+      "csv": "stations.csv",
+      "rows": 12,
+      "pages": [
+        "v230_mouths:p146",
+        "v229_seas:p10"
+      ],
+      "rows_skipped_other_posts": 6,
+      "n_anomalies": 0
+    },
+    "datum_corrections": {
+      "csv": "datum_corrections.csv",
+      "rows": 2,
+      "pages": [
+        "v229_seas:p10"
+      ],
+      "rows_skipped_other_posts": 6,
+      "n_anomalies": 0
+    },
+    "station_descriptions": {
+      "csv": "station_descriptions.csv",
+      "rows": 12,
+      "pages": [
+        "v230_mouths:p149-158",
+        "v229_seas:p12-27"
+      ],
+      "rows_skipped_other_posts": 11,
+      "n_anomalies": 0
+    },
+    "daily_levels_2023": {
+      "csv": "daily_levels_2023.csv",
+      "rows": 2120,
+      "pages": [
+        "v230_mouths:p162",
+        "v230_mouths:p163",
+        "v230_mouths:p164",
+        "v230_mouths:p165",
+        "v230_mouths:p166",
+        "v230_mouths:p167",
+        "v230_mouths:p168"
+      ],
+      "rows_skipped_other_posts": 0,
+      "n_anomalies": 0,
+      "n_flagged": 56,
+      "n_doubtful": 13,
+      "n_dam_breach_flagged": 46,
+      "n_undocumented_flags": 253,
+      "posts": [
+        "Касперівка",
+        "Миколаїв",
+        "Олександрівка",
+        "Очаків",
+        "Парутине",
+        "Станіслав",
+        "Херсон"
+      ]
+    },
+    "level_monthly_2023": {
+      "csv": "level_monthly_2023.csv",
+      "rows": 211,
+      "pages": [],
+      "rows_skipped_other_posts": 0,
+      "n_anomalies": 0
+    },
+    "level_summary_2023": {
+      "csv": "level_summary_2023.csv",
+      "rows": 14,
+      "pages": [],
+      "rows_skipped_other_posts": 0,
+      "n_anomalies": 0
+    },
+    "sea_levels_2023": {
+      "csv": "sea_levels_2023.csv",
+      "rows": 730,
+      "pages": [
+        "v229_seas:p34",
+        "v229_seas:p35"
+      ],
+      "rows_skipped_other_posts": 0,
+      "n_anomalies": 0,
+      "n_flagged": 0,
+      "n_doubtful": 0,
+      "n_dam_breach_flagged": 0,
+      "n_undocumented_flags": 0,
+      "posts": [
+        "Очаків",
+        "Парутине"
+      ]
+    },
+    "sea_level_summary_2023": {
+      "csv": "sea_level_summary_2023.csv",
+      "rows": 78,
+      "pages": [],
+      "rows_skipped_other_posts": 0,
+      "n_anomalies": 0
+    },
+    "level_frequency_2023": {
+      "csv": "level_frequency_2023.csv",
+      "rows": 71,
+      "pages": [
+        "v230_mouths:p169",
+        "v230_mouths:p170",
+        "v230_mouths:p171"
+      ],
+      "rows_skipped_other_posts": 0,
+      "n_anomalies": 0
+    },
+    "sea_level_stats_2023": {
+      "csv": "sea_level_stats_2023.csv",
+      "rows": 23,
+      "pages": [
+        "v229_seas:p36",
+        "v229_seas:p37",
+        "v229_seas:p38",
+        "v229_seas:p39"
+      ],
+      "rows_skipped_other_posts": 6,
+      "n_anomalies": 0
+    },
+    "hazard_events_2023": {
+      "csv": "hazard_events_2023.csv",
+      "rows": 25,
+      "pages": [
+        "v230_mouths:p159",
+        "v230_mouths:p160"
+      ],
+      "rows_skipped_other_posts": 0,
+      "n_anomalies": 0
+    },
+    "hazard_thresholds_2023": {
+      "csv": "hazard_thresholds_2023.csv",
+      "rows": 26,
+      "pages": [
+        "v230_mouths:p172",
+        "v230_mouths:p173"
+      ],
+      "rows_skipped_other_posts": 0,
+      "n_anomalies": 0
+    },
+    "surges_2023": {
+      "csv": "surges_2023.csv",
+      "rows": 9,
+      "pages": [
+        "v229_seas:p40"
+      ],
+      "rows_skipped_other_posts": 7,
+      "n_anomalies": 0
+    },
+    "overview_2023": {
+      "csv": "overview_2023.csv",
+      "rows": 163,
+      "pages": [
+        "v230_mouths:p184",
+        "v230_mouths:p185",
+        "v230_mouths:p186",
+        "v230_mouths:p187",
+        "v230_mouths:p188",
+        "v230_mouths:p189",
+        "v230_mouths:p190",
+        "v230_mouths:p191",
+        "v230_mouths:p192",
+        "v230_mouths:p193",
+        "v230_mouths:p194",
+        "v230_mouths:p195"
+      ],
+      "rows_skipped_other_posts": 0,
+      "n_anomalies": 0
+    },
+    "narrative_facts_2023": {
+      "csv": "narrative_facts_2023.csv",
+      "rows": 18,
+      "pages": [
+        "v230_mouths:p193-195"
+      ],
+      "rows_skipped_other_posts": 0,
+      "n_anomalies": 0
+    },
+    "data_gaps": {
+      "csv": "data_gaps.csv",
+      "rows": 24,
+      "pages": [
+        "v230_mouths:p147",
+        "v230_mouths:p148",
+        "v229_seas:p11"
+      ],
+      "rows_skipped_other_posts": 0,
+      "n_anomalies": 0
+    }
+  },
+  "checks": {
+    "stations.v230_station_count": {
+      "passed": true,
+      "detail": "10 estuary posts listed on p146 (expected 10)"
+    },
+    "stations.zero_of_post_minus_5": {
+      "passed": true,
+      "detail": "zeros: {'Каховська ГЕС': -5.0, 'Нова Каховка': -5.0, 'Херсон': -5.0, 'Касперівка': -5.0, 'Олександрівка': -3.02, 'Миколаїв': -5.0, 'Парутине': -5.0, 'Станіслав': -5.0, 'Геройське': -5.0, 'Очаків': -5.0}"
+    },
+    "stations.oleksandrivka_zero": {
+      "passed": true,
+      "detail": "Олександрівка zero -3.02"
+    },
+    "datum_corrections.unified_zero_corrections": {
+      "passed": true,
+      "detail": "{'Очаків': 321.0, 'Парутине': 440.0}"
+    },
+    "station_descriptions.manuscript_kherson_80805": {
+      "passed": true,
+      "detail": "Херсон code 80805, zero -5.0 m БС-77 — manuscript [V1.1, V1.3] state 80805 at −5.000 m BS-77"
+    },
+    "station_descriptions.nova_kakhovka_is_tailwater_post_80802": {
+      "passed": true,
+      "detail": "yearbook Нова Каховка code 80802 (ГП-ІІ, 2.5 km below the dam) — NOT the manuscript's reservoir station 80977 (+12.000 m)"
+    },
+    "daily_levels_2023.monthly_consistency_kherson": {
+      "passed": true,
+      "detail": "11 months compared; all within 1 cm of «Середн.»"
+    },
+    "daily_levels_2023.extremes_kherson": {
+      "passed": true,
+      "detail": "undistorted daily range 448–552 cm within table 432–566 cm"
+    },
+    "daily_levels_2023.monthly_consistency_kasperivka": {
+      "passed": true,
+      "detail": "6 months compared; all within 1 cm of «Середн.»"
+    },
+    "daily_levels_2023.monthly_consistency_oleksandrivka": {
+      "passed": true,
+      "detail": "12 months compared; all within 1 cm of «Середн.»"
+    },
+    "daily_levels_2023.extremes_oleksandrivka": {
+      "passed": true,
+      "detail": "undistorted daily range 322–444 cm within table 320–515 cm"
+    },
+    "daily_levels_2023.monthly_consistency_mykolaiv": {
+      "passed": true,
+      "detail": "11 months compared; all within 1 cm of «Середн.»"
+    },
+    "daily_levels_2023.extremes_mykolaiv": {
+      "passed": true,
+      "detail": "undistorted daily range 407–542 cm within table 378–580 cm"
+    },
+    "daily_levels_2023.monthly_consistency_ochakiv": {
+      "passed": true,
+      "detail": "11 months compared; all within 1 cm of «Середн.»"
+    },
+    "daily_levels_2023.extremes_ochakiv": {
+      "passed": true,
+      "detail": "undistorted daily range 452–514 cm within table 444–525 cm"
+    },
+    "daily_levels_2023.monthly_consistency_stanislav": {
+      "passed": true,
+      "detail": "3 months compared; all within 1 cm of «Середн.»"
+    },
+    "daily_levels_2023.monthly_consistency_parutyne": {
+      "passed": true,
+      "detail": "11 months compared; all within 1 cm of «Середн.»"
+    },
+    "daily_levels_2023.extremes_parutyne": {
+      "passed": true,
+      "detail": "undistorted daily range 441–530 cm within table 414–546 cm"
+    },
+    "daily_levels_2023.kherson_june_dam_breach_flagged": {
+      "passed": true,
+      "detail": "7 of 12 June values carry «/»"
+    },
+    "daily_levels_2023.kherson_june_exceeds_may": {
+      "passed": true,
+      "detail": "June max 1059 cm vs May max 542 cm"
+    },
+    "daily_levels_2023.nova_kakhovka_absent": {
+      "passed": true,
+      "detail": "0 daily rows (yearbook: data absent — occupation, dam destroyed)"
+    },
+    "sea_levels_2023.monthly_consistency_ochakiv": {
+      "passed": true,
+      "detail": "all 12 monthly means within 1 cm of «сер. міс.»"
+    },
+    "sea_levels_2023.monthly_consistency_parutyne": {
+      "passed": true,
+      "detail": "all 12 monthly means within 1 cm of «сер. міс.»"
+    },
+    "level_frequency_2023.frequency_posts": {
+      "passed": true,
+      "detail": "5 posts with frequency rows: Миколаїв, Олександрівка, Очаків, Парутине, Херсон"
+    },
+    "level_frequency_2023.frequency_pct_sums_Миколаїв": {
+      "passed": true,
+      "detail": "percentages sum to 100.00"
+    },
+    "level_frequency_2023.frequency_pct_sums_Олександрівка": {
+      "passed": true,
+      "detail": "percentages sum to 100.00"
+    },
+    "level_frequency_2023.frequency_pct_sums_Очаків": {
+      "passed": true,
+      "detail": "percentages sum to 100.00"
+    },
+    "level_frequency_2023.frequency_pct_sums_Парутине": {
+      "passed": true,
+      "detail": "percentages sum to 100.00"
+    },
+    "level_frequency_2023.frequency_pct_sums_Херсон": {
+      "passed": true,
+      "detail": "percentages sum to 100.00"
+    },
+    "sea_level_stats_2023.sea_stats_posts": {
+      "passed": true,
+      "detail": "posts: ['Очаків', 'Парутине']"
+    },
+    "hazard_events_2023.june_breach_events": {
+      "passed": true,
+      "detail": "8 June-2023 event rows across 7 posts"
+    },
+    "hazard_thresholds_2023.threshold_posts": {
+      "passed": true,
+      "detail": "posts: ['Касперівка', 'Миколаїв', 'Очаків', 'Парутине', 'Станіслав', 'Херсон']"
+    },
+    "surges_2023.surge_posts": {
+      "passed": true,
+      "detail": "posts: ['Очаків', 'Парутине']"
+    },
+    "overview_2023.breach_subsection_found": {
+      "passed": true,
+      "detail": "«ВПЛИВ ПІДРИВУ…» on p193"
+    },
+    "narrative_facts_2023.narrative_datum_consistent": {
+      "passed": true,
+      "detail": "3 «см (м БС)» pairs; all satisfy −5.000 + cm/100"
+    },
+    "narrative_facts_2023.narrative_max_kherson": {
+      "passed": true,
+      "detail": "narrative max 1068 cm found; June daily-mean max 1059 cm ≤ it"
+    },
+    "narrative_facts_2023.narrative_max_mykolaiv": {
+      "passed": true,
+      "detail": "narrative max 602 cm found; June daily-mean max 596 cm ≤ it"
+    },
+    "narrative_facts_2023.narrative_max_parutyne": {
+      "passed": true,
+      "detail": "narrative max 599 cm found; June daily-mean max 595 cm ≤ it"
+    },
+    "narrative_facts_2023.narrative_max_ochakiv": {
+      "passed": true,
+      "detail": "narrative max 573 cm found; June daily-mean max 569 cm ≤ it"
+    },
+    "data_gaps.gap_records": {
+      "passed": true,
+      "detail": "24 verbatim gap records for 8 posts"
+    },
+    "data_gaps.gap_mentions_Нова Каховка": {
+      "passed": true,
+      "detail": "Нова Каховка named in a gap record"
+    },
+    "data_gaps.gap_mentions_Геройське": {
+      "passed": true,
+      "detail": "Геройське named in a gap record"
+    },
+    "data_gaps.gap_mentions_Станіслав": {
+      "passed": true,
+      "detail": "Станіслав named in a gap record"
+    },
+    "data_gaps.gap_mentions_Касперівка": {
+      "passed": true,
+      "detail": "Касперівка named in a gap record"
+    },
+    "data_gaps.gap_mentions_Херсон": {
+      "passed": true,
+      "detail": "Херсон named in a gap record"
+    }
+  },
+  "n_checks_failed": 0,
+  "anomalies": {},
+  "history": []
+}
