@@ -240,3 +240,53 @@ def test_publish_never_ships_parquet():
     """*.parquet is git-ignored, so publishing one would lose it silently."""
     from src.paper_3.publish import PUBLISHED
     assert not any(name.endswith(".parquet") for name in PUBLISHED)
+
+
+# ── step_chroma verifies presence, not growth (2026-09-19) ────────────────────
+
+def test_chroma_step_accepts_a_zero_delta_when_every_paper_is_indexed(monkeypatch, tmp_path):
+    """`process_paper` already upserts each paper's chunks during --step pipeline,
+    so re-indexing the same papers moves no counter. The old delta<=0 guard called
+    that a corrupt index and aborted a healthy run."""
+    import pandas as pd
+    from src.paper_3 import harvest_ingest as hi
+
+    todo = pd.DataFrame({"slug": ["a", "b"], "selected": [True, True]})
+    monkeypatch.setattr(hi, "_todo_frame", lambda _t: todo)
+    monkeypatch.setattr(hi, "chroma_count", lambda: 1000)          # unchanged
+    monkeypatch.setattr(hi, "_run_module", lambda *a, **k: True)
+    monkeypatch.setattr(hi, "chunks_present", lambda ids: {i: 50 for i in ids})
+    staging = hi.HARVEST_DIR / "staging_xml"
+    staging.mkdir(parents=True, exist_ok=True)
+
+    res = hi.step_chroma(out_dir=tmp_path)
+    assert res["ok"] and res["delta"] == 0 and res["n_indexed"] == 2
+
+
+def test_chroma_step_fails_when_a_paper_has_no_chunks(monkeypatch, tmp_path):
+    import pandas as pd
+    from src.paper_3 import harvest_ingest as hi
+
+    todo = pd.DataFrame({"slug": ["a", "b"], "selected": [True, True]})
+    monkeypatch.setattr(hi, "_todo_frame", lambda _t: todo)
+    monkeypatch.setattr(hi, "chroma_count", lambda: 1000)
+    monkeypatch.setattr(hi, "_run_module", lambda *a, **k: True)
+    monkeypatch.setattr(hi, "chunks_present", lambda ids: {"a": 50, "b": 0})
+    (hi.HARVEST_DIR / "staging_xml").mkdir(parents=True, exist_ok=True)
+
+    res = hi.step_chroma(out_dir=tmp_path)
+    assert not res["ok"] and res["n_missing"] == 1
+
+
+def test_chroma_step_fails_loudly_when_the_index_raises(monkeypatch, tmp_path):
+    import pandas as pd
+    from src.paper_3 import harvest_ingest as hi
+
+    todo = pd.DataFrame({"slug": ["a"], "selected": [True]})
+    monkeypatch.setattr(hi, "_todo_frame", lambda _t: todo)
+    monkeypatch.setattr(hi, "chroma_count", lambda: 1000)
+    monkeypatch.setattr(hi, "_run_module", lambda *a, **k: True)
+    monkeypatch.setattr(hi, "chunks_present", lambda ids: {"a": -1})   # lookup threw
+    (hi.HARVEST_DIR / "staging_xml").mkdir(parents=True, exist_ok=True)
+
+    assert not hi.step_chroma(out_dir=tmp_path)["ok"]

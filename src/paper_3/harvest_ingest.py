@@ -286,6 +286,28 @@ def chroma_count() -> int:
     return VectorStore(collection_name=COLLECTION_NAME).count()
 
 
+def chunks_present(paper_ids: list[str]) -> dict[str, int]:
+    """Chunks per paper_id actually in the collection.
+
+    This is the question the chroma step really asks. Counting the collection
+    before and after cannot answer it: `process_paper` already upserts each
+    paper's chunks during `--step pipeline`, so re-indexing the same papers
+    rewrites the same chunk_ids and the total does not move. A zero delta then
+    means "already indexed", not "corrupt".
+    """
+    from src.config import COLLECTION_NAME
+    from src.vectorstore.chroma_store import VectorStore
+    collection = VectorStore(collection_name=COLLECTION_NAME)._collection
+    out: dict[str, int] = {}
+    for pid in paper_ids:
+        try:
+            out[pid] = len(collection.get(where={"paper_id": pid}, include=[])["ids"])
+        except Exception as exc:      # a broken index raises here, which is the real signal
+            logger.error("Chroma lookup failed for %s: %s", pid, exc)
+            out[pid] = -1
+    return out
+
+
 def step_chroma(out_dir: Path | None = None, batch_size: int = 32) -> dict:
     """Index the new papers, then verify the collection actually grew.
 
@@ -314,21 +336,29 @@ def step_chroma(out_dir: Path | None = None, batch_size: int = 32) -> dict:
     after = chroma_count()
     delta = after - before
     n_papers = len(todo)
-    expected_min = n_papers * 20   # deliberately loose; we are catching zero, not tuning
+    # What must be true is that every paper we just ingested is retrievable —
+    # not that the total grew. The pipeline step already indexed them, so a
+    # zero delta is the normal case when the two steps are run in sequence.
+    present = chunks_present([str(s) for s in todo["slug"]])
+    missing = sorted(pid for pid, n in present.items() if n == 0)
+    broken = sorted(pid for pid, n in present.items() if n < 0)
+    indexed = sum(1 for n in present.values() if n > 0)
 
-    if delta <= 0:
-        logger.error("Chroma count did not increase (%d → %d) — the index may be "
-                     "corrupt. Do NOT continue; check .chromadb before re-running.",
-                     before, after)
+    if broken:
+        logger.error("Chroma lookup failed for %d paper(s) — the index may be "
+                     "corrupt. Do NOT continue; check .chromadb. First: %s",
+                     len(broken), ", ".join(broken[:5]))
         ok = False
-    elif delta < expected_min:
-        logger.warning("Chroma grew by only %d chunks for %d papers — expected at "
-                       "least %d. Verify before trusting retrieval.",
-                       delta, n_papers, expected_min)
+    elif missing:
+        logger.error("%d of %d papers have no chunks in Chroma: %s",
+                     len(missing), n_papers, ", ".join(missing[:5]))
+        ok = False
     else:
-        logger.info("Chroma: %d → %d chunks (+%d for %d papers)",
-                    before, after, delta, n_papers)
-    return {"before": before, "after": after, "delta": delta, "ok": ok}
+        logger.info("Chroma: %d → %d chunks (delta %+d); all %d papers indexed "
+                    "(%d chunks for the smallest)",
+                    before, after, delta, indexed, min(present.values()))
+    return {"before": before, "after": after, "delta": delta,
+            "n_indexed": indexed, "n_missing": len(missing), "ok": ok}
 
 
 # ── steps: enrich, parquet, graph ─────────────────────────────────────────────
