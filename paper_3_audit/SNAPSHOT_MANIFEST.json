@@ -1,0 +1,839 @@
+{
+  "run_id": "20260916T092929Z",
+  "pulled_at": "2026-09-18T22:52:50+00:00",
+  "repos": {
+    "swot": {
+      "path": "/home/niko/repo/SWOT-DNIPRO",
+      "commit": "6bf0c4087545fdcd2fb6e107cfb71a14827d9710",
+      "dirty_paths": 286
+    },
+    "icesat": {
+      "path": "/home/niko/repo/icesat2-atl13-kakhovka",
+      "commit": "b1c872044261b159bdb183e54279b87dd842c186",
+      "dirty_paths": 18
+    }
+  },
+  "n_files": 117,
+  "missing_patterns": [],
+  "files": [
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/claim_evidence_matrix.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/claim_evidence_matrix.csv",
+      "sha256": "eef53e3c1c21077f5ac8cb7cd4a82f6e13f1bed7be387b8a5021cc1abe0ee9d3",
+      "bytes": 31274
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/findings.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/findings.csv",
+      "sha256": "ceae811930e61a800ec6cc0db81dbb93e56a103bd2fbe6b4b998256fdf676e34",
+      "bytes": 29735
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/checks.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/checks.csv",
+      "sha256": "547e85f968f0a00b81f4c672295cc5c0e9bbeceb5b992e9400f6d85223e7b533",
+      "bytes": 14294
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/literature_sources.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/literature_sources.csv",
+      "sha256": "42d3db4c53bca0b30eaa9d92070adddbb1e7ec8fbf7d262f1eb6e7ef4f829815",
+      "bytes": 11697
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/literature_search_log.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/literature_search_log.csv",
+      "sha256": "4584c2e6472fce487baf5c4863740fffe25342de9f6a96b76e300b694fe5b826",
+      "bytes": 4091
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/roughness_class_table.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/roughness_class_table.csv",
+      "sha256": "526f1eafeaa474f07a6e619eec44f7ca3df984dd5fe2b8134574cbd4adfe1026",
+      "bytes": 40676
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/dataset_inventory.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/dataset_inventory.csv",
+      "sha256": "ff0e60c961633dcd6563850733690795a66d331e5bf402406d4ad94129f8c041",
+      "bytes": 29973
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/index_feature_catalog.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/index_feature_catalog.csv",
+      "sha256": "f0034c3b1b85fc4f2b6dcf6c023e4ab5291c77717d563fa82794c81dfbc8fcd1",
+      "bytes": 9540
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/product_status.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/product_status.csv",
+      "sha256": "5a3481693055031a4472d47d51dbc94b63c43c4f67b33ce26f3d43f016520e70",
+      "bytes": 66639
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/scope_manifest.json",
+      "local_path": "swot/audit_runs/20260918T175108Z/scope_manifest.json",
+      "sha256": "84c5c310bd487cb3ed1fef82ac1955ce0ca104d2680fe5f42ce77cdc3fcf9f5e",
+      "bytes": 12254
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/checks/zone_nvalid_summary.json",
+      "local_path": "swot/audit_runs/20260918T175108Z/checks/zone_nvalid_summary.json",
+      "sha256": "c3bb55fd4a9b9c3af5c41dd48fcb2cafe08d8c9aa34e23852746f9b0d3d13856",
+      "bytes": 5980
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/checks/chk020_finding1_result.json",
+      "local_path": "swot/audit_runs/20260918T175108Z/checks/chk020_finding1_result.json",
+      "sha256": "114abf4470f98e56f944cc4f265b2454d03e34cda1117fd4a2fd8ed5897b19d6",
+      "bytes": 1864
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/vegetation/out/class_shares_by_date_former_water.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/vegetation/out/class_shares_by_date_former_water.csv",
+      "sha256": "f94d92749eea3a315e81563c82c75b1fb2ede503d92f34fd7e47fa1ceb5da848",
+      "bytes": 3108
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/vegetation/out/class_shares_by_year_summary.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/vegetation/out/class_shares_by_year_summary.csv",
+      "sha256": "7fb7af22c1550b1cb720d1b547374cb9aead0986ab68913de50401f09e060c21",
+      "bytes": 989
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/vegetation/out/mode_class_areas_by_year_former_water.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/vegetation/out/mode_class_areas_by_year_former_water.csv",
+      "sha256": "0b53372f003984b4632a1f99a3a9c8df7e5bd9dd527cf594ff724336fb541b89",
+      "bytes": 392
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/vegetation/out/transition_2023_2024_km2.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/vegetation/out/transition_2023_2024_km2.csv",
+      "sha256": "35105420e4f77be0fc813f42e1e99217492ecd52df08a6aee99c2c370f70eb0b",
+      "bytes": 667
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/vegetation/out/transition_2023_2025_km2.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/vegetation/out/transition_2023_2025_km2.csv",
+      "sha256": "ba443d4d6341461973e118648079fe0a54fd462ff6105aa2bd840ee23e8ddee2",
+      "bytes": 657
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/vegetation/out/transition_2024_2025_km2.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/vegetation/out/transition_2024_2025_km2.csv",
+      "sha256": "d1e0b6c55176168272703ae85911ff8f7445dcadd5ca1b5f157bcef4e913c2a1",
+      "bytes": 659
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/vegetation/out/validation_sample_design_2025.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/vegetation/out/validation_sample_design_2025.csv",
+      "sha256": "15804c7a95a449eaab1540f058f7ec5408136b79ff336542ad4c739812e95dc9",
+      "bytes": 35418
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/vegetation/out/summary.json",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/vegetation/out/summary.json",
+      "sha256": "1417037f2a99d91356aba6a6dc6ee482a065b3fe53f5578ddf98a17d9108c913",
+      "bytes": 9561
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/channel/out/bank_displacement_vs_ref.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/channel/out/bank_displacement_vs_ref.csv",
+      "sha256": "d6d95bbafd715efa739fcba2086ea9b8d410fe7cafba7712462d2fce6ce8b4fe",
+      "bytes": 2269
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/channel/out/width_by_transect_date.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/channel/out/width_by_transect_date.csv",
+      "sha256": "f7f9b48121f89835fb3f47029e3fc8d1669fbb9f599c85fdc421054ad60bb06d",
+      "bytes": 399466
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/channel/out/width_median_by_date.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/channel/out/width_median_by_date.csv",
+      "sha256": "bc7ef9a3088f6102cc9811c37a8be52385505a082fcffc5f13d7e6a062047e58",
+      "bytes": 1424
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/channel/out/width_summary_by_year.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/channel/out/width_summary_by_year.csv",
+      "sha256": "11e211305be06969fd4022388a59c86d5ce7a294ca96a20043017ae083121a9f",
+      "bytes": 539
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/channel/out/summary.json",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/channel/out/summary.json",
+      "sha256": "776e8f9628e0a3b438a566d53676b2d08d3de6b6b8d6da2e8118da0f1e22463c",
+      "bytes": 22317
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_class_areas_by_state.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_class_areas_by_state.csv",
+      "sha256": "57fc2df63b2e507b459ea539eb513ecee4d268ca2e989131dfce012f9eb8de4d",
+      "bytes": 638
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_roughness_transition_summary.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_roughness_transition_summary.csv",
+      "sha256": "f434560bff90dbbfc9a2cd8e71544a9bc7abfe35003f8b487c0f02d76521fc3a",
+      "bytes": 700
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_transition_BREACH_2023_FIRST_EXPOSURE_2023_km2.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_transition_BREACH_2023_FIRST_EXPOSURE_2023_km2.csv",
+      "sha256": "5e0faad939b7507f95475f264cb24a66b5625ca86ad370c4f8d2e7c6ef92f71f",
+      "bytes": 840
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_transition_FIRST_EXPOSURE_2023_STATE_2024_km2.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_transition_FIRST_EXPOSURE_2023_STATE_2024_km2.csv",
+      "sha256": "86677711c8d7cc5e6827a2dfeb69ced8db93857c6852daffb94d6bf362618f69",
+      "bytes": 866
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_transition_STATE_2024_STATE_2025_km2.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_transition_STATE_2024_STATE_2025_km2.csv",
+      "sha256": "e71bbe1fee9217cd3fa33642acd6d94a0250db95401a9d19b8a822c7954df63f",
+      "bytes": 858
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_class_areas_by_state.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_class_areas_by_state.csv",
+      "sha256": "a5504ed733172c6a33ee758f4bd40723383c487e96751db976579f0cc58a6515",
+      "bytes": 731
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_roughness_transition_summary.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_roughness_transition_summary.csv",
+      "sha256": "c6d8d542219dd2286fef31859a67635d8b1725f30ff0509ca98492d32dee706a",
+      "bytes": 757
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_transition_BREACH_2023_FIRST_EXPOSURE_2023_km2.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_transition_BREACH_2023_FIRST_EXPOSURE_2023_km2.csv",
+      "sha256": "5d39e4a1db4bb6d3f0385b8922a5b6c294a49415babfebd082c6708ddd22b1de",
+      "bytes": 875
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_transition_FIRST_EXPOSURE_2023_STATE_2024_km2.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_transition_FIRST_EXPOSURE_2023_STATE_2024_km2.csv",
+      "sha256": "315880f1f9d415a956b485999b7b851ed62362cb205e42ed48c0d8b25aa97dda",
+      "bytes": 842
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_transition_STATE_2024_STATE_2025_km2.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_transition_STATE_2024_STATE_2025_km2.csv",
+      "sha256": "403349963fe4acc0ff6f25a487c1cacfe3b95215c086c81b9a74963b574df1a0",
+      "bytes": 841
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_transition_STATE_2025_CURRENT_2026_km2.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_transition_STATE_2025_CURRENT_2026_km2.csv",
+      "sha256": "2df3e20aae78a609ccb142c824a8c7e8d1fe150a2b19ae3c3eea8ffd0ee4cd97",
+      "bytes": 854
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/hecras_sensitivity_design.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/hecras_sensitivity_design.csv",
+      "sha256": "277613fd85b830ee8991d240189f183697e8f5cda1515acb5eaadc55b56bc197",
+      "bytes": 2899
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/roughness_evidence_table.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/roughness_evidence_table.csv",
+      "sha256": "07b39f8e18315cd525e82189d9bdeaf591b68da027dccdfbd7f9206266009aa6",
+      "bytes": 4835
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/roughness/out/summary.json",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/roughness/out/summary.json",
+      "sha256": "f56e98627d032feb48c87d8354337c16ca23af5897b77f2c62baadd13e4a1328",
+      "bytes": 9629
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/icesat2/out/repeat_track_canopy_pairs_former_pool.csv",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/icesat2/out/repeat_track_canopy_pairs_former_pool.csv",
+      "sha256": "34a056c99d179697370d89824a38059758b3438dd335815b6eadc2196c66778f",
+      "bytes": 191
+    },
+    {
+      "repo": "swot",
+      "rel_path": "audit_runs/20260918T175108Z/pilots/icesat2/out/summary.json",
+      "local_path": "swot/audit_runs/20260918T175108Z/pilots/icesat2/out/summary.json",
+      "sha256": "54a17b9a145dad9962cc1684c980ae629ccd35afb2f8a958ef8ef580b4fc1307",
+      "bytes": 15109
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/manuscript_evidence_matrix.csv",
+      "local_path": "swot/outputs/tables/manuscript_evidence_matrix.csv",
+      "sha256": "4e1e348563de4f65a2f3f1cf678d10056de1662061903800a81292c021ca78e7",
+      "bytes": 31020
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/kakhovka_transition_statistics.csv",
+      "local_path": "swot/outputs/tables/kakhovka_transition_statistics.csv",
+      "sha256": "7ec46290ece8ecd295b0e355bb3240d35cb4df07fbec8d8ad6ebd1851c1a7d6d",
+      "bytes": 767
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/kakhovka_perdate_slopes_robust.csv",
+      "local_path": "swot/outputs/tables/kakhovka_perdate_slopes_robust.csv",
+      "sha256": "45deca8cff69a3f82b5c6b6ac257e90754f963208652acc54c85289beb34cc5e",
+      "bytes": 6011
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/kakhovka_pre_post_slope_summary.csv",
+      "local_path": "swot/outputs/tables/kakhovka_pre_post_slope_summary.csv",
+      "sha256": "11c95b61e7ce78e7b4243b359302100f501fd3874e5cc3183e9b94fbe2f3925c",
+      "bytes": 712
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/figure_data/FigG_span_sensitivity.csv",
+      "local_path": "swot/outputs/figure_data/FigG_span_sensitivity.csv",
+      "sha256": "a775120fc4e321cfea57a82d7b703cbfb7ff1a8a3f9a4a4f5a9325155ae335f8",
+      "bytes": 1233
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/reservoir_to_river_statistics.csv",
+      "local_path": "swot/outputs/tables/reservoir_to_river_statistics.csv",
+      "sha256": "e5fc584ff91fe608a00beffd51c160c8dc8dca257cbd1a39cc93d77e512ee936",
+      "bytes": 2644
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/allwater_vs_channel_slopes.csv",
+      "local_path": "swot/outputs/tables/allwater_vs_channel_slopes.csv",
+      "sha256": "769d50f10b9ca196ffc2075687cf003ceb184a623a9b2a40123a34ca53d181fb",
+      "bytes": 2249
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/pre_post_fragmentation_statistics.csv",
+      "local_path": "swot/outputs/tables/pre_post_fragmentation_statistics.csv",
+      "sha256": "1761d0150280d8d3205fe443277bf15755194bbc848d168a07f9db43e9d24c69",
+      "bytes": 328
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/residual_water_offset_summary.csv",
+      "local_path": "swot/outputs/tables/residual_water_offset_summary.csv",
+      "sha256": "46c79ec784ed0bcdc4f0758fdb6f49f2e701e8291bf7d476c9e30269311613d7",
+      "bytes": 559
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/fragmentation_metrics_by_date.csv",
+      "local_path": "swot/outputs/tables/fragmentation_metrics_by_date.csv",
+      "sha256": "780b1b8403e805ea58a1e7a65f330b128e69ef742eafb3b214091f8fea0836de",
+      "bytes": 9282
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/slope_Q_regression_results.csv",
+      "local_path": "swot/outputs/tables/slope_Q_regression_results.csv",
+      "sha256": "61df788df562bdf4ac0d331b58c627062b50d04b6a063615306d56673a0089da",
+      "bytes": 475
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/gauge_vertical_reference_summary.csv",
+      "local_path": "swot/outputs/tables/gauge_vertical_reference_summary.csv",
+      "sha256": "2dbbf65e04279e42f594b6fd40f7140541c9b9b8dad095520ef9f7f381f19f0f",
+      "bytes": 1747
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/part4_colocated_swot_icesat.csv",
+      "local_path": "swot/outputs/tables/part4_colocated_swot_icesat.csv",
+      "sha256": "63dfb12bb912ea0cebb97d0e183f4cccb2e2e0dfd78ac325aefbbec219bcf96e",
+      "bytes": 800
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/validation_summary_table.csv",
+      "local_path": "swot/outputs/tables/validation_summary_table.csv",
+      "sha256": "8f8522a773e8fb8b4639c439148d6f6da3a116baae0d5e77026531c0768dd1d8",
+      "bytes": 1523
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/vertical_reference_audit.csv",
+      "local_path": "swot/outputs/tables/vertical_reference_audit.csv",
+      "sha256": "8d5ec2f84c37bb726a07637f89833371681d6af588b51068c302b7e1b52c04b5",
+      "bytes": 1371
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/figure_data/Fig04_permanent_tide_correctors.csv",
+      "local_path": "swot/outputs/figure_data/Fig04_permanent_tide_correctors.csv",
+      "sha256": "8d8cdfdc1281914000e60286f9f9b3ff1d0109214ccbe68588aaf6847c79bd25",
+      "bytes": 1482
+    },
+    {
+      "repo": "icesat",
+      "rel_path": "outputs/tables/egg2015_to_evrf2019_by_station.csv",
+      "local_path": "icesat/outputs/tables/egg2015_to_evrf2019_by_station.csv",
+      "sha256": "92d9fd71a1c8da3915806f61690518686a0bdda57839c364a182cae969917c4b",
+      "bytes": 1992
+    },
+    {
+      "repo": "icesat",
+      "rel_path": "outputs/tables/kakhovka_datum_comparison.csv",
+      "local_path": "icesat/outputs/tables/kakhovka_datum_comparison.csv",
+      "sha256": "9d5f9fa72ea48c89b8bd04f5d3e15f8b061deebbdb89e4d5060f5837414c0d49",
+      "bytes": 1549
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/historical_reference_sensitivity.csv",
+      "local_path": "swot/outputs/tables/historical_reference_sensitivity.csv",
+      "sha256": "00fa738528f4311711942bdfb7a80a93ec8082e98e79c6e7209f8dcf9057c732",
+      "bytes": 869
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/hist3_datum_in_evrf2019.csv",
+      "local_path": "swot/outputs/tables/hist3_datum_in_evrf2019.csv",
+      "sha256": "6ffe901e68687f264e57dae1f21fb42484a0f62a05267b08517642799b4681ef",
+      "bytes": 540
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/hist6_reach_slopes.csv",
+      "local_path": "swot/outputs/tables/hist6_reach_slopes.csv",
+      "sha256": "74d968a904ffba375e1be70f86bfc447194d63b4709ed57e36240b4cebcf7170",
+      "bytes": 897
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/hist7_slope_geometry.csv",
+      "local_path": "swot/outputs/tables/hist7_slope_geometry.csv",
+      "sha256": "e007cd1fccf779e80208bf8e71e27d81095750f569f686896cbea5e4c988bc9b",
+      "bytes": 13272
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/hist12_bed_morphology_tests.csv",
+      "local_path": "swot/outputs/tables/hist12_bed_morphology_tests.csv",
+      "sha256": "22582561fc743b9b37f5665112a12ff65c3a088d2408fc62d5828069dfaf4ce1",
+      "bytes": 778
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/hist14_interpolator_cv.csv",
+      "local_path": "swot/outputs/tables/hist14_interpolator_cv.csv",
+      "sha256": "41766376f398bd43a11899b3ef0bca415f6fb6f1caa1c6b0bfb36b42193bde5b",
+      "bytes": 2197
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/hist14_surface_summary.csv",
+      "local_path": "swot/outputs/tables/hist14_surface_summary.csv",
+      "sha256": "401cabf62d136b02785755ec4ebb40da2112484e83075b0d14501fba2d89ac4c",
+      "bytes": 1048
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/hist17_grid_resolution.csv",
+      "local_path": "swot/outputs/tables/hist17_grid_resolution.csv",
+      "sha256": "d7bdce8a20beeb5bb9e3a42ce4a84f496c577d22bdf5c677c2a3aa8028745db9",
+      "bytes": 2476
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/hist18_cv_scheme_comparison.csv",
+      "local_path": "swot/outputs/tables/hist18_cv_scheme_comparison.csv",
+      "sha256": "c707cd544356edc831b472c8894d4e0ef66b290e834f1c97a071efb94295da66",
+      "bytes": 1270
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/historical_exposure_area_validation.csv",
+      "local_path": "swot/outputs/tables/historical_exposure_area_validation.csv",
+      "sha256": "eb9ac48ecd0f3720a231a394488de5d0eddb8943a7eb6fde37d0d91974b39c25",
+      "bytes": 1363
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/hypsometric_constraint_test.csv",
+      "local_path": "swot/outputs/tables/hypsometric_constraint_test.csv",
+      "sha256": "018d90020be6d5f92c8eea8a64b5bee1896d36c530966ac9f1abc507c44ea424",
+      "bytes": 980
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/hist28_offset_stability.csv",
+      "local_path": "swot/outputs/tables/hist28_offset_stability.csv",
+      "sha256": "d8e9d92410131d2e21f96aae36edf49feef1dae2d6f04a1437c7e4da985b7b1e",
+      "bytes": 386
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/hist31_dem_constraints.csv",
+      "local_path": "swot/outputs/tables/hist31_dem_constraints.csv",
+      "sha256": "0dcdae7feaf4feb0172e14f10f77b33d043cb57516195d7af782ab5f79d9f9fd",
+      "bytes": 1133
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p21_cv_summary_all.csv",
+      "local_path": "swot/outputs/tables/p21_cv_summary_all.csv",
+      "sha256": "f67e85b39ede724cb8cb530e77c33a3a44b696b310d3ee93e827b0f0d48ceaaa",
+      "bytes": 8840
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_surface_summary_ZONE_2_KHERSON_DELTA.csv",
+      "local_path": "swot/outputs/tables/p28_surface_summary_ZONE_2_KHERSON_DELTA.csv",
+      "sha256": "623ca0721633845fda0328c2129f73e83237aaff3ef3f50e186fba94478c4dcb",
+      "bytes": 580
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_surface_summary_ZONE_2_KHERSON_DELTA_30m.csv",
+      "local_path": "swot/outputs/tables/p28_surface_summary_ZONE_2_KHERSON_DELTA_30m.csv",
+      "sha256": "a4d436c47102b97fa838282975417c34b5ff761371d426862b8ea3cb30efae51",
+      "bytes": 585
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_surface_summary_ZONE_2_KHERSON_DELTA_50m.csv",
+      "local_path": "swot/outputs/tables/p28_surface_summary_ZONE_2_KHERSON_DELTA_50m.csv",
+      "sha256": "c0c6ff1e463757cf4b7ded2c23daa03740faaca526688f05edc4dd4a51cefd18",
+      "bytes": 582
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_surface_summary_ZONE_3_DNIPRO_BUG_ESTUARY.csv",
+      "local_path": "swot/outputs/tables/p28_surface_summary_ZONE_3_DNIPRO_BUG_ESTUARY.csv",
+      "sha256": "77e8d5a7e2ceec641e494cfdf7df6dc90ff6f216773025e2208bcc325b0b33a3",
+      "bytes": 561
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_surface_summary_ZONE_3_DNIPRO_BUG_ESTUARY_30m.csv",
+      "local_path": "swot/outputs/tables/p28_surface_summary_ZONE_3_DNIPRO_BUG_ESTUARY_30m.csv",
+      "sha256": "5fa30da9159a2fced9f44aa022e24775b9b232f3de7669d02cbe2a6bf20f32da",
+      "bytes": 564
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_surface_summary_ZONE_3_DNIPRO_BUG_ESTUARY_50m.csv",
+      "local_path": "swot/outputs/tables/p28_surface_summary_ZONE_3_DNIPRO_BUG_ESTUARY_50m.csv",
+      "sha256": "a644661695f0bbb12b3de86a735ef0a2dede46cc101c9cf23edff0f4dce636dc",
+      "bytes": 566
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_surface_summary_ZONE_4_DAM_TO_KHERSON_FLOODWAY.csv",
+      "local_path": "swot/outputs/tables/p28_surface_summary_ZONE_4_DAM_TO_KHERSON_FLOODWAY.csv",
+      "sha256": "54790446edc9e29b278214b154e25a0ff0b436dcb9d000017addeab1e48bd635",
+      "bytes": 594
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_surface_summary_ZONE_4_DAM_TO_KHERSON_FLOODWAY_30m.csv",
+      "local_path": "swot/outputs/tables/p28_surface_summary_ZONE_4_DAM_TO_KHERSON_FLOODWAY_30m.csv",
+      "sha256": "94d6966934585575795f9c57b32c802f401e54be3fd8923e259c9472f27d4799",
+      "bytes": 597
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_surface_summary_ZONE_4_DAM_TO_KHERSON_FLOODWAY_50m.csv",
+      "local_path": "swot/outputs/tables/p28_surface_summary_ZONE_4_DAM_TO_KHERSON_FLOODWAY_50m.csv",
+      "sha256": "3669310aba7451d08461d0ccd431e2157fda3af030c29987bea01a78b2e3d8f9",
+      "bytes": 595
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_interpolator_cv_ZONE_2_KHERSON_DELTA.csv",
+      "local_path": "swot/outputs/tables/p28_interpolator_cv_ZONE_2_KHERSON_DELTA.csv",
+      "sha256": "175a9bfeaad3d5b8f50fef97132c297f506223093402b0c16773429bac927bda",
+      "bytes": 7844
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_interpolator_cv_ZONE_2_KHERSON_DELTA_30m.csv",
+      "local_path": "swot/outputs/tables/p28_interpolator_cv_ZONE_2_KHERSON_DELTA_30m.csv",
+      "sha256": "175a9bfeaad3d5b8f50fef97132c297f506223093402b0c16773429bac927bda",
+      "bytes": 7844
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_interpolator_cv_ZONE_2_KHERSON_DELTA_50m.csv",
+      "local_path": "swot/outputs/tables/p28_interpolator_cv_ZONE_2_KHERSON_DELTA_50m.csv",
+      "sha256": "175a9bfeaad3d5b8f50fef97132c297f506223093402b0c16773429bac927bda",
+      "bytes": 7844
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_interpolator_cv_ZONE_3_DNIPRO_BUG_ESTUARY.csv",
+      "local_path": "swot/outputs/tables/p28_interpolator_cv_ZONE_3_DNIPRO_BUG_ESTUARY.csv",
+      "sha256": "441b89ffec1d36e4fad8f8027777a2931daa04598a95fd0e6a9df327169048e0",
+      "bytes": 6594
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_interpolator_cv_ZONE_3_DNIPRO_BUG_ESTUARY_30m.csv",
+      "local_path": "swot/outputs/tables/p28_interpolator_cv_ZONE_3_DNIPRO_BUG_ESTUARY_30m.csv",
+      "sha256": "441b89ffec1d36e4fad8f8027777a2931daa04598a95fd0e6a9df327169048e0",
+      "bytes": 6594
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_interpolator_cv_ZONE_3_DNIPRO_BUG_ESTUARY_50m.csv",
+      "local_path": "swot/outputs/tables/p28_interpolator_cv_ZONE_3_DNIPRO_BUG_ESTUARY_50m.csv",
+      "sha256": "441b89ffec1d36e4fad8f8027777a2931daa04598a95fd0e6a9df327169048e0",
+      "bytes": 6594
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_interpolator_cv_ZONE_4_DAM_TO_KHERSON_FLOODWAY.csv",
+      "local_path": "swot/outputs/tables/p28_interpolator_cv_ZONE_4_DAM_TO_KHERSON_FLOODWAY.csv",
+      "sha256": "7471cb807c0ff0098e98b5843ac2b76ef05f63850541fa9784c641290530e082",
+      "bytes": 7811
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_interpolator_cv_ZONE_4_DAM_TO_KHERSON_FLOODWAY_30m.csv",
+      "local_path": "swot/outputs/tables/p28_interpolator_cv_ZONE_4_DAM_TO_KHERSON_FLOODWAY_30m.csv",
+      "sha256": "7471cb807c0ff0098e98b5843ac2b76ef05f63850541fa9784c641290530e082",
+      "bytes": 7811
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p28_interpolator_cv_ZONE_4_DAM_TO_KHERSON_FLOODWAY_50m.csv",
+      "local_path": "swot/outputs/tables/p28_interpolator_cv_ZONE_4_DAM_TO_KHERSON_FLOODWAY_50m.csv",
+      "sha256": "7471cb807c0ff0098e98b5843ac2b76ef05f63850541fa9784c641290530e082",
+      "bytes": 7811
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p25_zone_spectral_manifest_ZONE_1_KAKHOVKA_LOWER_DNIPRO.csv",
+      "local_path": "swot/outputs/tables/p25_zone_spectral_manifest_ZONE_1_KAKHOVKA_LOWER_DNIPRO.csv",
+      "sha256": "085b16b8ae0f1d3843f6f7d2905dfa646f470e0e40d40acbe7f21331981721df",
+      "bytes": 18617
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p25_zone_spectral_manifest_ZONE_2_KHERSON_DELTA.csv",
+      "local_path": "swot/outputs/tables/p25_zone_spectral_manifest_ZONE_2_KHERSON_DELTA.csv",
+      "sha256": "6e0ad483d481e7a289de3876a38f3a7e91fa9f84b4057b9273b194c38b0d5ec9",
+      "bytes": 4407
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p25_zone_spectral_manifest_ZONE_3_DNIPRO_BUG_ESTUARY.csv",
+      "local_path": "swot/outputs/tables/p25_zone_spectral_manifest_ZONE_3_DNIPRO_BUG_ESTUARY.csv",
+      "sha256": "5a1cc84dc0ad95b9e7d00e477d30672fbd1e4aab543f86bda5ba2aff30c5e870",
+      "bytes": 43836
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p25_zone_spectral_manifest_ZONE_4_DAM_TO_KHERSON_FLOODWAY.csv",
+      "local_path": "swot/outputs/tables/p25_zone_spectral_manifest_ZONE_4_DAM_TO_KHERSON_FLOODWAY.csv",
+      "sha256": "d4555704b5a52c49ac8b428a9a1cd5fb1e50595d3b625c1da4adc2f288851b75",
+      "bytes": 5126
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p27_zone_shoreline_uncertainty.csv",
+      "local_path": "swot/outputs/tables/p27_zone_shoreline_uncertainty.csv",
+      "sha256": "5a79d05ccb41040de8d61be65f7218e7b03c014896bfcabd7b6816aebb2723f9",
+      "bytes": 3131
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p32_metrics_ZONE_1_KAKHOVKA_LOWER_DNIPRO.csv",
+      "local_path": "swot/outputs/tables/p32_metrics_ZONE_1_KAKHOVKA_LOWER_DNIPRO.csv",
+      "sha256": "67832b20db7acb27699efa5b7cc0670ccca9f4a068d7ab35cb97a0a777affa71",
+      "bytes": 107019
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p32_metrics_ZONE_2_KHERSON_DELTA.csv",
+      "local_path": "swot/outputs/tables/p32_metrics_ZONE_2_KHERSON_DELTA.csv",
+      "sha256": "4c6cd43b2c6641450b4c6d59efb4a3084619de4a060195dc5c8871cc8740b994",
+      "bytes": 142395
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p32_metrics_ZONE_3_DNIPRO_BUG_ESTUARY.csv",
+      "local_path": "swot/outputs/tables/p32_metrics_ZONE_3_DNIPRO_BUG_ESTUARY.csv",
+      "sha256": "81872d326fed30a399c2f5d2c455c73ea94a7441d145c2ff42182a073e8119bd",
+      "bytes": 143240
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p32_metrics_ZONE_4_DAM_TO_KHERSON_FLOODWAY.csv",
+      "local_path": "swot/outputs/tables/p32_metrics_ZONE_4_DAM_TO_KHERSON_FLOODWAY.csv",
+      "sha256": "01c3a32525a5a038067d5639cf9905bf50f221f3c77bca4abe2484759cecda79",
+      "bytes": 165082
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p34_variant_ranking.csv",
+      "local_path": "swot/outputs/tables/p34_variant_ranking.csv",
+      "sha256": "727f0c7ec2178774facb1ee5bc7a1063de3cbbaae71b6ef014297d080dfe8cb4",
+      "bytes": 30721
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p34_references.csv",
+      "local_path": "swot/outputs/tables/p34_references.csv",
+      "sha256": "394c8f6374a245caf90b6b4e7d0e4912143cc4bad1c3d2dac127e833434d87f1",
+      "bytes": 4522
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p38_references.csv",
+      "local_path": "swot/outputs/tables/p38_references.csv",
+      "sha256": "8e75e8ca6cad66ea4054bd3409249cd880010ff66d1c8c42c42bb2bc11a04760",
+      "bytes": 5194
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p38c_operating_points_ZONE_4_DAM_TO_KHERSON_FLOODWAY_pre.csv",
+      "local_path": "swot/outputs/tables/p38c_operating_points_ZONE_4_DAM_TO_KHERSON_FLOODWAY_pre.csv",
+      "sha256": "2c9fec60c67a1e4dee2b9f34e883c3075a26a9e6d85ee05e20ec610e7c0201d8",
+      "bytes": 38892
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p37_false_water_summary.csv",
+      "local_path": "swot/outputs/tables/p37_false_water_summary.csv",
+      "sha256": "44f35ab54b1481d6a0bf78f197c5783e39e5ab359aec8cd7e8e624885fc38b71",
+      "bytes": 1975308
+    },
+    {
+      "repo": "swot",
+      "rel_path": "data/historical/sea_posts_2023/annual_stats_2023.csv",
+      "local_path": "swot/data/historical/sea_posts_2023/annual_stats_2023.csv",
+      "sha256": "b2d39dfaa3c297b2dfb057425600feeba36406d2b454ef0162dee542a0f2189a",
+      "bytes": 2233
+    },
+    {
+      "repo": "swot",
+      "rel_path": "data/historical/sea_posts_2023/daily_discharge_oleksandrivka_m3s.csv",
+      "local_path": "swot/data/historical/sea_posts_2023/daily_discharge_oleksandrivka_m3s.csv",
+      "sha256": "6cb23cb91babb6c30b28e6e729954a72a0338c12eb0f4b3f06cffdc2b8b26bff",
+      "bytes": 80718
+    },
+    {
+      "repo": "swot",
+      "rel_path": "data/historical/sea_posts_2023/daily_levels_cm.csv",
+      "local_path": "swot/data/historical/sea_posts_2023/daily_levels_cm.csv",
+      "sha256": "d7f731464319b436c6c600c76d16b5f5de60b49499dc0ee0f8438454be19cd64",
+      "bytes": 787721
+    },
+    {
+      "repo": "swot",
+      "rel_path": "data/historical/sea_posts_2023/daily_salinity_ppt.csv",
+      "local_path": "swot/data/historical/sea_posts_2023/daily_salinity_ppt.csv",
+      "sha256": "400835096849005fb4fbe8b7cd8bdfe4c7ae6556d2a5d6526f6272e0aa80b78b",
+      "bytes": 150025
+    },
+    {
+      "repo": "swot",
+      "rel_path": "data/historical/sea_posts_2023/daily_water_temperature_c.csv",
+      "local_path": "swot/data/historical/sea_posts_2023/daily_water_temperature_c.csv",
+      "sha256": "2df123f6dcc26dca9fdaed41b8076af0571b2041fcb24e4b709390de5049ae5b",
+      "bytes": 157102
+    },
+    {
+      "repo": "swot",
+      "rel_path": "data/historical/sea_posts_2023/level_extremes_2023.csv",
+      "local_path": "swot/data/historical/sea_posts_2023/level_extremes_2023.csv",
+      "sha256": "a34a7efcc9621344cb19291861fae9a7d0bf0721099cb29895328490de7a8c61",
+      "bytes": 6369
+    },
+    {
+      "repo": "swot",
+      "rel_path": "data/historical/sea_posts_2023/level_statistics_229.csv",
+      "local_path": "swot/data/historical/sea_posts_2023/level_statistics_229.csv",
+      "sha256": "96fc497fdd8e0f29d74cfd19ca152686093153ba03c61f814754e0679b89c000",
+      "bytes": 370
+    },
+    {
+      "repo": "swot",
+      "rel_path": "data/historical/sea_posts_2023/monthly_stats_printed.csv",
+      "local_path": "swot/data/historical/sea_posts_2023/monthly_stats_printed.csv",
+      "sha256": "ba9fe7b941c38f1aa17736aaf3c421b11d1a52f143f52c31374ea3aa6cbc1471",
+      "bytes": 72423
+    },
+    {
+      "repo": "swot",
+      "rel_path": "data/historical/sea_posts_2023/monthly_temperature_salinity_230.csv",
+      "local_path": "swot/data/historical/sea_posts_2023/monthly_temperature_salinity_230.csv",
+      "sha256": "85f97259bcfafeffbb50a246465952981dd70d6159e8c3813df58226198992c9",
+      "bytes": 51708
+    },
+    {
+      "repo": "swot",
+      "rel_path": "data/historical/sea_posts_2023/post_metadata_2023.csv",
+      "local_path": "swot/data/historical/sea_posts_2023/post_metadata_2023.csv",
+      "sha256": "722a337bfced0f918cc99de74d411afc0c9cf5f2c008510891ef0cda3cc9a31d",
+      "bytes": 2987
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/k5_gauge_availability.csv",
+      "local_path": "swot/outputs/tables/k5_gauge_availability.csv",
+      "sha256": "6b4f0d9c6a06f6bb739fe620606e67b3a50d704da0eae2e951f34b56f50e0893",
+      "bytes": 4560
+    },
+    {
+      "repo": "swot",
+      "rel_path": "config/spatial_domains.yaml",
+      "local_path": "swot/config/spatial_domains.yaml",
+      "sha256": "093c90f4e2ea7578c78a9dc0d3fbb7ee9f7504ffab1e2af37205c33fe6bac270",
+      "bytes": 10221
+    }
+  ]
+}

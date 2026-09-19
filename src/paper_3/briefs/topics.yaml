@@ -1,0 +1,137 @@
+# The three methodological aspects the manuscript needs the literature on.
+#
+# Each topic declares a SOURCE POLICY, because the two corpora answer different
+# questions:
+#
+#   new_harvest (9 148 OpenAlex abstracts)  — breadth. Which methods exist at all.
+#   old_fulltext (3 675 normalised papers)  — depth. The numbers, and how they
+#                                             were obtained.
+#
+# `abstract_role` caps what an abstract-level record may ever become, whatever
+# the extractor returns. A topic whose abstract_role is `discovery` can never
+# contribute a number to the manuscript from an abstract — the cap is enforced in
+# code, not by convention.
+
+- id: A
+  name: bathymetry
+  title: "Bathymetry: why it matters and how it is built"
+  question: >
+    Why does bathymetry matter for this kind of study, and what are the available
+    ways of producing it when no modern survey exists?
+  # Both sources work hard here: abstracts give the taxonomy of methods, full text
+  # gives the accuracy each method achieves.
+  abstract_role: qualitative_support
+  fulltext_required_for: [value, metric, vertical_datum]
+  theses: [T17, T18, T15]
+  key_terms:
+    - ["bathymetr", "sounding", "echo sound", "single-beam", "single beam",
+       "multibeam", "multi-beam", "depth survey", "hydrographic survey",
+       "satellite-derived bathymetry", "SDB", "lakebed", "lake bed",
+       "reservoir bed", "bed elevation", "exposed bed", "nautical chart"]
+    - ["interpolat", "kriging", "IDW", "inverse distance", "radial basis", "RBF",
+       "spline", "TIN", "triangulat", "DEM differencing", "surface reconstruction"]
+    - ["reservoir", "lake", "river", "channel", "impound", "drawdown"]
+  negative_terms:
+    - "ocean bathymetry chart only"
+    - "seafloor spreading"
+    - "bathymetric fish habitat"
+  extract:
+    - method            # echo sounding | ICESat-2 exposed bed | SDB | chart digitisation | DEM differencing
+    - interpolator      # kriging | IDW | RBF | spline | TIN | none
+    - value             # RMSE / MAE / bias of the reconstructed bed
+    - metric
+    - unit
+    - vertical_datum    # what the soundings were reduced to
+    - waterbody_type
+    - limitations
+
+- id: B
+  name: vertical_reference
+  title: "Vertical reference: bringing heights into one system"
+  question: >
+    Why must heights be brought into one vertical and tide system before they are
+    compared, and what error is introduced when that step is skipped?
+  # Abstracts almost never say "heights were converted from tide-free ellipsoidal
+  # to EVRF2019 normal heights" — that lives in Methods, a product description or
+  # supplementary material. So abstracts are used to find candidates and nothing more.
+  abstract_role: discovery
+  # Two concepts must meet in one passage. A flood paper says "reference frame"
+  # once and "elevation" often; a geodesy paper puts them in the same sentence.
+  require_cooccurrence: true
+  fulltext_required_for: [value, metric, vertical_datum, geoid_model, permanent_tide]
+  theses: [T08, T09, T10, T11]
+  key_terms:
+    # Deliberately wider than thesis T08/T09. The flood-oriented corpus does not
+    # index geodesy well, and T09 returning zero papers said more about the
+    # corpus than about the literature — so the geodesy vocabulary is spelled out
+    # here rather than inherited.
+    # Primary = unambiguously geodetic. "reference frame", "geolocation" and
+    # "height reference" were here at first and pulled in flood-DEM papers, so
+    # they sit in the second family now: supporting vocabulary, not the
+    # distinguishing concept.
+    - ["vertical datum", "geoid", "quasigeoid", "ellipsoidal height",
+       "orthometric height", "normal height", "geoid undulation",
+       "EGM2008", "EGM96", "EGG2015", "EVRF", "levelling network",
+       "permanent tide", "tide-free", "tide free", "zero-tide", "zero tide",
+       "mean-tide", "mean tide", "tidal deformation",
+       "GNSS levelling", "GNSS leveling", "datum transformation", "ITRF"]
+    - ["vertical reference", "height system", "height reference",
+       "reference frame", "geolocation", "altimet", "ICESat", "SWOT",
+       "geodes", "GNSS", "GPS", "gauge", "in situ", "in-situ"]
+    - ["water level", "water surface elevation", "WSE", "height", "elevation",
+       "bias", "offset", "difference", "discrepancy"]
+  negative_terms:
+    - "tidal flat"
+    - "tidal current"
+    - "chart datum sounding reduction only"
+  extract:
+    - vertical_datum
+    - geoid_model
+    - permanent_tide
+    - method            # how the conversion was done
+    - value             # magnitude of the error if omitted, or the residual after
+    - metric
+    - unit
+    - limitations
+
+- id: C
+  name: validation_accuracy
+  title: "Satellite validation and measurement accuracy"
+  question: >
+    What accuracy do satellite water-surface elevations achieve, against what
+    reference, under what collocation rules, and over how many stations?
+  # The strictest topic. An abstract can find a paper that "validated ICESat-2
+  # against gauges"; it cannot say whether that was RMSE or MAE, ATL13 or ATL08,
+  # a river or a reservoir, Δt of one hour or seven days, or n = 2 or n = 150.
+  # Without those, comparing our own +0.0036 m and +0.026 m against it would be
+  # methodologically wrong.
+  abstract_role: discovery
+  fulltext_required_for: [value, metric, collocation_rule, n_gauges, independent_unit]
+  theses: [T05, T06, T07, T12, T13]
+  key_terms:
+    # Primary = the altimeter. The metric family led at first, and since every
+    # hydrological modelling paper is full of RMSE and bias, the queue filled
+    # with runoff models. The topic is satellite validation, so the sensor is
+    # the distinguishing concept and the metric is supporting vocabulary.
+    - ["ICESat", "ATL03", "ATL06", "ATL08", "ATL13", "SWOT", "KaRIn", "PIXC",
+       "RiverSP", "LakeSP", "Sentinel-3", "Jason", "CryoSat", "Envisat",
+       "radar altimet", "laser altimet", "satellite altimet", "virtual station"]
+    - ["validation", "validat", "accuracy assessment", "comparison with gauge",
+       "against in situ", "against in-situ", "RMSE", "MAE", "NMAD", "bias",
+       "standard deviation", "residual", "error budget"]
+    - ["water surface elevation", "water level", "WSE", "stage", "water surface slope"]
+    - ["gauge", "in situ", "in-situ", "station", "reference data", "ground truth"]
+  negative_terms:
+    - "sea surface height validation"
+    - "ice sheet elevation validation"
+    - "cross-validation of a classifier"
+  extract:
+    - sensor
+    - value
+    - metric
+    - unit
+    - collocation_rule
+    - n_gauges
+    - independent_unit
+    - waterbody_type
+    - limitations

@@ -1,0 +1,164 @@
+# Authoritative technical sources for topic B that are NOT journal papers.
+#
+# For a methods section these often outrank a random geodesy paper: the
+# statement "ATL03 heights are in the tide-free system" comes from the ATBD, not
+# from someone citing the ATBD. They are indexed poorly or not at all by
+# OpenAlex, so they are listed here by hand.
+#
+# Every entry below is something the v1 draft already cites informally in its
+# §REFERENCES. No URL is filled in unless it is known for certain — an
+# invented URL is worse than an empty one. `status: url_needed` marks the gap.
+#
+# source_type vocabulary (mirrored in geodesy.py):
+#   paper              peer-reviewed article, from the harvest
+#   curated_paper      peer-reviewed article NOT reachable by the harvest (no DOI
+#                      or not indexed by OpenAlex), listed by hand. Because
+#                      retrieval could never recover it, it can never be a
+#                      positive control — only a source.
+#   technical_standard convention or resolution (IAG, ISO)
+#   mission_document   ATBD, product description, user handbook
+#   registry           EPSG / authoritative dataset documentation
+#
+# status vocabulary:
+#   url_needed         no URL known for certain
+#   url_verified       the URL was fetched by hand and, for a PDF, its sha256 is
+#                      recorded in `url_sha256`; the download step refuses a
+#                      file whose bytes differ.
+#
+# `mandatory: true` marks a source the manuscript must cite (user decision);
+# `formal_citation` is the reference-list entry the v2 overlay appends.
+
+- id: SWOT_PIXC_PDD
+  source_type: mission_document
+  title: "SWOT Level 2 KaRIn High Rate Pixel Cloud Product Description Document"
+  identifier: "JPL D-56411 Rev C"
+  issuer: "NASA JPL / CNES"
+  bears_on: [permanent_tide, swot_reference]
+  draft_citation: "SWOT PIXC Product Description Document D-56411 Rev C (tide fields not applied; p. 53)"
+  url: ""
+  status: url_needed
+  note: "Establishes which tide fields are supplied but not applied in PIXC."
+
+- id: ICESAT2_ATL03_ATBD
+  source_type: mission_document
+  title: "ICESat-2 Algorithm Theoretical Basis Document for Global Geolocated Photons (ATL03)"
+  identifier: "Release 007"
+  issuer: "NASA / NSIDC"
+  bears_on: [permanent_tide, icesat2_reference, height_types]
+  draft_citation: "ICESat-2 ATL03 ATBD Release 007 (tide-free system, pp. 8, 20, 26; tide_earth_free2mean, pp. 125–126)"
+  url: ""
+  status: url_needed
+  note: "Defines the tide-free reference and the tide_earth_free2mean parameter."
+
+- id: ICESAT2_ATL13_ATBD
+  source_type: mission_document
+  title: "ICESat-2 Algorithm Theoretical Basis Document for Inland Water Surface Height (ATL13)"
+  identifier: ""
+  issuer: "NASA / NSIDC"
+  bears_on: [icesat2_reference]
+  draft_citation: "ICESat-2 ATL13 ATBD"
+  url: ""
+  status: url_needed
+
+- id: IAG_RESOLUTION_16_1983
+  source_type: technical_standard
+  title: "IAG Resolution No. 16 on the permanent tide"
+  identifier: "1983"
+  issuer: "International Association of Geodesy"
+  bears_on: [permanent_tide]
+  draft_citation: "IAG Resolution 16 (1983) — permanent tide conventions"
+  url: ""
+  status: url_needed
+  note: "The convention that defines zero-tide as the recommended system."
+
+- id: EGG2015
+  source_type: registry
+  title: "EGG2015 — European Gravimetric (Quasi)Geoid"
+  identifier: ""
+  issuer: "Denker, H. (2015), IfE Hannover"
+  bears_on: [reference_systems, height_types]
+  draft_citation: "Denker, H. (2015) — EGG2015 European Gravimetric Quasigeoid"
+  url: ""
+  status: url_needed
+
+- id: EVRF2019
+  source_type: registry
+  title: "EVRF2019 — European Vertical Reference Frame 2019 realisation"
+  identifier: "EPSG:9389"
+  issuer: "BKG"
+  bears_on: [reference_systems]
+  draft_citation: "BKG — EVRF2019 realisation (EPSG:9389)"
+  url: ""
+  status: url_needed
+
+- id: EPSG_9902
+  source_type: registry
+  title: "EPSG coordinate operation 9902: Baltic 1977 height to EVRF2019 height (1)"
+  identifier: "EPSG:9902; source EPSG:5705 → target EPSG:9389; method EPSG:1085 (vertical offset by grid interpolation, asc); grid ua_2019z.asc; accuracy 0.068 m; determined at 154 points, SD 0.034 m; offset mean 0.151 m, min 0.079 m, max 0.285 m"
+  issuer: "IOGP EPSG Geodetic Parameter Dataset (information source: EuroGeographics)"
+  bears_on: [datum_transformation, reference_systems]
+  draft_citation: "EPSG registry — coordinate operation 9902 (BS-77 → EVRF2019), grid ua_2019z.asc, stated accuracy 0.068 m"
+  formal_citation: "IOGP (n.d.). EPSG Geodetic Parameter Dataset, coordinate operation 9902 «Baltic 1977 height to EVRF2019 height (1)», grid ua_2019z.asc, accuracy 0.068 m. https://epsg.io/9902"
+  url: "https://epsg.io/9902"
+  status: url_verified
+  mandatory: true
+  note: >-
+    The operation the manuscript applies; its stated accuracy is the anchor for
+    T08. Verified on epsg.io 2026-09-17. NOT the same product as the CRS-EU
+    «UA_KRON / NH to EVRF2019zero» grid (idw_ua_2019_z.asc, IDW) that
+    Стопхай et al. 2026 build on — the manuscript's §3.4 and §9 currently name
+    them in one breath («EPSG registry / BKG EVRF2019»).
+
+- id: CRS_EU_UA_KRON_EVRF2019ZERO
+  source_type: registry
+  title: "Description of transformation — UA_KRON / NH to EVRF2019zero"
+  identifier: "grid idw_ua_2019_z.asc (+ .prj); method: interpolation of a raster surface from points (IDW); operation version September 2020; target EVRF2019 zero-tide (EVRF2019_AMST / NH); valid area Ukraine; verification data: none stated"
+  issuer: "CRS-EU (BKG) — Information and Service System for European Coordinate Reference Systems"
+  bears_on: [datum_transformation, reference_systems, permanent_tide]
+  draft_citation: ""
+  formal_citation: "BKG (2020). UA_KRON / NH to EVRF2019zero — description of transformation (grid idw_ua_2019_z.asc, inverse distance weighted). CRS-EU. https://www.crs-geo.eu/crs/descrtrans/eu-descrtrans.php?crs_id=dFVBX0tST04gLyBOSA==&op_id=VUFfS1JPTiAvIE5IIHRvIEVWUkYyMDE5emVybw==&tr_one=0"
+  url: "https://www.crs-geo.eu/crs/descrtrans/eu-descrtrans.php?crs_id=dFVBX0tST04gLyBOSA==&op_id=VUFfS1JPTiAvIE5IIHRvIEVWUkYyMDE5emVybw==&tr_one=0"
+  status: url_verified
+  mandatory: true
+  note: "Named by the user 2026-09-17 as mandatory. The grid Стопхай et al. 2026 use as EVRF2019zero_AMST input."
+
+- id: STOPKHAI_2026_BS77_EVRF2019
+  source_type: curated_paper
+  title: "Розроблення моделі для переходу від Балтійської системи висот 1977 р. до Європейської вертикальної референцної системи (EVRS) для території України"
+  title_en: "Development of a height transformation model from the Baltic Height System 1977 to the European Vertical Reference System (EVRS) for the territory of Ukraine"
+  authors: "Стопхай Ю., Матвійчук І., Данильчук Д., Жолоб О., Прищепа С., Чорнокнижний О."
+  issuer: "Сучасні досягнення геодезичної науки та виробництва, вип. І (51), 2026, с. 62–67"
+  identifier: "УДК 528.2; no DOI; not indexed in OpenAlex (checked 2026-09-17)"
+  year: 2026
+  bears_on: [datum_transformation, reference_systems, height_types]
+  draft_citation: ""
+  formal_citation: "Стопхай, Ю., Матвійчук, І., Данильчук, Д., Жолоб, О., Прищепа, С., & Чорнокнижний, О. (2026). Розроблення моделі для переходу від Балтійської системи висот 1977 р. до Європейської вертикальної референцної системи (EVRS) для території України. Сучасні досягнення геодезичної науки та виробництва, І(51), 62–67. https://zgt.com.ua/wp-content/uploads/2026/06/9.pdf"
+  formal_citation_en: "Stopkhai, Yu., Matviichuk, I., Danylchuk, D., Zholob, O., Pryschepa, S., & Chornoknyzhnyi, O. (2026). Development of a height transformation model from the Baltic Height System 1977 to the European Vertical Reference System (EVRS) for the territory of Ukraine. Modern Achievements of Geodetic Science and Industry, I(51), 62–67."
+  url: "https://zgt.com.ua/wp-content/uploads/2026/06/9.pdf"
+  url_sha256: "be6569bc0784f66f565674edb5ffee63acc003ad1329364bbe0b8baebc54742c"
+  status: url_verified
+  mandatory: true
+  key_facts:   # verbatim numbers from pp 62–65, for §3.4 / §7.5
+    - "Постанова КМУ №590 від 09.06.2023 — EVRS на території України з 01.01.2026"
+    - "inputs: квазігеоїд УКГ2017 (1′×1.5′, 425 100 nodes) + CRS-EU grid EVRF2019zero_AMST (15′×15′, 3 776 nodes); IDW in ArcGIS Pro"
+    - "raster FGDBR (UKG2017 vs EVRF2019zero_AMST): min 0.000, max 0.250, mean 0.070, SD 0.080 m"
+    - "control on 106 benchmarks I–III class: residuals 0.000 … −0.104 m, mean 0.007 m; 4 exceed 0.05 m, 102 within"
+  note: >-
+    Mandatory (user, 2026-09-17). Distinct from EPSG:9902 — different grid and a
+    different mean offset (0.070 vs 0.151 m); recorded, not interpreted. Cannot be
+    a positive control: retrieval cannot recover a paper that is in no index.
+
+- id: TREVOHO_2021_UA_HEIGHT_SYSTEM
+  source_type: curated_paper
+  title: "About modernization of Ukrainian height system"
+  authors: "Trevoho, I."
+  issuer: "Geodesy, Cartography and Aerial Photography, 93 (2021), Lviv Polytechnic"
+  identifier: "doi:10.23939/istcgcap2021.93.013"
+  year: 2021
+  bears_on: [datum_transformation, reference_systems]
+  draft_citation: ""
+  formal_citation: "Trevoho, I. (2021). About modernization of Ukrainian height system. Geodesy, Cartography and Aerial Photography, 93. https://doi.org/10.23939/istcgcap2021.93.013"
+  url: ""
+  status: url_needed
+  mandatory: false
+  note: "Indexed in OpenAlex, so it is also a candidate positive control for T08/T10 (theses.yaml, unread). The harvest resolves its PDF by DOI."

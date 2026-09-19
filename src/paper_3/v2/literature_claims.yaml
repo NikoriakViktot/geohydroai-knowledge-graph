@@ -1,0 +1,377 @@
+# L-series: literature-positioning claims for §7.8 "Comparison with literature".
+#
+# Each claim is a statement ABOUT the literature, never about our own data (those
+# are the V/M/X rows of the SWOT-DNIPRO evidence matrix, linked here via `backs`).
+# Status is assigned by rule in v2/literature_matrix.py from GAP_MATRIX,
+# relations.parquet and SLICE_DENOMINATORS.csv — never by a model, never by hand.
+#
+# THREE PARALLEL LAYERS, because the manuscript proves three different things and
+# each is defended by a different body of literature:
+#
+#   K  Kakhovka      what has already been observed at this site?
+#                    → carries the novelty case (what nobody has measured here)
+#   T  Transitions   what is known about reservoir → river hydraulic transitions,
+#                    at any dam, any river?
+#                    → carries the physical interpretation (why a rising slope means
+#                      a regime change), and is STRONGER when the literature is rich
+#   D  Data/methods  what can SWOT, ICESat-2, gauges and legacy surveys actually
+#                    measure, and how must they be harmonised?
+#                    → carries the methodology defence
+#
+# A gap in layer K is a contribution. A gap in layers T or D is a weakness — those
+# claims want established literature behind them, not silence. Confusing the two is
+# the failure this split exists to prevent.
+#
+# Claim ids are LK/LT/LD + n.m, which is the same grammar as the draft's V6.1 / M1.1
+# tags, so §7.8 can cite them inline and claim_map reads them unchanged.
+#
+# evidence_mode
+#   thesis            resolved from the verdicts of `thesis_ids`. May NOT contain
+#                     absence or prevalence wording ("none", "no study", "rarely");
+#                     a negative claim needs a denominator, so it must be a slice claim.
+#   slice_absence     "among N screened by slice S, none reports X" — needs
+#                     `slice_id`, `target_attribute`, and a screened sample of at
+#                     least `min_screened` covering at least half the worldwide count.
+#   slice_prevalence  "among N screened by slice S, k report X" — same requirements;
+#                     the fraction k/N is reported, never rounded to "rarely".
+#
+# The strongest status the code can assign is CANDIDATE_GAP. "First", "novel" and
+# "unprecedented" are never written by the renderer; that judgement is a human one,
+# made after reading the closest precedents.
+#
+# British spelling throughout, to match the manuscript.
+
+slices:
+  # topic_terms  the slice's distinguishing concept. OpenAlex `works?search=` ranks
+  #              rather than enforcing a strict AND, so a Boolean slice returns
+  #              works satisfying only part of the query (measured 2026-09-17: S1
+  #              came back 49.7 % non-Kakhovka, S4 98 % off topic). Only works
+  #              hitting a topic term enter the denominator; the rest stay in
+  #              SLICE_SCREENING.csv with on_topic=False, because an exclusion with
+  #              no record is a deletion.
+  # attributes   what is counted among the on-topic works. A hit means the term
+  #              occurs in the screened text (full text when the paper is in the
+  #              corpus, abstract otherwise). This is a screen that ranks papers
+  #              for reading, not a reading.
+
+  S1_kakhovka_status_quo:
+    layer: K
+    question: "What has already been studied at Kakhovka after the breach?"
+    topic_terms:
+      ["Kakhovka", "Kakhovske", "Kachovka", "Kakhovsk"]
+    attributes:
+      reports_extent:
+        ["water extent", "inundat", "flooded area", "flood extent", "water area",
+         "surface area", "NDWI", "MNDWI", "SAR", "Sentinel-1", "Sentinel-2"]
+      reports_wse:
+        ["water surface elevation", "water-surface elevation", "water level",
+         "water stage", "altimetry", "ICESat-2", "SWOT", "ATL13", "PIXC"]
+      reports_wse_slope:
+        ["water surface slope", "water-surface slope", "longitudinal gradient",
+         "longitudinal profile", "hydraulic gradient", "free-surface slope",
+         "surface gradient"]
+      reports_bathymetry:
+        ["bathymetr", "sounding", "depth survey", "bed elevation", "bed topograph",
+         "reservoir bed", "sediment thickness"]
+      reports_morphology:
+        ["geomorph", "channel incision", "knickpoint", "erosion", "sediment transport",
+         "channel change", "delta", "terrace"]
+      reports_vegetation:
+        ["vegetation", "plant", "willow", "succession", "revegetat", "biomass",
+         "NDVI", "ecosystem", "habitat"]
+      historical_validation:
+        ["historical", "pre-dam", "pre-impoundment", "archival", "legacy",
+         "before impoundment", "1950s", "design documentation"]
+      harmonises_datum:
+        ["vertical datum", "geoid", "quasigeoid", "EVRF", "Baltic", "permanent tide",
+         "ellipsoidal height", "normal height", "orthometric"]
+
+  S2_altimetry_vertical_datum:
+    layer: D
+    question: "How do altimetry studies treat the vertical reference?"
+    topic_terms:
+      ["ICESat", "SWOT", "altimet", "satellite laser", "radar interferometr"]
+    attributes:
+      harmonises_datum:
+        ["vertical datum", "geoid", "quasigeoid", "EVRF", "EGM2008", "ellipsoidal height",
+         "normal height", "orthometric", "datum transformation", "height system"]
+      permanent_tide:
+        ["permanent tide", "tide-free", "tide free", "mean-tide", "mean tide",
+         "zero-tide", "zero tide"]
+      spatially_varying_offset:
+        ["spatially varying", "spatially-varying", "grid interpolation", "offset grid",
+         "local bias", "site-specific bias"]
+      reports_wse_slope:
+        ["water surface slope", "water-surface slope", "longitudinal gradient",
+         "longitudinal profile", "hydraulic gradient", "free-surface slope"]
+      gauge_comparison:
+        ["gauge", "in situ", "in-situ", "stage record", "validation against"]
+
+  S3_hydraulic_transition_from_space:
+    layer: T
+    question: "How is a reservoir-to-river transition diagnosed, and with what?"
+    topic_terms:
+      ["dam removal", "dam breach", "dam failure", "dam break", "drawdown",
+       "de-impoundment", "dewatering", "impoundment removal"]
+    attributes:
+      dam_transition:
+        ["dam removal", "dam breach", "dam failure", "dam break", "drawdown",
+         "de-impoundment", "dewatering"]
+      reports_wse_slope:
+        ["water surface slope", "water-surface slope", "longitudinal gradient",
+         "longitudinal profile", "hydraulic gradient", "free-surface slope"]
+      satellite_observed:
+        ["ICESat-2", "SWOT", "altimetry", "satellite", "remote sensing"]
+      channelisation:
+        ["channelis", "channeliz", "incision", "knickpoint", "shear stress",
+         "flow velocity", "width adjustment", "connectivity"]
+      in_situ_only:
+        ["field survey", "gauging station", "pressure transducer", "total station",
+         "surveyed cross-section"]
+
+  S4_historical_data_as_validation:
+    layer: D
+    question: "Is legacy survey data used as a quantitative validation target?"
+    topic_terms:
+      ["historical bathymetr", "legacy data", "design documentation", "archival",
+       "historical survey", "historical chart", "historical map"]
+    attributes:
+      historical_as_target:
+        ["historical bathymetr", "legacy", "archival", "design documentation",
+         "historical survey", "old chart", "historical map"]
+      quantitative_validation:
+        ["validation", "validated", "calibration", "RMSE", "bias", "residual"]
+      satellite_or_dem:
+        ["satellite", "altimetry", "ICESat-2", "SWOT", "DEM", "LiDAR", "lidar"]
+      datum_resolved:
+        ["vertical datum", "reduction level", "chart datum", "sounding datum",
+         "reference level", "geoid"]
+
+  S5_vegetation_succession_drained_bed:
+    layer: K
+    question: "What has been measured about vegetation on the drained Kakhovka bed and on other drained reservoir beds?"
+    topic_terms:
+      ["Kakhovka", "Kakhovske", "drained reservoir", "reservoir bed", "exposed bed",
+       "former reservoir", "drawdown zone", "dam removal"]
+    attributes:
+      reports_vegetation_series:
+        ["time series", "multi-temporal", "multitemporal", "2023", "2024", "2025",
+         "interannual", "successive years", "year after"]
+      reports_habitat_map:
+        ["habitat map", "vegetation map", "classification", "supervised", "random forest",
+         "field survey", "relev", "phytosociolog"]
+      reports_woody:
+        ["willow", "Salix", "poplar", "Populus", "woody", "shrub", "tree", "forest"]
+      reports_area_km2:
+        ["km2", "km²", "hectare", " ha ", "area of", "cover fraction", "percent cover", "% of the"]
+      reports_roughness:
+        ["Manning", "roughness", "flow resistance", "conveyance"]
+
+  S6_roughness_vegetation:
+    layer: T
+    question: "How is vegetation on floodplains and exposed beds translated into hydraulic roughness?"
+    topic_terms:
+      ["Manning", "roughness coefficient", "flow resistance", "friction factor", "drag"]
+    attributes:
+      reports_n_value:
+        ["n = 0", "n=0", "0.0", "Manning's n", "roughness value", "n values"]
+      vegetation_type_resolved:
+        ["willow", "reed", "riparian", "woody", "herbaceous", "shrub", "forest", "grass"]
+      hydraulic_calibration:
+        ["calibrat", "measured water level", "observed stage", "flume", "field measurement",
+         "high-water mark", "debris mark"]
+      land_cover_based:
+        ["land cover", "land-cover", "classification", "remote sensing", "satellite",
+         "NLCD", "CORINE", "Dynamic World"]
+      dam_context:
+        ["dam removal", "dam breach", "dam failure", "reservoir", "drawdown"]
+
+  S7_channel_width_dam:
+    layer: T
+    question: "How do channels adjust in width and planform after dam removal or failure?"
+    topic_terms:
+      ["channel width", "wetted width", "river width", "braid", "bank erosion", "planform"]
+    attributes:
+      reports_width_change:
+        ["widen", "width increase", "width change", "narrow", "m wider", "% wider"]
+      satellite_based:
+        ["Sentinel", "Landsat", "satellite", "remote sensing", "RivWidth", "water mask"]
+      stage_matched:
+        ["stage", "discharge", "same flow", "comparable flow", "matched", "gauge"]
+      dam_context:
+        ["dam removal", "dam breach", "dam failure", "reservoir drawdown", "downstream of the dam"]
+      timescale_years:
+        ["year", "years", "decade", "months after"]
+
+claims:
+
+  # ── Layer K — what has already been observed at Kakhovka ───────────────────
+  # These carry the novelty case: a gap here is a contribution.
+
+  - id: LK1.1
+    layer: K
+    gap_type: empirical
+    evidence_mode: slice_absence
+    slice_id: S1_kakhovka_status_quo
+    target_attribute: reports_wse_slope
+    min_screened: 20
+    claim: >
+      Among the post-breach Kakhovka studies recovered and screened by slice S1,
+      none quantifies a longitudinal water-surface gradient.
+    thesis_ids: [T03, T19]
+    backs: [M1.1, M3.1]
+    limitations: >
+      Keyword screen, mostly over abstracts; a paper may report a gradient in its
+      results without naming it in the abstract. Absence is stated for the screened
+      sample only, never for the literature at large.
+
+  - id: LK1.2
+    layer: K
+    gap_type: empirical
+    evidence_mode: slice_prevalence
+    slice_id: S1_kakhovka_status_quo
+    target_attribute: reports_extent
+    min_screened: 20
+    claim: >
+      The screened Kakhovka literature characterises the event predominantly through
+      planform quantities — water extent, exposed area and their change — and the
+      measured share is reported as such.
+    thesis_ids: [T19, T03]
+    backs: [M3.1]
+    limitations: >
+      A share of the screened sample, which is relevance-ranked rather than random.
+      Extent vocabulary also appears in papers whose main subject is ecological.
+
+  - id: LK1.3
+    layer: K
+    gap_type: methodological
+    evidence_mode: thesis
+    claim: >
+      Published hydrodynamic reconstructions of the Kakhovka outburst attribute stage
+      error to their terrain input, and the vertical reference of that input is
+      treated as a secondary concern rather than as a harmonised frame.
+    thesis_ids: [T02, T08]
+    backs: [V6.1, V10.3]
+    limitations: >
+      Rests on the verdicts for T02 and T08; the closest precedent must be read
+      before this is phrased as a limitation of a named study.
+
+  # ── Layer T — what is known about reservoir-to-river transitions ───────────
+  # These want RICH literature behind them: silence here is a weakness, not a gap.
+
+  - id: LT1.1
+    layer: T
+    gap_type: conceptual
+    evidence_mode: thesis
+    claim: >
+      Dam removal, dam failure and rapid drawdown are established as producing a
+      transition from impounded conditions towards channelised fluvial hydraulics,
+      expressed through water-surface slope, velocity, shear stress and connectivity.
+    thesis_ids: [T01, T02]
+    backs: [M1.1]
+    limitations: >
+      Most of this literature concerns small-to-medium dams observed in situ; its
+      transfer to a 2 000 km² impoundment observed from orbit is an assumption this
+      study makes explicit rather than one the literature settles.
+
+  - id: LT1.2
+    layer: T
+    gap_type: conceptual
+    evidence_mode: thesis
+    claim: >
+      Longitudinal water-surface slope is treated in the literature as a diagnostic
+      state variable for hydraulic regime, separable from water-surface area, and a
+      sustained change in it is read as a regime shift rather than a relaxation
+      transient.
+    thesis_ids: [T03, T23]
+    backs: [M1.1, M2.1]
+    limitations: >
+      The separation of regime shift from transient relies on observation length;
+      the literature offers no agreed threshold, so the 22-month span is argued on
+      its own terms.
+
+  # ── Layer D — what the instruments can measure, and how to combine them ────
+  # These defend the methodology. Silence here is also a weakness.
+
+  - id: LD1.1
+    layer: D
+    gap_type: methodological
+    evidence_mode: thesis
+    claim: >
+      SWOT and ICESat-2 can each resolve inland water-surface geometry at the
+      precision a longitudinal gradient requires, while reporting heights on
+      different reference surfaces and in different permanent-tide conventions.
+    thesis_ids: [T05, T06, T07]
+    backs: [V2.1, V3.1]
+    limitations: >
+      Cross-mission agreement in this study rests on three co-located overpasses;
+      the literature's own collocation statistics must be read before any general
+      statement about inter-mission bias is repeated here.
+
+  - id: LD1.2
+    layer: D
+    gap_type: methodological
+    evidence_mode: thesis
+    claim: >
+      Vertical-datum choice and permanent-tide convention introduce offsets of
+      centimetre to decimetre size, of the same order as the hydraulic signal being
+      measured, and those offsets vary spatially across a domain of this size.
+    thesis_ids: [T08, T09, T10, T11]
+    backs: [V1.2, V3.1]
+    limitations: >
+      Magnitudes quoted from the literature are site-specific; the 4.4 cm spread
+      measured here is a property of EPSG:9902 over this reach, not a general figure.
+
+  - id: LD1.3
+    layer: D
+    gap_type: methodological
+    evidence_mode: slice_prevalence
+    slice_id: S2_altimetry_vertical_datum
+    target_attribute: permanent_tide
+    min_screened: 20
+    claim: >
+      Among inland-water altimetry studies screened by slice S2 that engage with a
+      vertical reference, the share naming a permanent-tide convention is reported
+      as measured.
+    thesis_ids: [T08, T09, T10, T11]
+    backs: [V1.2]
+    limitations: >
+      A tide-system statement often sits in the product handbook a paper cites
+      rather than in the paper itself, which the screen cannot see; the share is a
+      property of the screened sample, which is relevance-ranked, not random.
+
+  - id: LD1.4
+    layer: D
+    gap_type: conceptual
+    evidence_mode: thesis
+    claim: >
+      Historical bathymetric surveys and reservoir design records can serve as
+      independent quantitative validation targets for modern satellite measurements
+      once their reduction datum has been established.
+    thesis_ids: [T15, T16, T17, T18]
+    backs: [V6.1, V7.1, V10.1]
+    limitations: >
+      The manuscript's §7.2 marks the design-documentation claim preliminary; it
+      stays so until the closest precedents have been read and the T15–T18 controls
+      verified.
+
+unresolved_citations:
+  # Citations that were proposed for §7.8 and attempted. Zero hits in an index is
+  # not evidence that a work does not exist; it is a reason not to cite it yet.
+  - text: "Stelmaszczuk-Gorska et al., 2023"
+    status: UNRESOLVED_OPENALEX
+    do_not_cite_until_resolved: true
+    checked: "2026-09-17"
+    method: "OpenAlex works?search=Kakhovka&filter=raw_author_name.search:Stelmaszczuk → 0 works"
+  - text: "Kuzova, 2023"
+    status: UNRESOLVED_OPENALEX
+    do_not_cite_until_resolved: true
+    checked: "2026-09-17"
+    method: "OpenAlex works?search=Kakhovka&filter=raw_author_name.search:Kuzova → 0 works"
+  - text: "unnamed GeoClaw/SWOT Kakhovka outburst study"
+    status: RESOLVED
+    doi: "10.1029/2025gl120832"
+    do_not_cite_until_resolved: true
+    checked: "2026-09-17"
+    method: "matches theses.yaml positive control T02/T07/T19 (Lehnigk et al. 2026 GRL)"
+    note: "Citable only once the control carries manually_checked: true with a quote."

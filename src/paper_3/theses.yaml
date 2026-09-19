@@ -1,0 +1,1446 @@
+# T01–T36 — thesis cards for the Kakhovka post-breach transformation manuscript.
+#
+# This file is the single source of truth for the gap analysis. The OpenAlex query
+# set, the semantic retrieval queries, the structural prefilter and every count in
+# GAP_MATRIX are derived from it, so a reviewer can read this file and know exactly
+# what was searched for and what was deliberately excluded.
+#
+# Field contract (see theses.py):
+#   search_queries    natural-language, encoded with SPECTER2 against ChromaDB (>=3)
+#   openalex_queries  keyword forms sent to the OpenAlex /works search endpoint (>=1)
+#   key_terms         term FAMILIES. The prefilter requires a hit in >=2 DIFFERENT
+#                     families, which is what stops a flood-mapping corpus from
+#                     answering every altimetry query with flood-mapping papers.
+#   negative_terms    load-bearing, not decoration: "SWOT" collides with SWOT
+#                     analysis, "dam removal" with "removal of dam-related bias".
+#   positive_controls HOLD-OUT recall benchmark. Each control is ingested into the
+#                     corpus during the harvest and then retrieval must find it
+#                     UNAIDED — controls are never injected into the candidate set,
+#                     because a recall measured against a search that was handed
+#                     the answer measures nothing. `manually_checked: true`
+#                     requires a `quote` proving someone read it.
+#   manuscript_anchor the draft section this thesis underwrites.
+#   numeric_anchor    the draft's own number this thesis has to defend, if any.
+#
+# British spelling throughout, to match the manuscript.
+
+# ── Block A — what a reservoir-to-river hydraulic transition means ────────────
+
+- id: T01
+  block: A
+  statement: >
+    Reservoirs and rivers differ systematically in longitudinal water-surface
+    geometry: impounded reaches tend towards low longitudinal gradients, whereas
+    free-flowing reaches maintain persistent downstream gradients controlled by
+    discharge, channel geometry, roughness and backwater conditions.
+  rationale: >
+    The premise the whole manuscript rests on. If impounded and free-flowing
+    reaches were not separable by longitudinal gradient, a slope change could not
+    diagnose a regime change.
+  search_queries:
+    - "longitudinal water surface profile of an impounded river reach versus a free-flowing reach"
+    - "backwater effect on water surface slope upstream of a dam"
+    - "water surface slope controlled by discharge channel geometry and roughness"
+    - "hydraulic gradient along a reservoir compared with the river upstream"
+    - "gradually varied flow backwater curve reservoir longitudinal profile"
+  openalex_queries:
+    - "longitudinal water surface profile impounded river"
+    - "backwater water surface slope reservoir"
+    - "free flowing river water surface gradient hydraulics"
+  key_terms:
+    - ["water surface slope", "water-surface slope", "surface gradient", "longitudinal gradient", "hydraulic gradient", "free-surface slope"]
+    - ["reservoir", "impound", "backwater", "dam pool", "free-flowing", "free flowing"]
+    - ["longitudinal profile", "long profile", "water surface profile", "chainage", "thalweg"]
+  negative_terms:
+    - "land surface slope"
+    - "terrain slope"
+    - "hillslope"
+  positive_controls:
+    - doi: "10.1029/2023wr036428"
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "Hydraulic river models from ICESat-2 elevation and water surface slope"
+  expected_relations: [SUPPORTS, METHOD_RELEVANT]
+  manuscript_anchor: "1.2 Why post-breach water-surface geometry matters"
+  numeric_anchor: null
+
+- id: T02
+  block: A
+  statement: >
+    Dam removal, dam failure or rapid reservoir drawdown can produce an abrupt
+    transition from impounded hydraulic conditions towards a channelised fluvial
+    regime, expressed through changes in water-surface slope, velocity, shear
+    stress, width and connectivity.
+  rationale: >
+    Establishes the mechanism as known in the dam-removal literature, where rising
+    water-surface slope is the classic response to base-level lowering. Determines
+    whether our contribution is the mechanism or its detection from space.
+  search_queries:
+    - "geomorphic and hydraulic response of a river to dam removal"
+    - "water surface slope increase after dam removal base level lowering"
+    - "reservoir drawdown channel incision and knickpoint migration"
+    - "dam failure hydraulic regime change downstream channel"
+    - "sediment and shear stress response to removal of an impoundment"
+  openalex_queries:
+    - "dam removal hydraulic geomorphic response river"
+    - "reservoir drawdown channel incision knickpoint"
+    - "dam failure downstream hydraulic response"
+  key_terms:
+    - ["dam removal", "dam breach", "dam failure", "dam break", "drawdown", "de-impoundment", "dewatering"]
+    - ["water surface slope", "hydraulic regime", "shear stress", "flow velocity", "incision", "knickpoint", "channelis", "channeliz"]
+    - ["reservoir", "impound", "river", "channel"]
+  negative_terms:
+    - "removal of dam-related bias"
+    - "outlier removal"
+    - "noise removal"
+    - "cloud removal"
+  positive_controls:
+    - doi: "10.1029/2025gl120832"
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "Lehnigk et al. 2026 GRL — SWOT observations of the Kakhovka dam-break flood"
+  expected_relations: [SUPPORTS, ANALOGUE, METHOD_RELEVANT]
+  manuscript_anchor: "7.1 From a reservoir-like to a river-dominated regime"
+  numeric_anchor: null
+
+- id: T03
+  block: A
+  statement: >
+    Longitudinal water-surface slope may serve as an observable state variable for
+    identifying hydraulic regime changes independently of water-surface area.
+  rationale: >
+    Distinguishes our framing from extent-based monitoring. If slope is already
+    used as a state variable elsewhere, the contribution narrows to its use across
+    a catastrophic loss of impoundment.
+  search_queries:
+    - "water surface slope as a diagnostic state variable of river hydraulic state"
+    - "monitoring hydraulic regime change using surface gradient rather than inundated area"
+    - "reach-scale water surface slope time series as an indicator of flow state"
+    - "slope break as an indicator of hydraulic control in a river reach"
+  openalex_queries:
+    - "water surface slope state variable river hydraulics"
+    - "reach scale water surface slope time series"
+    - "surface gradient indicator hydraulic regime"
+  key_terms:
+    - ["water surface slope", "water-surface slope", "surface gradient", "longitudinal gradient"]
+    - ["state variable", "regime", "indicator", "diagnostic", "hydraulic state", "flow state"]
+    - ["reach", "river", "reservoir", "channel"]
+  negative_terms:
+    - "slope stability"
+    - "landslide"
+    - "slope failure"
+  positive_controls:
+    - doi: "10.1038/s41597-023-02215-x"
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "IRIS — global reach-scale ICESat-2 water-surface-slope dataset"
+    - doi: "10.1029/2022wr032842"
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "ICESat-2 river surface slope and its impact on water level time series"
+  expected_relations: [SUPPORTS, METHOD_RELEVANT, CONTRADICTS]
+  manuscript_anchor: "6.3 Post-breach longitudinal gradient"
+  numeric_anchor: "+0.090 cm/km pre-breach vs +3.314 cm/km post-breach"
+
+# ── Block B — satellites must see surface geometry, not a single level ────────
+
+- id: T04
+  block: B
+  statement: >
+    Treating a lake or reservoir as a single water-surface elevation may hide
+    meaningful spatial gradients and hydraulic heterogeneity.
+  rationale: >
+    Directly challenged by Huang & Gao (2026), who show spatially uneven lake
+    surfaces biasing ICESat-2 level time series. Determines whether this is our
+    finding or an established one we build on.
+  search_queries:
+    - "spatial variability of water surface elevation within a single lake"
+    - "assumption of a flat lake surface in satellite water level retrieval"
+    - "uneven water surface elevation across a reservoir affects level time series"
+    - "lake level from altimetry biased by within-lake elevation gradients"
+  openalex_queries:
+    - "uneven lake water surface elevation satellite altimetry bias"
+    - "spatial variability water surface elevation within lake"
+    - "flat lake surface assumption water level retrieval"
+  # Most specific family first: is_on_topic() requires it. Neither "water level"
+  # nor a bare "spatial variability" can lead — both match most of this corpus.
+  # The thesis is about variability OF THE WATER SURFACE WITHIN one body, so the
+  # primary family binds the two ideas together.
+  key_terms:
+    - ["spatially uneven water", "uneven water surface", "water surface variability",
+       "within-lake", "within lake", "within the lake", "across the lake",
+       "not flat", "lake surface tilt", "tilted water surface",
+       "heterogeneous water surface", "spatially varying water surface"]
+    - ["spatially uneven", "spatial variability", "heterogen", "tilt", "gradient"]
+    - ["water surface elevation", "water-surface elevation", "WSE", "water level", "lake level"]
+    - ["lake", "reservoir", "impound"]
+  negative_terms:
+    - "sea surface height"
+    - "ocean dynamic topography"
+  positive_controls:
+    - doi: "10.1029/2025gl119771"
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "Huang & Gao 2026 GRL — SWOT-mapped uneven lake WSE for ICESat-2 levels"
+  expected_relations: [SUPPORTS, METHOD_RELEVANT, CONTRADICTS]
+  manuscript_anchor: "6.5 Water-surface heterogeneity"
+  numeric_anchor: null
+
+- id: T05
+  block: B
+  statement: >
+    Spatially distributed altimetry provides information about water-surface
+    geometry that cannot be recovered from conventional virtual-station water
+    levels alone.
+  rationale: >
+    Justifies using along-track and swath products rather than a virtual-station
+    time series, which is still the default in satellite hydrology.
+  search_queries:
+    - "virtual station water level time series limitations for river hydraulics"
+    - "distributed satellite altimetry versus point virtual stations for rivers"
+    - "swath altimetry two dimensional water surface versus nadir altimetry"
+    - "spatially distributed water surface elevation observations along a river"
+  openalex_queries:
+    - "virtual station altimetry river water level limitation"
+    - "distributed satellite altimetry river water surface"
+    - "swath versus nadir altimetry inland water"
+  key_terms:
+    - ["virtual station", "nadir altimet", "radar altimet", "swath altimet", "along-track", "along track", "distributed altimet"]
+    - ["water surface elevation", "water level", "WSE", "water surface geometry", "surface slope"]
+    - ["river", "reservoir", "lake", "inland water"]
+  negative_terms:
+    - "ocean altimetry"
+    - "sea level rise"
+    - "ice sheet elevation change"
+  positive_controls:
+    - doi: "10.1029/2022wr032842"
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "ICESat-2 river surface slope and its impact on water level time series"
+  expected_relations: [SUPPORTS, METHOD_RELEVANT]
+  manuscript_anchor: "1.3 The satellite-altimetry challenge"
+  numeric_anchor: null
+
+- id: T06
+  block: B
+  statement: >
+    ICESat-2 along-track observations can estimate longitudinal hydraulic gradients
+    over sufficiently long river or reservoir reaches, but the validity depends on
+    surface classification, along-channel referencing and the treatment of
+    within-overpass dependence.
+  rationale: >
+    The method the manuscript uses. A global reach-scale ICESat-2 slope dataset
+    already exists (IRIS, 2023), so this thesis is expected to come back KNOWN —
+    which is itself a result worth stating plainly.
+  search_queries:
+    - "river water surface slope estimated from ICESat-2 along-track photon elevations"
+    - "ICESat-2 ATL13 inland water surface height accuracy and classification"
+    - "reach scale water surface slope dataset from laser altimetry"
+    - "ATL03 photon classification over inland water bodies"
+    - "uncertainty in ICESat-2 derived river slope estimates"
+  openalex_queries:
+    - "ICESat-2 river water surface slope"
+    - "ICESat-2 ATL13 inland water surface height"
+    - "ICESat-2 reach scale slope dataset"
+  key_terms:
+    - ["ICESat-2", "ICESat 2", "ATL03", "ATL06", "ATL08", "ATL13", "ATLAS", "photon-counting", "photon counting"]
+    - ["water surface slope", "water-surface slope", "surface gradient", "water surface elevation", "WSE"]
+    - ["river", "reach", "reservoir", "inland water", "lake"]
+  negative_terms:
+    - "sea ice freeboard"
+    - "ice sheet"
+    - "canopy height"
+    - "forest biomass"
+  positive_controls:
+    - doi: "10.1038/s41597-023-02215-x"
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "IRIS — global reach-scale ICESat-2 water-surface-slope dataset"
+    - doi: "10.1029/2022wr032842"
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "ICESat-2 river surface slope and its impact on water level time series"
+    - doi: "10.1029/2023wr036428"
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "Hydraulic river models from ICESat-2 elevation and water surface slope"
+  expected_relations: [SUPPORTS, METHOD_RELEVANT, CONTRADICTS]
+  manuscript_anchor: "4.3 ICESat-2 branch"
+  numeric_anchor: null
+
+- id: T07
+  block: B
+  statement: >
+    SWOT enables two-dimensional characterisation of inland-water surface elevation
+    and slope, but product assumptions developed for lakes or rivers may become
+    invalid when a water body undergoes rapid morphological or hydraulic
+    reorganisation.
+  rationale: >
+    Underwrites the decision to work from PIXC rather than accept LakeSP
+    aggregation over a fragmenting reservoir. The strongest candidate for a
+    METHOD_RELEVANT-dominated verdict.
+  search_queries:
+    - "SWOT KaRIn water surface elevation product assumptions over lakes"
+    - "SWOT pixel cloud aggregation to lake mean elevation"
+    - "SWOT LakeSP and RiverSP product validation inland water"
+    - "SWOT two dimensional water surface elevation and slope over rivers"
+    - "limitations of SWOT lake products for heterogeneous water bodies"
+  openalex_queries:
+    - "SWOT KaRIn lake water surface elevation product"
+    - "SWOT LakeSP RiverSP validation"
+    - "SWOT pixel cloud PIXC water surface elevation"
+  key_terms:
+    - ["SWOT", "KaRIn", "Surface Water and Ocean Topography"]
+    - ["LakeSP", "RiverSP", "PIXC", "pixel cloud", "pixel-cloud", "water mask", "prior lake database"]
+    - ["water surface elevation", "WSE", "water level", "surface slope"]
+  negative_terms:
+    - "SWOT analysis"
+    - "strengths weaknesses opportunities threats"
+  positive_controls:
+    - doi: "10.1029/2025gl119771"
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "Huang & Gao 2026 GRL — SWOT-mapped uneven lake WSE for ICESat-2 levels"
+    - doi: "10.1029/2025gl120832"
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "Lehnigk et al. 2026 GRL — SWOT observations of the Kakhovka dam-break flood"
+  expected_relations: [METHOD_RELEVANT, CONTRADICTS, SUPPORTS]
+  manuscript_anchor: "3.2 SWOT PIXC and RiverSP"
+  numeric_anchor: null
+
+# ── Block C — vertical-datum harmonisation ───────────────────────────────────
+
+- id: T08
+  block: C
+  statement: >
+    Satellite altimetry, gauge records and historical hydrological observations are
+    frequently referenced to different ellipsoids, geoids, national height systems
+    and permanent-tide conventions, so apparent centimetre- to decimetre-scale
+    differences may be geodetic rather than hydrological.
+  rationale: >
+    The central methodological claim. The hydraulic signal under investigation
+    (~3 cm/km) is the same order as the correction terms, so a study that skips
+    harmonisation cannot separate the two.
+  search_queries:
+    - "vertical datum differences between satellite altimetry gauges and national height systems"
+    - "geoid model choice affecting water level comparison between sensors"
+    - "ellipsoidal versus orthometric heights in satellite hydrology"
+    - "converting satellite water surface elevation to a national vertical reference"
+    - "vertical reference frame consistency in multi-mission water level studies"
+  openalex_queries:
+    - "vertical datum harmonization satellite altimetry water level"
+    - "geoid model water level gauge altimetry comparison"
+    - "ellipsoidal orthometric height inland water altimetry"
+  key_terms:
+    - ["vertical datum", "vertical reference", "height system", "geoid", "quasigeoid", "ellipsoidal height", "orthometric height", "EGM2008", "EGM96", "EVRF", "EGG2015"]
+    - ["altimet", "satellite", "gauge", "water level", "water surface elevation", "WSE"]
+    - ["bias", "offset", "difference", "discrepancy", "consistency", "harmonis", "harmoniz", "transformation"]
+  negative_terms:
+    - "tidal datum for navigation charts"
+    - "chart datum sounding reduction only"
+  positive_controls:
+    - doi: "10.23939/istcgcap2021.93.013"
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: hard          # Ukrainian journal; relevance sits in the body, not the abstract
+      source_of_seed: expert_known
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "Trevoho 2021 — modernisation of the Ukrainian height system (BS-77 → EVRS); found via OpenAlex while registering Стопхай et al. 2026, which has no DOI and cannot be a control"
+  expected_relations: [SUPPORTS, METHOD_RELEVANT]
+  manuscript_anchor: "4.1 Vertical harmonisation: the four surfaces"
+  numeric_anchor: "EPSG:9902 stated accuracy 0.068 m"
+
+- id: T09
+  block: C
+  statement: >
+    Permanent-tide conventions can produce elevation differences of the same order
+    as the hydraulic gradients investigated by modern satellite hydrology, and
+    should therefore be handled explicitly in cross-mission studies of water-surface
+    elevation.
+  rationale: >
+    The sharpest candidate gap. A full-text grep of the current corpus returns zero
+    hits for "permanent tide", while OpenAlex reports ~880 works — so this thesis
+    is the clearest test of whether the matrix can tell a literature gap from a
+    corpus gap.
+  search_queries:
+    - "permanent tide convention mean tide zero tide and tide free height systems"
+    - "conversion between tide systems in geodetic height determination"
+    - "permanent tidal deformation effect on geoid and ellipsoidal heights"
+    - "tide system consistency between satellite products and national height datums"
+  openalex_queries:
+    - "permanent tide convention mean tide zero tide tide free"
+    - "permanent tidal deformation geoid height system"
+    - "tide system conversion geodetic heights"
+  key_terms:
+    - ["permanent tide", "mean-tide", "mean tide system", "zero-tide", "zero tide system", "tide-free", "tide free system", "tidal deformation"]
+    - ["geoid", "height system", "vertical datum", "ellipsoidal height", "orthometric height", "reference frame"]
+  negative_terms:
+    - "ocean tide model"
+    - "tidal flat"
+    - "tidal current"
+    - "tidal marsh"
+  positive_controls: []
+  expected_relations: [METHOD_RELEVANT, SUPPORTS]
+  manuscript_anchor: "4.5 Permanent-tide treatment"
+  numeric_anchor: null
+
+- id: T10
+  block: C
+  statement: >
+    A spatially varying vertical transformation should not be replaced by a single
+    empirical national or regional offset when studying long river or reservoir
+    systems.
+  rationale: >
+    Our EPSG:9902 transformation varies measurably along ~250 km; a single constant
+    would have hidden a centimetre-scale spatial effect and manufactured a slope.
+  search_queries:
+    - "spatially varying vertical datum transformation grid versus constant offset"
+    - "regional geoid gradient along a long river reach"
+    - "error introduced by a single mean offset in height transformation"
+    - "vertical transformation grid accuracy across a national territory"
+  openalex_queries:
+    - "spatially varying vertical datum transformation grid"
+    - "geoid gradient along river reach height transformation"
+    - "constant offset versus grid height transformation error"
+  key_terms:
+    - ["transformation grid", "spatially varying", "spatially variable", "constant offset", "mean offset", "single offset", "bias correction"]
+    - ["vertical datum", "height system", "geoid", "quasigeoid", "vertical reference", "EPSG"]
+    - ["river", "reservoir", "reach", "longitudinal", "along-track", "regional"]
+  negative_terms:
+    - "horizontal datum transformation only"
+    - "map projection distortion"
+  positive_controls:
+    - doi: "10.23939/istcgcap2021.93.013"
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: hard          # Ukrainian journal; relevance sits in the body, not the abstract
+      source_of_seed: expert_known
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "Trevoho 2021 — modernisation of the Ukrainian height system (BS-77 → EVRS), the national transformation-grid context for T10; found via OpenAlex while registering Стопхай et al. 2026"
+  expected_relations: [SUPPORTS, METHOD_RELEVANT]
+  manuscript_anchor: "7.5 Spatial transferability of empirical corrections"
+  numeric_anchor: null
+
+- id: T11
+  block: C
+  statement: >
+    Cross-sensor bias should be estimated only after formal harmonisation of
+    reference frames; otherwise geodetic differences, hydrodynamic differences and
+    instrumental bias are conflated.
+  rationale: >
+    The ordering claim. Many validation studies report a sensor bias without
+    stating the frame it was computed in, which makes the number unusable elsewhere.
+  search_queries:
+    - "cross sensor bias in water surface elevation after datum harmonisation"
+    - "separating geodetic offset from instrumental bias in altimetry validation"
+    - "systematic difference between SWOT and ICESat-2 water surface elevations"
+    - "validating satellite water levels against gauges in a common reference frame"
+  openalex_queries:
+    - "cross sensor bias water surface elevation datum"
+    - "SWOT ICESat-2 water surface elevation difference validation"
+    - "satellite water level gauge bias reference frame"
+  key_terms:
+    - ["vertical datum", "reference frame", "geoid", "harmonis", "harmoniz", "height system"]
+    - ["bias", "systematic difference", "offset", "residual", "RMSE", "mean difference"]
+    - ["altimet", "SWOT", "ICESat", "gauge", "in situ", "in-situ"]
+  negative_terms:
+    - "radiometric bias"
+    - "atmospheric correction only"
+  positive_controls: []
+  expected_relations: [SUPPORTS, METHOD_RELEVANT, CONTRADICTS]
+  manuscript_anchor: "5.2 The SWOT PIXC vertical chain"
+  numeric_anchor: null
+
+# ── Block D — collocation and the independent statistical unit ───────────────
+
+- id: T12
+  block: D
+  statement: >
+    Apparent cross-sensor bias in water-surface elevation depends strongly on
+    temporal and spatial collocation, and can reflect real hydrodynamic variability
+    rather than instrumental error.
+  rationale: >
+    Our ICESat-2–SWOT residual falls sharply with better temporal proximity, which
+    means a reported bias without a stated matchup window is not comparable.
+  search_queries:
+    - "effect of temporal matchup window on satellite water level validation"
+    - "spatial collocation criteria for comparing altimetry with in situ gauges"
+    - "time difference between overpasses causing apparent elevation bias"
+    - "matchup criteria in cross-mission inland water validation"
+  openalex_queries:
+    - "temporal matchup window satellite water level validation"
+    - "spatial collocation altimetry gauge comparison criteria"
+    - "cross mission inland water validation matchup"
+  key_terms:
+    - ["collocation", "matchup", "match-up", "temporal window", "time difference", "spatial window", "search radius", "coincident"]
+    - ["bias", "difference", "residual", "RMSE", "validation", "comparison"]
+    - ["water level", "water surface elevation", "WSE", "altimet", "gauge"]
+  negative_terms:
+    - "co-location of services"
+    - "colocation data centre"
+  positive_controls: []
+  expected_relations: [SUPPORTS, METHOD_RELEVANT]
+  manuscript_anchor: "4.6 Spatial and temporal matchup"
+  numeric_anchor: null
+
+- id: T13
+  block: D
+  statement: >
+    Sensor validation over dynamic inland waters must account for hydrograph slope,
+    wind setup, seiche and other short-term hydrodynamic processes.
+  rationale: >
+    Supports the claim that the pre-breach scatter is physical rather than
+    instrumental — a reviewer will otherwise read it as noise.
+  search_queries:
+    - "wind setup and seiche effects on reservoir water surface elevation"
+    - "short term water level fluctuations affecting satellite validation"
+    - "seiche oscillation in a large reservoir measured by gauges"
+    - "hydrograph stage change during a satellite overpass"
+    - "wind induced tilt of a lake surface"
+  openalex_queries:
+    - "wind setup seiche reservoir water surface elevation"
+    - "seiche large lake water level oscillation"
+    - "short term water level variability satellite validation"
+  key_terms:
+    - ["seiche", "wind setup", "wind set-up", "wind tilt", "surface oscillation", "denivellation"]
+    - ["reservoir", "lake", "impound", "river"]
+    - ["water level", "water surface elevation", "WSE", "stage"]
+  negative_terms:
+    - "storm surge coastal ocean"
+    - "tsunami"
+  positive_controls: []
+  expected_relations: [SUPPORTS, ANALOGUE, METHOD_RELEVANT]
+  manuscript_anchor: "7.3 Seiches, wind setup, and why the pre-breach scatter is physical"
+  numeric_anchor: null
+
+- id: T14
+  block: D
+  statement: >
+    Thousands of along-track photon or pixel measurements acquired during a single
+    satellite pass should not be treated as thousands of statistically independent
+    observations.
+  rationale: >
+    Determines whether our choice of the overpass as the independent unit is
+    standard practice or a correction to it. A field-wide pseudoreplication problem
+    would be a genuine methodological finding.
+  search_queries:
+    - "pseudoreplication and spatial autocorrelation in remote sensing validation statistics"
+    - "effective sample size for autocorrelated along-track altimetry measurements"
+    - "independent observation unit in satellite water level validation"
+    - "treating each pixel as an independent sample inflates significance"
+  openalex_queries:
+    - "pseudoreplication spatial autocorrelation remote sensing validation"
+    - "effective sample size autocorrelated satellite measurements"
+    - "independent samples altimetry along track statistics"
+  key_terms:
+    - ["pseudoreplication", "spatial autocorrelation", "effective sample size", "independent observation", "statistically independent", "degrees of freedom", "non-independence"]
+    - ["along-track", "along track", "photon", "pixel", "overpass", "pass", "footprint"]
+    - ["validation", "significance", "confidence interval", "uncertainty", "statistic"]
+  negative_terms:
+    - "bootstrap resampling of images only"
+  positive_controls: []
+  expected_relations: [SUPPORTS, METHOD_RELEVANT, CONTRADICTS]
+  manuscript_anchor: "4.13 Statistical testing"
+  numeric_anchor: null
+
+# ── Block E — historical hydraulics as a validation layer ────────────────────
+
+- id: T15
+  block: E
+  statement: >
+    Historical longitudinal water-surface surveys can provide independent validation
+    of modern satellite-derived hydraulic gradients decades after the original
+    measurements were made.
+  rationale: >
+    Half of the manuscript's claimed novelty. Expected to be thin in the
+    literature, which makes the corpus-coverage diagnostic decisive here.
+  search_queries:
+    - "historical hydrological survey used to validate modern remote sensing measurements"
+    - "archival water surface profile compared with satellite observations"
+    - "legacy hydrographic survey as a reference for present day elevation data"
+    - "long term reuse of historical river survey data in hydraulics"
+  openalex_queries:
+    - "historical hydrological survey validation remote sensing"
+    - "archival water surface profile satellite comparison"
+    - "legacy survey data modern elevation validation"
+  key_terms:
+    - ["water surface profile", "free-surface profile", "longitudinal survey", "levelling", "stage record"]
+    - ["historical", "archival", "legacy", "historic survey", "pre-satellite", "decades old", "twentieth century"]
+    - ["validation", "independent check", "reference", "comparison", "verify"]
+  negative_terms:
+    - "historical climate reanalysis only"
+    - "historical land cover change only"
+  positive_controls: []
+  expected_relations: [ANALOGUE, METHOD_RELEVANT, SUPPORTS]
+  manuscript_anchor: "5.7 The historical free-surface curve"
+  numeric_anchor: null
+
+- id: T16
+  block: E
+  statement: >
+    Engineering design documentation can contain quantitative hydraulic information
+    — backwater profiles, stage–area–volume curves, operating levels, seiche and
+    wind-setup estimates — that remains scientifically useful for validating modern
+    Earth-observation products.
+  rationale: >
+    The other half of the claimed novelty, and the part §7.2 currently marks
+    preliminary precisely because no review has been done.
+  search_queries:
+    - "reservoir design documentation as a source of hydraulic data for research"
+    - "stage area volume curves from original reservoir design used in modern studies"
+    - "engineering reports as quantitative data sources in hydrology"
+    - "grey literature hydraulic data reuse for satellite validation"
+  openalex_queries:
+    - "reservoir design documentation hydraulic data reuse"
+    - "stage area volume curve reservoir design study"
+    - "engineering report grey literature hydrological data"
+  key_terms:
+    - ["design documentation", "design report", "engineering report", "project documentation", "grey literature", "monograph", "technical report"]
+    - ["stage-area-volume", "area-elevation", "hypsometric", "operating level", "backwater profile", "normal pool", "design flood"]
+    - ["reservoir", "dam", "impound", "hydraulic"]
+  negative_terms:
+    - "software design document"
+    - "experimental design"
+  positive_controls: []
+  expected_relations: [ANALOGUE, METHOD_RELEVANT]
+  manuscript_anchor: "7.2 What the historical documentation contributes"
+  numeric_anchor: null
+
+- id: T17
+  block: E
+  statement: >
+    Reservoir drainage creates a rare opportunity to compare legacy bathymetric
+    soundings against modern laser-altimetry measurements of the formerly submerged
+    bed.
+  rationale: >
+    Underwrites the bed-surface reconstruction and its cross-validated score. The
+    closest published analogue is ICESat-2 over the exposed Kakhovka bed.
+  search_queries:
+    - "exposed reservoir bed elevation measured by satellite laser altimetry"
+    - "comparison of historical bathymetric soundings with modern lidar of a drained reservoir"
+    - "reservoir dewatering reveals bed topography for validation"
+    - "legacy bathymetry accuracy assessment against new elevation data"
+    - "drawdown exposed lakebed digital elevation model"
+  openalex_queries:
+    - "exposed reservoir bed ICESat-2 elevation"
+    - "legacy bathymetry validation modern lidar reservoir"
+    - "drawdown exposed lakebed elevation model"
+  key_terms:
+    - ["bathymetr", "sounding", "bed elevation", "lakebed", "lake bed", "reservoir bed", "exposed bed", "subaerial"]
+    - ["lidar", "laser altimet", "ICESat", "photogrammetr", "digital elevation model", "DEM"]
+    - ["drawdown", "dewater", "drained", "emptied", "exposed", "breach", "historical", "legacy"]
+  negative_terms:
+    - "ocean bathymetry chart only"
+    - "seafloor spreading"
+  positive_controls: []
+  expected_relations: [ANALOGUE, METHOD_RELEVANT, SUPPORTS]
+  manuscript_anchor: "5.9 Bed-surface reconstruction and cross-validation"
+  numeric_anchor: "2.76 m"
+
+- id: T18
+  block: E
+  statement: >
+    Confidence in a reconstructed reservoir bathymetry increases when independent
+    point elevations, area–elevation relationships and reach-scale drawdown
+    exposure statistics converge on the same vertical interpretation.
+  rationale: >
+    The convergent-validation argument behind §5.10. Tests whether multi-constraint
+    convergence is an established standard or something we are proposing.
+  search_queries:
+    - "convergent validation of a reconstructed bathymetry using independent constraints"
+    - "area elevation curve used to check a reservoir digital elevation model"
+    - "multiple independent datasets agreeing on a vertical datum interpretation"
+    - "hypsometric consistency check for reservoir volume reconstruction"
+  openalex_queries:
+    - "reservoir bathymetry reconstruction independent validation area elevation"
+    - "hypsometric curve reservoir DEM validation"
+    - "multiple constraints vertical datum interpretation"
+  key_terms:
+    - ["area-elevation", "hypsometric", "stage-area", "volume curve", "exposure area", "inundation area curve"]
+    - ["bathymetr", "bed elevation", "reconstruct", "digital elevation model", "DEM"]
+    - ["independent", "converge", "consistency", "cross-validat", "agreement", "corroborat"]
+  negative_terms:
+    - "cross-validation of a machine learning classifier only"
+  positive_controls: []
+  expected_relations: [METHOD_RELEVANT, SUPPORTS]
+  manuscript_anchor: "5.10 Area-weighted exposure: an independent morphological validation"
+  numeric_anchor: null
+
+# ── Block F — morphology and hydraulic fragmentation ─────────────────────────
+
+- id: T19
+  block: F
+  statement: >
+    A reduction in total water area is insufficient to characterise post-dam
+    hydraulic transformation, because equal water areas may correspond to
+    fundamentally different connectivity and hydraulic regimes.
+  rationale: >
+    Separates this manuscript from the existing Kakhovka remote-sensing papers,
+    which are extent- and land-cover-based. The corpus does hold those, so this is
+    one of the few theses where current coverage is adequate.
+  search_queries:
+    - "water extent alone insufficient to describe hydrological change"
+    - "surface water area versus hydrological connectivity after dam failure"
+    - "inundation extent mapping limitations for hydraulic interpretation"
+    - "same water area different flow regime"
+  openalex_queries:
+    - "surface water extent versus hydrological connectivity"
+    - "inundation extent limitation hydraulic interpretation"
+    - "water area change dam failure remote sensing"
+  key_terms:
+    - ["water extent", "inundation extent", "surface water area", "water area", "areal extent"]
+    - ["connectivity", "hydraulic regime", "flow regime", "fragmentation", "insufficient", "limitation", "cannot distinguish"]
+    - ["dam", "reservoir", "river", "breach", "drawdown"]
+  negative_terms:
+    - "urban extent"
+    - "burned area extent"
+  positive_controls:
+    - doi: "10.1029/2025gl120832"
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "Lehnigk et al. 2026 GRL — SWOT observations of the Kakhovka dam-break flood"
+  expected_relations: [SUPPORTS, CONTRADICTS, METHOD_RELEVANT]
+  manuscript_anchor: "6.6 Sentinel-2 planform transformation"
+  numeric_anchor: null
+
+- id: T20
+  block: F
+  statement: >
+    Combining planform water connectivity with longitudinal water-surface geometry
+    provides a more physically meaningful classification of post-reservoir state
+    than either variable alone.
+  rationale: >
+    The synthesis claim: not "the reservoir disappeared" but "a river-dominated
+    system with residual disconnected water bodies".
+  search_queries:
+    - "combining planform connectivity metrics with water surface elevation for river state"
+    - "joint use of surface water mapping and altimetry to classify hydrological regime"
+    - "river planform metrics derived from optical imagery and water level data"
+    - "multi-variable classification of post-dam river state"
+  openalex_queries:
+    - "planform connectivity water surface elevation river classification"
+    - "surface water mapping altimetry combined hydrological regime"
+    - "multi variable post dam river state classification"
+  # The thesis is the JOINT use of the two, not either alone — so the primary
+  # family names the combination. Leading with "connectivity" matched ~800 papers
+  # in a flood corpus, almost none of which classify state from both signals.
+  key_terms:
+    - ["connectivity and water surface", "planform and water surface",
+       "connectivity and elevation", "combined planform", "joint use",
+       "jointly classif", "planform and altimet", "extent and elevation",
+       "area and water level", "morphology and hydraulic"]
+    - ["connectivity", "planform", "river morphology", "channel network", "fragmentation"]
+    - ["water surface elevation", "water surface slope", "WSE", "longitudinal", "surface geometry"]
+    - ["classif", "regime", "state", "combined", "joint", "integrat", "multi-sensor", "multi sensor"]
+  negative_terms:
+    - "landscape connectivity for wildlife"
+    - "habitat corridor"
+  positive_controls: []
+  expected_relations: [SUPPORTS, METHOD_RELEVANT]
+  manuscript_anchor: "6.7 Residual water bodies"
+  numeric_anchor: null
+
+- id: T21
+  block: F
+  statement: >
+    Residual ponds and disconnected water bodies within a drained reservoir should
+    not be interpreted as samples of the main-channel longitudinal water surface.
+  rationale: >
+    A concrete sampling rule. If satellite hydrology already handles disconnected
+    water bodies explicitly, our masking step is standard; if not, it is a needed
+    correction.
+  search_queries:
+    - "disconnected water bodies and residual ponds in a drained reservoir"
+    - "masking off-channel water when deriving river water surface profiles"
+    - "distinguishing main channel from floodplain ponds in satellite water masks"
+    - "perched or isolated water bodies with different elevation from the channel"
+  openalex_queries:
+    - "disconnected water bodies residual ponds drained reservoir"
+    - "off channel water masking river water surface profile"
+    - "isolated water body elevation different from main channel"
+  key_terms:
+    - ["disconnected", "isolated", "residual pond", "off-channel", "off channel", "perched", "remnant water", "detached"]
+    - ["water surface elevation", "water level", "longitudinal profile", "main channel", "thalweg", "water mask"]
+    - ["reservoir", "floodplain", "drained", "drawdown", "river"]
+  negative_terms:
+    - "disconnected graph component"
+  positive_controls: []
+  expected_relations: [SUPPORTS, METHOD_RELEVANT]
+  manuscript_anchor: "6.7 Residual water bodies"
+  numeric_anchor: null
+
+- id: T22
+  block: F
+  statement: >
+    Static water-body databases and lake-averaged satellite products may become
+    physically inappropriate after a reservoir fragments into channels and
+    disconnected water bodies.
+  rationale: >
+    An operational finding with value beyond this case: post-breach LakeSP still
+    treats the fragments as one lake polygon. Potentially a short methodological
+    paper in its own right.
+  search_queries:
+    - "prior lake database becomes outdated after rapid water body change"
+    - "static water mask limitations for rapidly changing water bodies"
+    - "lake averaged satellite product invalid for fragmented water body"
+    - "SWOT prior lake database and river database maintenance"
+    - "HydroLAKES or Global Surface Water static layer limitations"
+  openalex_queries:
+    - "prior lake database outdated water body change SWOT"
+    - "static water mask limitation changing water body"
+    - "lake averaged satellite product fragmented water body"
+  key_terms:
+    - ["prior lake database", "PLD", "SWORD", "HydroLAKES", "static water mask", "water body database", "lake polygon", "predefined mask"]
+    - ["outdated", "invalid", "inappropriate", "no longer", "fragment", "mismatch", "obsolete", "maintenance"]
+    - ["lake", "reservoir", "river", "water body"]
+  negative_terms:
+    - "database schema design"
+    - "relational database performance"
+  positive_controls:
+    - doi: "10.1029/2025gl119771"
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_seed: external_search
+      manually_checked: false   # TODO: read it, add a quote, flip to true
+      quote: ""
+      section: ""
+      note: "Huang & Gao 2026 GRL — SWOT-mapped uneven lake WSE for ICESat-2 levels"
+  expected_relations: [SUPPORTS, METHOD_RELEVANT, CONTRADICTS]
+  manuscript_anchor: "3.8 SWORD"
+  numeric_anchor: null
+
+# ── Block G — regime shift versus transient disturbance ──────────────────────
+
+- id: T23
+  block: G
+  statement: >
+    A hydraulic regime shift should be distinguished from a transient drawdown by
+    the persistence of the new directional water-surface gradient well after the
+    initial drainage period.
+  rationale: >
+    The persistence criterion: a positive gradient on all 14 post-breach dates
+    across 22 months is what makes this a regime shift rather than an emptying event.
+  search_queries:
+    - "distinguishing a persistent regime shift from a transient hydrological disturbance"
+    - "how long must a change persist to be called a regime shift"
+    - "recovery trajectory of a river after dam removal over several years"
+    - "temporal persistence criterion for detecting hydrological change"
+  openalex_queries:
+    - "regime shift versus transient disturbance hydrology persistence"
+    - "post dam removal recovery trajectory multi year"
+    - "persistence criterion hydrological change detection"
+  # "persistent" and "sustained" alone are ordinary words; the thesis is about a
+  # change that endures being distinguished from one that does not.
+  key_terms:
+    - ["regime shift", "regime change", "state transition", "new equilibrium",
+       "step change", "recovery trajectory", "persistent change",
+       "sustained change", "persists", "transient disturbance",
+       "permanent change", "irreversible"]
+    - ["persistent", "persistence", "transient", "sustained", "recovery", "equilibrium"]
+    - ["hydrolog", "hydraulic", "river", "reservoir", "flow", "water surface"]
+    - ["time series", "multi-year", "multi year", "months", "years after", "monitoring period"]
+  negative_terms:
+    - "climate regime shift Pacific decadal oscillation"
+    - "ecological regime shift in plankton communities"
+  positive_controls: []
+  expected_relations: [SUPPORTS, ANALOGUE, METHOD_RELEVANT]
+  manuscript_anchor: "6.8 Temporal persistence"
+  numeric_anchor: "14 post-breach dates over 22 months"
+
+- id: T24
+  block: G
+  statement: >
+    A reservoir-to-river transition is most defensibly identified when multiple
+    independent indicators change coherently: longitudinal slope, water-surface
+    heterogeneity, water connectivity, channel dominance and residual-water
+    elevation structure.
+  rationale: >
+    The multi-line-of-evidence argument the conclusions rest on. Tests whether
+    coherent multi-indicator attribution is an established standard in this field.
+  search_queries:
+    - "multiple lines of evidence for attributing a hydrological regime change"
+    - "coherent change across independent indicators confirms a state transition"
+    - "multi indicator detection of river state change from satellite data"
+    - "convergent evidence in Earth observation based change attribution"
+  openalex_queries:
+    - "multiple lines of evidence hydrological regime change attribution"
+    - "multi indicator river state change satellite detection"
+    - "convergent evidence earth observation change attribution"
+  key_terms:
+    - ["multiple lines of evidence", "multiple indicators", "multi-indicator", "convergent", "coherent", "independent indicators", "corroborat"]
+    - ["regime", "state change", "transition", "shift", "attribution"]
+    - ["river", "reservoir", "hydraulic", "hydrolog", "water surface"]
+  negative_terms:
+    - "multi-criteria decision analysis for site selection"
+  positive_controls: []
+  expected_relations: [SUPPORTS, METHOD_RELEVANT]
+  manuscript_anchor: "5.12 Validation synthesis"
+  numeric_anchor: null
+
+# ── Block H — surface transformation: vegetation succession and woody encroachment ──
+# Added 2026-09-18 for the full-transformation manuscript. Numbers these theses
+# defend come from SWOT-DNIPRO audit run 20260918T175108Z (pilots/vegetation,
+# Dynamic World frames, ATL08 layers). Direct Kakhovka precedents without a DOI
+# (Hemeroby 2025 PMC12205700; Tutova et al. 2025 Studia Biologica) are read as
+# sources but cannot be controls — retrieval could never recover them by DOI.
+
+- id: T25
+  block: H
+  statement: >
+    Vegetation succession on a drained reservoir bed is rapid and can be quantified
+    as a multi-year area and transition series from multi-temporal optical indices,
+    independently of any single-date habitat map.
+  rationale: >
+    Underwrites the 27 → 72 → 84 % vegetated share of the former water surface
+    (2023–2025) and the transition matrices. Kuzemko et al. (2025) and Didukh et al.
+    (2024) already publish field-based habitat maps of the same bed, so the claim is
+    the time series, not the map.
+  search_queries:
+    - "revegetation of a drained reservoir bed observed with multi-temporal Sentinel-2"
+    - "plant succession on exposed reservoir sediments after dam removal"
+    - "vegetation cover time series on a former lakebed from NDVI"
+    - "colonisation of drawdown zone by willow and reed after reservoir emptying"
+  openalex_queries:
+    - "revegetation drained reservoir bed Sentinel-2"
+    - "vegetation succession exposed reservoir sediment dam removal"
+  key_terms:
+    - ["revegetation", "succession", "recolonis", "recoloniz", "plant colonis", "plant coloniz", "vegetation establishment"]
+    - ["drained reservoir", "reservoir bed", "exposed bed", "former reservoir", "drawdown zone", "reservoir drawdown", "dam removal", "dewatered"]
+    - ["NDVI", "Sentinel-2", "Landsat", "time series", "multi-temporal", "vegetation index"]
+  negative_terms:
+    - "phytoplankton succession"
+    - "forest succession after fire"
+  positive_controls:
+    - doi: "10.15407/ukrbotj82.05.488"
+      role: development
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: external_search
+      manually_checked: false
+      note: "Kuzemko et al. 2025, Ukr Bot J — initial revegetation stages of the drained Kakhovka bed; habitat map from field + RS."
+    - doi: "10.32999/ksu1990-553X/2024-20-3-5"
+      role: holdout
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: hard
+      source_of_control: external_search
+      manually_checked: false
+      note: "Didukh et al. 2024, Chornomorski Bot J — first year of floodplain forest on the former Kakhovka bed (Salix × rubens)."
+  expected_relations: [SUPPORTS, ANALOGUE, METHOD_RELEVANT]
+  manuscript_anchor: "6.9 Vegetation succession on the exposed bed"
+  numeric_anchor: "84 %"
+
+- id: T26
+  block: H
+  statement: >
+    Global land-cover probability products can resolve woody encroachment on a newly
+    exposed bed where spectral-index thresholds cannot separate shrub or tree from
+    herbaceous cover.
+  rationale: >
+    Underwrites the Dynamic World trees+shrub probability rising from 0.03 % (2022)
+    to 25 % (2024) of the former water surface, used because the k10e index rule
+    cannot separate woody from herbaceous classes.
+  search_queries:
+    - "Dynamic World land cover probabilities to detect shrub encroachment"
+    - "woody vegetation encroachment mapping with Sentinel-2 land cover product"
+    - "separating shrub and tree cover from herbaceous vegetation with optical indices"
+  openalex_queries:
+    - "Dynamic World woody encroachment"
+    - "shrub encroachment Sentinel-2 land cover probability"
+  key_terms:
+    - ["woody encroachment", "shrub encroachment", "woody cover", "tree cover", "shrub cover", "afforestation"]
+    - ["Dynamic World", "land cover product", "land cover probability", "WorldCover", "land cover classification"]
+    - ["Sentinel-2", "Landsat", "NDVI", "spectral index", "time series"]
+  negative_terms:
+    - "urban encroachment"
+  positive_controls:
+    - doi: "10.1038/s41597-022-01307-4"
+      role: development
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: citation
+      manually_checked: false
+      note: "Brown et al. 2022 — Dynamic World dataset paper; resolve DOI before use."
+  expected_relations: [METHOD_RELEVANT, SUPPORTS]
+  manuscript_anchor: "6.10 Woody encroachment"
+  numeric_anchor: "25 %"
+
+- id: T27
+  block: H
+  statement: >
+    Area estimates from a pixel classification carry no accuracy statement until a
+    design-based, stratified reference sample has been labelled and the error matrix
+    propagated to area uncertainty.
+  rationale: >
+    The 320-point stratified sample (40 per class) exists but is unlabelled, so the
+    manuscript reports class areas as measured shares without accuracy; this thesis
+    is what forbids an accuracy or area-error sentence until labelling is done.
+  search_queries:
+    - "good practices for estimating area and assessing accuracy of land change"
+    - "stratified random sampling for accuracy assessment of land cover maps"
+    - "area estimation with error-adjusted confidence intervals from a confusion matrix"
+  openalex_queries:
+    - "accuracy assessment area estimation stratified sample land cover"
+  key_terms:
+    - ["accuracy assessment", "error matrix", "confusion matrix", "reference sample", "design-based", "stratified random sample"]
+    - ["area estimation", "area estimate", "unbiased area", "error-adjusted", "map area"]
+    - ["land cover", "classification", "Sentinel-2", "Landsat"]
+  negative_terms:
+    - "positional accuracy of GNSS"
+  positive_controls:
+    - doi: "10.1016/j.rse.2014.02.015"
+      role: development
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: expert_known
+      manually_checked: false
+      note: "Olofsson et al. 2014, RSE — good practices for area and accuracy; resolve DOI before use."
+  expected_relations: [METHOD_RELEVANT]
+  manuscript_anchor: "4.12 Sentinel-2 classes"
+  numeric_anchor: null
+
+- id: T28
+  block: H
+  statement: >
+    ICESat-2 ATL08 terrain and canopy segments over a newly exposed bed yield height
+    distributions per year, but canopy-height change cannot be identified without
+    repeat-track pairs on the same ground track.
+  rationale: >
+    Underwrites the ATL08 layer product (h_canopy p50 1.4 m, p95 11.2 m) and the
+    negative result that only one cross-year pair exists within 20 m
+    (NOT_IDENTIFIABLE), so no growth rate is reported from ICESat-2.
+  search_queries:
+    - "ICESat-2 ATL08 canopy height over regenerating vegetation repeat tracks"
+    - "canopy height change detection with spaceborne lidar requires repeat-track geometry"
+    - "ATL08 terrain and canopy segments accuracy in low vegetation"
+  openalex_queries:
+    - "ATL08 canopy height change repeat track"
+  key_terms:
+    - ["ATL08", "canopy height", "h_canopy", "vegetation height", "terrain height", "photon-counting"]
+    - ["ICESat-2", "ICESat 2", "spaceborne lidar", "laser altimet"]
+    - ["repeat track", "change detection", "revisit", "growth", "regenerat"]
+  negative_terms:
+    - "sea ice freeboard"
+  positive_controls:
+    - doi: "10.1016/j.rse.2019.111411"
+      role: development
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: citation
+      manually_checked: false
+      note: "Neuenschwander & Magruder-type ATL08 validation paper; DOI to be confirmed by CrossRef before use."
+  expected_relations: [METHOD_RELEVANT, ANALOGUE]
+  manuscript_anchor: "4.14 ICESat-2 ATL08 layers"
+  numeric_anchor: "n_pairs = 1"
+
+# ── Block I — bed reconstruction across zones and its validation limits ──────
+
+- id: T29
+  block: I
+  statement: >
+    A bed surface interpolated from legacy navigation soundings is least constrained
+    in the near-shore band the survey never visited, and shoreline pseudo-points
+    added there act as soft constraints that can bias the surface rather than
+    validate it.
+  rationale: >
+    Underwrites the p28 result that soundings-only interpolation (2.20–2.62 m RMSE)
+    beats every shoreline-constrained arm (4.4–5.8 m, bias +2.8 to +4.2 m) in
+    ZONE_2/3/4, and the hist18 finding that 23 % of soundings within 500 m of shore
+    carry 54 % of the squared error.
+  search_queries:
+    - "interpolation of sparse bathymetric soundings near the shoreline bias"
+    - "using shoreline as zero-depth constraint in bathymetric interpolation"
+    - "reservoir bathymetry from navigation charts and its near-shore accuracy"
+  openalex_queries:
+    - "bathymetric interpolation shoreline constraint bias"
+  key_terms:
+    - ["shoreline constraint", "zero-depth", "pseudo-point", "boundary condition", "coastline constraint", "waterline"]
+    - ["bathymetr", "sounding", "bed elevation", "depth interpolation", "DEM"]
+    - ["kriging", "IDW", "inverse distance", "radial basis", "interpolat", "cross-validation"]
+  negative_terms:
+    - "multibeam seafloor mapping"
+  positive_controls:
+    - doi: "10.1088/1748-9326/ac4d4f"
+      role: development
+      relevance: analogue
+      expected_stage: semantic_retrieval
+      difficulty: hard
+      source_of_control: citation
+      manually_checked: false
+      note: "Hawker et al. 2022 FABDEM — bare-earth DEM used as terrain prior; analogue for DEM validation practice; resolve DOI before use."
+  expected_relations: [METHOD_RELEVANT, ANALOGUE, CONTRADICTS]
+  manuscript_anchor: "5.9 Bed-surface reconstruction and cross-validation"
+  numeric_anchor: "2.20 m"
+
+- id: T30
+  block: I
+  statement: >
+    The accuracy of a reconstructed bed must be reported against real depth
+    observations under spatially blocked cross-validation; pooled scores that
+    include constructed pseudo-points overstate accuracy.
+  rationale: >
+    Underwrites replacing the pooled 1.84/2.93 m (62–77 % pseudo-points) by the
+    soundings-only 3.19/3.99 m in p19 and the 1 km blocked scheme of hist14/hist18.
+  search_queries:
+    - "spatially blocked cross-validation for interpolated elevation surfaces"
+    - "overoptimistic random cross-validation in spatial prediction"
+    - "validation of bathymetric DEM against independent soundings"
+  openalex_queries:
+    - "spatial cross-validation blocked interpolation accuracy"
+  key_terms:
+    - ["blocked cross-validation", "spatial cross-validation", "block cross-validation", "spatial hold-out", "leave-location-out"]
+    - ["DEM", "bathymetr", "elevation surface", "interpolat", "kriging"]
+    - ["RMSE", "accuracy", "validation", "overoptimis", "autocorrelation"]
+  negative_terms:
+    - "k-fold cross-validation of a neural network on images"
+  positive_controls:
+    - doi: "10.1111/ecog.02881"
+      role: development
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: expert_known
+      manually_checked: false
+      note: "Roberts et al. 2017 Ecography — cross-validation strategies for spatially structured data; resolve DOI before use."
+  expected_relations: [METHOD_RELEVANT, SUPPORTS]
+  manuscript_anchor: "5.9.1 What the 2.76 m actually measures"
+  numeric_anchor: "2.76 m"
+
+- id: T31
+  block: I
+  statement: >
+    Multi-level optical waterlines cannot constrain shallow bathymetry when the
+    detected shoreline sits at the edge of an emergent-vegetation belt rather than at
+    the true water–land boundary, so the signal of level change is smaller than the
+    position bias.
+  rationale: >
+    Underwrites the halted hist21–hist31 experiment: shoreline displacement over
+    2.86 m of level change (median 21 m) versus an inward bias of 181 m; the
+    SAR–optical offset is not a constant (hist28); no contour is licensed for
+    cross-stage transfer (hist31). A negative result the manuscript must keep.
+  search_queries:
+    - "waterline method for intertidal or reservoir bathymetry from multi-date imagery"
+    - "emergent vegetation biases optical shoreline extraction"
+    - "shoreline position error in reservoirs with reed belts"
+  openalex_queries:
+    - "waterline method bathymetry multi-date shoreline"
+  key_terms:
+    - ["waterline method", "water line", "shoreline contour", "contour bathymetry", "multi-level shoreline", "stage-area"]
+    - ["emergent vegetation", "reed", "macrophyte", "vegetation belt", "fringe"]
+    - ["Sentinel", "Landsat", "SAR", "optical", "shoreline extraction", "water mask"]
+  negative_terms:
+    - "coastal erosion of sandy beaches only"
+  positive_controls:
+    - doi: "10.1016/j.rse.2011.05.005"
+      role: development
+      relevance: analogue
+      expected_stage: semantic_retrieval
+      difficulty: hard
+      source_of_control: expert_known
+      manually_checked: false
+      note: "Waterline-method precedent (intertidal DEM from multi-date SAR/optical); DOI to be confirmed by CrossRef before use."
+  expected_relations: [ANALOGUE, METHOD_RELEVANT, CONTRADICTS]
+  manuscript_anchor: "7.9 Limitations"
+  numeric_anchor: "0.12"
+
+# ── Block J — channel adjustment and roughness translation ────────────────────
+
+- id: T32
+  block: J
+  statement: >
+    Widening and transient braiding of the channel downstream of a breached dam can
+    be detected from water-contour transects when observation dates are matched on
+    downstream stage.
+  rationale: >
+    Underwrites the +100 m (15–20 %) wetted-width increase on 157 SWORD-node
+    transects below the dam at Kherson stages within 0.5 m, and the 2023-06-20
+    braiding peak (five arms). Water contour is not the geomorphic bank; bank
+    displacement stays at the 40 m detection limit.
+  search_queries:
+    - "river width change after dam removal from satellite imagery"
+    - "channel widening downstream of dam breach measured with Sentinel-2"
+    - "automated river width extraction from water masks along transects"
+  openalex_queries:
+    - "channel width change dam removal satellite"
+    - "RivWidthCloud river width Landsat"
+  key_terms:
+    - ["channel width", "wetted width", "river width", "channel widening", "braiding", "bank erosion", "planform change"]
+    - ["dam removal", "dam breach", "dam failure", "downstream of dam", "reservoir drawdown"]
+    - ["Sentinel", "Landsat", "satellite", "remote sensing", "water mask", "transect"]
+  negative_terms:
+    - "channel width in semiconductor devices"
+  positive_controls:
+    - doi: "10.1109/LGRS.2019.2920225"
+      role: development
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: citation
+      manually_checked: false
+      note: "Yang et al. 2019 RivWidthCloud; resolve DOI before use."
+  expected_relations: [METHOD_RELEVANT, ANALOGUE, SUPPORTS]
+  manuscript_anchor: "6.11 Channel widening below the dam"
+  numeric_anchor: "+100 m"
+
+- id: T33
+  block: J
+  statement: >
+    Surface-class maps of a newly vegetated bed can be translated into Manning
+    roughness ranges from published priors, but the resulting n values are
+    literature-supported estimates and are not calibrated until hydraulic
+    observations constrain them.
+  rationale: >
+    Underwrites the 11-class roughness table (n_low/base/high from WSP 2339, Chow,
+    HEC-RAS, Järvelä) and the rule that every class carries validation_ref = none.
+  search_queries:
+    - "Manning's n for vegetated floodplains from land cover classes"
+    - "guide for selecting Manning's roughness coefficients for natural channels and flood plains"
+    - "flow resistance of non-submerged woody vegetation"
+    - "assigning roughness coefficients from remote-sensing land cover for hydraulic models"
+  openalex_queries:
+    - "Manning roughness coefficient vegetated floodplain land cover"
+  key_terms:
+    - ["Manning", "roughness coefficient", "Manning's n", "flow resistance", "friction factor", "drag coefficient"]
+    - ["vegetat", "willow", "reed", "riparian", "floodplain forest", "woody", "herbaceous"]
+    - ["flood plain", "floodplain", "channel", "hydraulic model", "HEC-RAS", "land cover"]
+  negative_terms:
+    - "surface roughness of pavement"
+    - "roughness length for wind"
+  positive_controls:
+    - doi: "10.3133/wsp2339"
+      role: development
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: external_search
+      manually_checked: false
+      note: "Arcement & Schneider 1989, USGS WSP 2339 — the n = (nb+n1+n2+n3+n4)m method and vegetation adjustments used for the table."
+    - doi: "10.1080/15715124.2004.9635222"
+      role: development
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: external_search
+      manually_checked: false
+      note: "Järvelä 2004 — flow resistance of non-submerged woody vegetation."
+    - doi: "10.1002/2013WR013819"
+      role: holdout
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: hard
+      source_of_control: external_search
+      manually_checked: false
+      note: "Västilä & Järvelä 2014 WRR — modelling drag of foliated vegetation."
+    - doi: "10.1146/annurev-fluid-120710-101048"
+      role: development
+      relevance: method
+      expected_stage: citation_expansion
+      difficulty: hard
+      source_of_control: external_search
+      manually_checked: false
+      note: "Nepf 2012 — flow and transport in regions with aquatic vegetation."
+  expected_relations: [SUPPORTS, METHOD_RELEVANT]
+  manuscript_anchor: "6.12 Roughness translation"
+  numeric_anchor: "0.063"
+
+- id: T34
+  block: J
+  statement: >
+    Rapid vegetation succession on an exposed bed roughly doubles the area-weighted
+    effective roughness within two years, with consequences for flood conveyance
+    that hydraulic reconstructions of the breach cannot ignore.
+  rationale: >
+    Underwrites the area-weighted n 0.032 → 0.063 for the former pool (63 % of area
+    with Δn > 0.02) and the ZONE_4 0.041 → 0.063 — presented as a translation of
+    class change, not as a measured hydraulic effect.
+  search_queries:
+    - "vegetation growth increases floodplain roughness and reduces conveyance"
+    - "riparian forest drag force effect on flood water levels"
+    - "temporal change of Manning's n with vegetation succession"
+  openalex_queries:
+    - "floodplain vegetation roughness increase conveyance flood levels"
+  key_terms:
+    - ["conveyance", "flood level", "water level rise", "hydraulic roughness", "effective roughness", "resistance increase"]
+    - ["vegetation succession", "vegetation growth", "riparian forest", "willow", "reed", "encroachment"]
+    - ["floodplain", "dam breach", "dam failure", "flood routing", "hydraulic model"]
+  negative_terms:
+    - "aerodynamic roughness"
+  positive_controls:
+    - doi: "10.1111/jfr3.12892"
+      role: development
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: external_search
+      manually_checked: false
+      note: "Sharpe et al. 2023 JFRM — drag-force roughness in a riparian forest."
+    - doi: "10.1080/15715124.2022.2143512"
+      role: holdout
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: hard
+      source_of_control: external_search
+      manually_checked: false
+      note: "Box, Järvelä & Västilä 2022 — emergent-to-submerged resistance formulas."
+  expected_relations: [SUPPORTS, ANALOGUE]
+  manuscript_anchor: "7.6 Conveyance implications"
+  numeric_anchor: "0.032 → 0.063"
+
+# ── Block K — SAR flood-water detection over a drained bed ───────────────────
+
+- id: T35
+  block: K
+  statement: >
+    Over freshly exposed bare sediment, an anchored single-date SAR discriminant
+    retains more new flood water than backscatter change-detection, which loses
+    recall because the pre-event reference is itself dark.
+  rationale: >
+    Underwrites P31/P38: every change-detection variant fails the recall guard in
+    all four zones (VC4 −58 to −80 pp), while the anchored M3 discriminant stays the
+    baseline and a random-forest rejection stage reaches ×4.2 precision at matched
+    recall.
+  search_queries:
+    - "Sentinel-1 flood mapping change detection versus single image thresholding"
+    - "SAR flood extent over bare soil and sand false positives"
+    - "machine learning flood water classification from Sentinel-1 with optical reference"
+  openalex_queries:
+    - "Sentinel-1 flood mapping change detection thresholding"
+  key_terms:
+    - ["flood mapping", "flood extent", "flood water", "inundation mapping", "water extraction"]
+    - ["Sentinel-1", "SAR", "synthetic aperture radar", "backscatter", "VV", "VH"]
+    - ["change detection", "threshold", "Otsu", "discriminant", "random forest", "classifier"]
+  negative_terms:
+    - "SAR interferometry for subsidence only"
+  positive_controls:
+    - doi: "10.1016/j.rse.2020.111664"
+      role: development
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: citation
+      manually_checked: false
+      note: "DeVries et al. 2020 RSE — rapid Sentinel-1 flood mapping."
+    - doi: "10.1109/CVPRW50498.2020.00113"
+      role: holdout
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: hard
+      source_of_control: citation
+      manually_checked: false
+      note: "Bonafilia et al. 2020 — Sen1Floods11 benchmark."
+  expected_relations: [SUPPORTS, METHOD_RELEVANT, CONTRADICTS]
+  manuscript_anchor: "4.13 Sentinel-1 water masks"
+  numeric_anchor: "×4.2"
+
+- id: T36
+  block: K
+  statement: >
+    False water in SAR flood maps over bare sand and smooth fields is a
+    land-cover-conditioned error that no threshold on the backscatter axis removes,
+    so a rejection stage informed by land cover or terrain is required.
+  rationale: >
+    Underwrites the p37/p38d result: false-water rate on never-wet bare land 63–78 %,
+    the 108 km² chronic false-water object over the Oleshky sands, and the bimodal
+    position of hard negatives inside the water anchor.
+  search_queries:
+    - "look-alike surfaces in SAR flood mapping sand and smooth bare soil"
+    - "reducing false positives in Sentinel-1 water detection using HAND and land cover"
+    - "low backscatter of dry sand misclassified as water in radar"
+  openalex_queries:
+    - "SAR water look-alike bare sand false positive HAND"
+  key_terms:
+    - ["false positive", "look-alike", "misclassif", "overestimat", "commission error", "false water"]
+    - ["bare sand", "bare soil", "sand", "smooth surface", "dune", "arena"]
+    - ["SAR", "Sentinel-1", "backscatter", "flood mapping", "water detection", "HAND"]
+  negative_terms:
+    - "false positive rate in medical screening"
+  positive_controls:
+    - doi: "10.3390/rs15051200"
+      role: development
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: citation
+      manually_checked: false
+      note: "Tupas et al. 2023 Remote Sensing — Sentinel-1 flood mapping look-alikes."
+    - doi: "10.3390/rs10040583"
+      role: holdout
+      relevance: method
+      expected_stage: semantic_retrieval
+      difficulty: hard
+      source_of_control: citation
+      manually_checked: false
+      note: "Martinis et al. 2018 — SAR flood look-alike exclusion."
+  expected_relations: [SUPPORTS, METHOD_RELEVANT]
+  manuscript_anchor: "7.9 Limitations"
+  numeric_anchor: "78 %"

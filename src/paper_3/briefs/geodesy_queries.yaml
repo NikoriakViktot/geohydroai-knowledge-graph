@@ -1,0 +1,132 @@
+# Query families for the geodesy / vertical-reference mini-corpus (topic B).
+#
+# FROZEN. `geodesy.py` hashes this file into HARVEST_MANIFEST.json before the
+# first query is sent, and the manifest refuses to move without --force. The
+# point is to remove the temptation, after seeing what came back, to nudge a
+# term until a paper one already knows about appears — that is tuning the
+# search to the answer.
+#
+# Why a separate corpus at all: the flood-oriented knowledge graph yielded 14
+# full-text candidates for this topic, of which three or four were substantive
+# and one was an acronym list. That is a domain-coverage gap of the corpus, not
+# a scientific gap in the literature, and the honest response is to change the
+# corpus rather than the thresholds.
+
+#: Bare terms that are NOT admitted on their own. They appear in every
+#: remote-sensing paper. A candidate matching only these must also match a
+#: geodetic family inside the same passage to count.
+generic_terms:
+  - reference frame
+  - geolocation
+  - height reference
+  - vertical reference
+  - elevation
+
+families:
+  - id: datum_transformation
+    queries:
+      - "vertical datum transformation water level"
+      - "vertical datum transformation satellite altimetry"
+      - "height system unification vertical datum"
+      - "national vertical datum offset geoid"
+    terms:
+      - vertical datum
+      - datum transformation
+      - height system unification
+      - vertical datum offset
+
+  - id: height_types
+    queries:
+      - "ellipsoidal height to orthometric height conversion geoid"
+      - "normal height quasigeoid conversion ellipsoidal"
+      - "geoid undulation ellipsoidal orthometric difference"
+    terms:
+      - ellipsoidal height
+      - orthometric height
+      - normal height
+      - geoid undulation
+      - quasigeoid
+
+  - id: permanent_tide
+    queries:
+      - "permanent tide zero tide mean tide tide-free height"
+      - "permanent tide system geoid convention"
+      - "tide-free mean-tide conversion geodetic heights"
+      - "permanent tidal deformation reference frame heights"
+    terms:
+      - permanent tide
+      - zero-tide
+      - zero tide
+      - mean-tide
+      - mean tide
+      - tide-free
+      - tide free
+      - tidal deformation
+
+  - id: icesat2_reference
+    queries:
+      - "ICESat-2 vertical reference tide-free ellipsoid"
+      - "ICESat-2 ATL13 water surface height geoid correction"
+      - "ICESat-2 inland water height datum"
+    terms:
+      - ICESat-2
+      - ATL13
+      - ATL03
+      - ATL08
+
+  - id: swot_reference
+    queries:
+      - "SWOT height reference geoid EGM2008 water surface elevation"
+      - "SWOT pixel cloud height correction geoid"
+      - "SWOT river water surface elevation vertical datum"
+    terms:
+      - SWOT
+      - KaRIn
+      - PIXC
+      - RiverSP
+      - LakeSP
+
+  - id: gnss_levelling
+    queries:
+      - "GNSS levelling geoid model vertical datum"
+      - "GNSS leveling orthometric height accuracy"
+      - "GPS levelling water level gauge datum"
+    terms:
+      - GNSS levelling
+      - GNSS leveling
+      - GPS levelling
+      - GPS leveling
+      - GNSS/levelling
+
+  - id: reference_systems
+    queries:
+      - "EVRF2019 European vertical reference frame"
+      - "ITRF vertical reference height"
+      - "EGM2008 geoid model water level"
+      - "EGG2015 European gravimetric quasigeoid"
+      - "NAVD88 datum satellite altimetry water"
+    terms:
+      - EVRF
+      - ITRF
+      - EGM2008
+      - EGM96
+      - EGG2015
+      - NAVD88
+      - EGG
+
+  - id: altimetry_harmonisation
+    queries:
+      - "water level satellite altimetry datum harmonization gauge"
+      - "cross-mission altimetry bias water level reference"
+      - "satellite altimetry gauge vertical datum consistency inland water"
+      - "altimetry water level bias correction vertical reference"
+    terms:
+      - datum harmonization
+      - datum harmonisation
+      - cross-mission bias
+      - inter-mission bias
+      - altimetry bias
+
+filters:
+  from_publication_date: "2000-01-01"
+  type: "article|review|preprint|report"

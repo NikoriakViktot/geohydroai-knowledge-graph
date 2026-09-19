@@ -1,0 +1,796 @@
+# What our own data support, per claim ID of the v1 draft.
+#
+# Source: the SWOT-DNIPRO audit run, copied into paper_3_audit/audit_run/
+# and imported with `scientific_status.import_audit`.
+#
+# UNKNOWN blocks publication by default. A claim nobody has audited must
+# not reach the corrected manuscript merely because nobody looked at it.
+# Statuses: SUPPORTED | SUPPORTED_WITH_LIMITATION | REVISE_UNCERTAINTY | REQUIRES_REANALYSIS | NOT_TESTABLE | UNSUPPORTED | CONTRADICTED | UNKNOWN
+#
+# Only SUPPORTED lets a claim stand as written. Everything else needs a
+# recorded patch, a re-analysis, or removal.
+
+B2.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Constrained arms (S2 shoreline soft, p18 pseudo-points) are worse (audit C-16
+    CONTRADICTED); POST-breach bed is a data gap.
+  note: 'manual: outputs/tables/p28_surface_summary_ZONE_2_KHERSON_DELTA.csv'
+B2.2:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: outputs/tables/p28_surface_summary_ZONE_3_DNIPRO_BUG_ESTUARY.csv'
+B2.3:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: outputs/tables/p28_surface_summary_ZONE_4_DAM_TO_KHERSON_FLOODWAY.csv'
+B3.1:
+  audit_status: SUPPORTED
+  findings:
+  - 'A negative result the manuscript keeps: no contour is licensed for cross-stage
+    transfer (hist31).'
+  note: 'manual: outputs/tables/hist28_offset_stability.csv'
+B3.2:
+  audit_status: SUPPORTED
+  note: 'manual: outputs/tables/hist31_dem_constraints.csv'
+C-01:
+  audit_status: SUPPORTED
+  findings:
+  - Single date; coverage 1.000 so not coverage-limited | verification_level(2026-09-16)=EXECUTED_CHECK;
+    validation_type=internal
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-02:
+  audit_status: UNSUPPORTED
+  findings:
+  - 'PRE cohort n=3; headline date is the only one at full coverage; other two pre-breach
+    dates give F2 0.537/0.647 above the POST median 0.243. Pooled F2-coverage correlation
+    is null (rho=-0.058 p=0.72) so this is cohort composition not a monotone artifact
+    | After A4 (0/1/255 masks) and B-2b (registry bbox, footprint 2,299 km2): PRE_BREACH
+    still n=3 with ONE HIGH-coverage date (2023-06-05, F2 0.000047); POST HIGH 12->4;
+    F2 POST median 0.243->0.254. inferential=False on every row by rule | verification_level(2026-09-16)=EXECUTED_CHECK;
+    validation_type=internal'
+  required_actions:
+  - Recompute the contrast with both periods restricted to coverage_class==HIGH
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-03:
+  audit_status: CONTRADICTED
+  findings:
+  - n_water_bodies vs observed fraction Spearman rho=+0.568 p=0.0001 | verification_level(2026-09-16)=EXECUTED_CHECK;
+    validation_type=internal
+  required_actions:
+  - none - reformulate without counts
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-04:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - 'Pooled over a set that is 62-77% constructed shoreline pseudopoints. Re-run 2026-09-16
+    with stratified cv_score: pooled 2.9268 (Z2) / 1.8426 (Z4) m unchanged and now
+    labelled best_rmse_pooled_m; the summary''s accuracy field is best_rmse_soundings_m
+    | verification_level(2026-09-16)=REPRODUCED_RESULT; validation_type=internal blocked
+    CV'
+  required_actions:
+  - none - superseded as the accuracy figure by C-05
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-05:
+  audit_status: SUPPORTED
+  findings:
+  - 'PRODUCTION p19 (stratified cv_score, 2026-09-16) reproduces the prior audit''s
+    reimplementation to 16 significant digits: Z2 RMSE_snd 3.9932519892747753 bias
+    +1.1523564298145963 (n 527); Z4 RMSE_snd 3.1929484801131824 bias +0.8360013383439584
+    (n 626). RBF remains the selected method on the soundings metric in both zones
+    | verification_level(2026-09-16)=REPRODUCED_RESULT; validation_type=internal blocked
+    CV'
+  required_actions:
+  - p28 re-kriging with mask-derived soft constraints (plan F) - expected to change
+    these numbers
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-06:
+  audit_status: SUPPORTED
+  findings:
+  - True but covers only the degenerate case; the operator's distinguishing feature
+    is untested | verification_level(2026-09-16)=EXECUTED_CHECK; validation_type=internal
+  required_actions:
+  - see F-05
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-07:
+  audit_status: CONTRADICTED
+  findings:
+  - Sign inverted; noisier observations gain weight. Verified against a covariance-form
+    solve derived from first principles, not against the same formula | verification_level(2026-09-16)=REPRODUCED_RESULT;
+    validation_type=independent analytic reference
+  required_actions:
+  - Fix sign; see F-04
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-08:
+  audit_status: UNSUPPORTED
+  findings:
+  - Induced bias 0.006-0.099 m against CV RMSE 1.8-2.9 m. Harmless at current parameters
+    only; the relation is non-linear and degrades fast if constraint uncertainty grows
+    | verification_level(2026-09-16)=REPRODUCED_RESULT; validation_type=quantified
+    sensitivity
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-09:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - The report itself states 'not independence-tested'; overlap cells share inputs
+    and method so this is a consistency check not an independent validation | verification_level(2026-09-16)=DOCUMENT_ONLY;
+    validation_type=internal consistency
+  required_actions:
+  - Independent depth data in the overlap region
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-10:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Level-1 mathematical correctness only (7.1e-15 vs 1e-9 tolerance); does not transfer
+    to 20 m production matching | verification_level(2026-09-16)=DOCUMENT_ONLY; validation_type=analytic
+    reference
+  required_actions:
+  - Production-input test at 20 m
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-11:
+  audit_status: SUPPORTED
+  findings:
+  - Stated shift +0.0374 m against -mean(free2mean) = +0.0377 m, difference 0.3 mm.
+    Formula matches ATL03 ATBD v007 p.125 as cited and IS applied in production (p18,
+    phase19_*, k10, phase20_fragmentation_report) | verification_level(2026-09-16)=REPRODUCED_RESULT;
+    validation_type=arithmetic reproduction
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-12:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - 'Consistent, but not at the quoted precision: the documented datum 1-sigma alone
+    gives +-1.14 pp, 3.3x the published +-0.35 pp band and 11x the 0.1 pp difference.
+    Premise (14.00 m sounding reduction) is UNRESOLVED by the project''s own note
+    | verification_level(2026-09-16)=REPRODUCED_RESULT; validation_type=internal comparison'
+  required_actions:
+  - Requote with a datum-propagated band; see F-11
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-13:
+  audit_status: NOT_TESTABLE
+  findings:
+  - The project marks this itself as UNRESOLVED and as its own inference, not a source
+    statement, and specifies permitted and forbidden phrasings. Exemplary handling;
+    the gap is that downstream uncertainty bands do not carry it (F-11) | verification_level(2026-09-16)=DOCUMENT_ONLY;
+    validation_type=documentary
+  required_actions:
+  - Primary metadata for the charts, if it exists
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-14:
+  audit_status: NOT_TESTABLE
+  findings:
+  - n_POST_with_Q = 0 - all 14 POST dates fall in 2024-2025 with zero overlap with
+    the discharge record. The report establishes this BEFORE fitting any model and
+    refuses to relabel PRE vs DRAWDOWN as PRE vs POST. Exemplary; no finding raised
+    | 2026-09-16 status NOT_TESTABLE mapped to evidence UNRESOLVED + testability NOT_IDENTIFIABLE_WITH_DESIGN
+    | verification_level(2026-09-16)=EXECUTED_CHECK; validation_type=design census
+  required_actions:
+  - Discharge observations overlapping the 2024-2025 POST profile dates
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-15:
+  audit_status: REQUIRES_REANALYSIS
+  findings:
+  - 'Inside the connected water system the object count does NOT change (+14.5, p=0.195;
+    partial_f==0: p=0.94). The large increase (+111, p<0.001) is confined to the ZONE_1
+    polygon outside dnipro_water_domain. sum_area_total rises while the reservoir
+    drains, pointing at prior-matched objects keeping prior areas. Exploratory; post-hoc
+    population; seasonal component; small ponds below LakeSP detection | verification_level(2026-09-16)=EXECUTED_CHECK;
+    validation_type=permutation test on dates, bootstrap CI; run_refs=A5-P23-V2'
+  required_actions:
+  - Separate Obs from Unassigned inside the former pool; check whether Prior-matched
+    reservoir objects report prior areas post-breach (p_ref_area); restrict PRE to
+    the last 4 weeks before the breach to shrink the seasonal gap
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-16:
+  audit_status: CONTRADICTED
+  findings:
+  - 'Soundings-only LINEAR 2.31 m/+0.02 beats every constrained arm (4.4-4.9 m/+2.8..+3.5;
+    p19 design 4.12/+1.23); constraints hurt most within 500 m of shore where 443/527
+    soundings lie. CV cannot score the unsounded last ~100 m to the bank | ZONE_4:
+    soundings-only LINEAR 2.20/-0.07 vs S2 soft 5.38/+4.17 vs p19 design 3.20/+0.83;
+    554/626 soundings within 500 m of shore | verification_level(2026-09-16)=REPRODUCED_RESULT;
+    validation_type=blocked CV on soundings only, stratified by shore distance; run_refs=F-P28-Z2'
+  required_actions:
+  - ZONE_4 same design (queued); a bank-profile prior with its own validation if near-bank
+    shape is required
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-17:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - criterion A uses the persistent-water prior P (optical occurrence >=85 % U registry
+    water domain), not truth; 29-39 % of P is optically dry on same-day S2; report
+    built at fc6befb, tables not re-run in this audit
+  required_actions:
+  - recompute criterion A for 2 zones from the variant store (sampled events)
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-18:
+  audit_status: SUPPORTED
+  findings:
+  - 'ZONE_1: 3 pairs / 3 orbits, new water <1 km2 per pair (weakest); truth = open-water
+    rule only (flooded vegetation never truth); leakage audit PASS (no target inside
+    own composite)'
+  required_actions:
+  - none for the negative result; a standardized-anomaly formulation was tested in
+    P38 (C-21)
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-19:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - criterion A improvement is small (ZONE_4 9.9->9.1 %); neither VT nor VM touches
+    the bare-sand false water (78.3 % stays or rises to 84.6 %); no variant promoted,
+    products untouched
+  required_actions:
+  - exclusion layer for chronically radar-dark land (deferred in the report)
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-20:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Dynamic World is a weak label (60/30 m export resampled to 20 m); 'Oleshky sands'
+    attribution is by coordinates, no polygon; DW `bare` is 13.4 % of the false-water
+    area in ZONE_4 (RR is the number to read)
+  required_actions:
+  - high-resolution imagery check of the 108 km2 object; sand exclusion layer
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-21:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - one flood, one zone, 5 orbits of which 3 folds low-confidence (<3 pairs); bootstrap
+    over 5 clusters 'reported, not trusted'; generalisation beyond the Kakhovka event
+    not measured; VLR/VRF are candidate rejection stages, not products; frozen rule
+    at the 0.5 cut FAILED (recall 31.7 % vs 73.3 %) - the matched-recall reading was
+    specified in the review round before the evaluation run
+  required_actions:
+  - hard-negative-stratified sampling, incidence-angle normalisation, three-class
+    optical truth, extension to ZONE_2/3/1 (all deferred in the report)
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-22:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - 1e6-pixel samples per population; pooling on D_z assumes anchors at -/+ d'/2;
+    30 % of the zone's 119 events have d'<1 where M3 is near chance on its own anchors
+  required_actions:
+  - repeat on ZONE_1 eastern frame (also contains the arenas)
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-23:
+  audit_status: SUPPORTED
+  findings:
+  - 'REPRODUCED (CHK-020, R-005): per-date slopes to 4e-16, all deterministic statistics
+    exact, MC within tolerance; ''slope along track'' vs ''slope along channel'' not
+    separated pre-Phase-19 (the report says so); residual ponds pull OLS down (Theil-Sen
+    used); dates on repeated RGTs are not guaranteed independent'
+  required_actions:
+  - check RGT repetition among the 14 POST dates (raw ATL13 rgt/cycle); separate channel
+    vs residual-water slopes (Phase 19 product)
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-24:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - n=3; the report itself forbids publishing any single-date offset; wind/pressure
+    data absent (ERA5 blocked)
+  required_actions:
+  - ERA5/UkrHMI wind at Kherson; more co-located overpasses
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-25:
+  audit_status: NOT_TESTABLE
+  findings:
+  - wrong site for the test (extrapolation from the reservoir gauges) and n=3 - the
+    report says so itself
+  required_actions:
+  - co-located overpasses over the reservoir gauges
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-26:
+  audit_status: SUPPORTED
+  findings:
+  - the leak was worth little in AP (0.202 vs 0.204) but the principle is correctly
+    applied; this is design hygiene, not a science result
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-27:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - 'the check ran before deletion; only the clipped copy remains so the fidelity
+    test is no longer repeatable - only counts and internal integrity can be re-checked
+    (CHK-021) | CHK-021 (2026-09-18): counts reproduced exactly (4919 x 5 components;
+    manifest 4919 CLIPPED + 3507 NO_FEATURES + 35 BBOX_SKIP = 8461)'
+  required_actions:
+  - re-count granules and shapefile components in swot_ua
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-28:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - commit says 310 files; tree now holds 618 (577 hardlinked, 41 singletons) - grew
+    after p29 or counted logical groups; a hardlink tree is not a backup (same inodes)
+  required_actions:
+  - CHK-009 counted; pair inodes to sources if needed
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-29:
+  audit_status: SUPPORTED
+  findings:
+  - lateral tolerance 20 m is strict for off-pointing tracks; relaxing to 100 m would
+    pair different footprints (different vegetation); ATL03-level re-pull would not
+    change the geometry
+  required_actions:
+  - request repeat-track pairs from future cycles or a targeted RGT list (GAP-010)
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-30:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - stage not matched, only listed; dates cloud-limited (validity 11-100 %); water
+    contour != bank; discharge post-breach unregulated vs regulated pre-breach - a
+    hydrological, not morphological, explanation is not excluded
+  required_actions:
+  - stage-matched pairs (|dH|<0.1 m) and S1-based widths on the same transects; Kherson
+    discharge
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-31:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - classes unvalidated (no labels; sample designed); 'vegetated' includes REED_OR_FLOODED_VEGETATION
+    which here is mostly young willow/poplar thicket (DW trees label on 22 % in 2024)
+    - species/structure NOT claimed; observed share per date ~0.5 (clouds); first-vegetation
+    is a single-date class call
+  required_actions:
+  - label the 320-point sample on high-resolution imagery; repeat with 2026 stacks
+    (GAP-001)
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-32:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - segment counts also depend on track coverage per year (14/46/43 passes); DW is
+    a weak label at 60 m export; no independent structure data
+  required_actions:
+  - DW 2025/2026 frames (GAP-004); labelled sample
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-33:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - n values are LITERATURE PRIORS, not calibrated; class maps unvalidated (F-15 lineage);
+    woody split rests on Dynamic World (weak label, 60 m export, 2024 reused for 2025);
+    depth/season dependence unresolved (scenario bands); 2026 state missing for the
+    pool (GAP-001)
+  required_actions:
+  - label the 320-point sample; DW 2025/2026; paired HEC-RAS runs T6 (hecras_sensitivity_design.csv)
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-34:
+  audit_status: SUPPORTED
+  findings:
+  - 'MODEL_COMPARISON_ONLY (user decision); LandCover.hdf not opened; g02 has no #Mann
+    records (2D land-cover based)'
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+C-35:
+  audit_status: SUPPORTED
+  findings:
+  - negative result for THIS feature set and season; per-date features, S1 texture
+    or DW 2025 were not tried; labels are PhoREAL segment metrics
+  required_actions:
+  - repeat in 2026 with taller canopies and DW 2025/2026 frames; add S1 VV-VH and
+    per-date NDMI features
+  note: 'audit: audit_runs/20260918T175108Z/claim_evidence_matrix.csv'
+G1:
+  audit_status: SUPPORTED
+  findings:
+  - Grid identity rests on the sha256 in provenance.json; the EPSG sanity check is
+    consistency, not identity. v1 §3.4/§9 name EPSG registry, BKG and Stopkhai in
+    one breath (marker REF01).
+  note: 'manual: outputs/tables/kakhovka_datum_comparison.csv'
+G2:
+  audit_status: UNKNOWN
+  findings:
+  - Citation problem, not a numerical one (egm2008_minus_evrs −0.145 ± 0.027 m).
+  required_actions:
+  - obtain the 1′ EGG2015 grid with licence, or re-run on the public grid and report
+    the difference
+G3.1:
+  audit_status: SUPPORTED
+  findings:
+  - Levels are cm above the post zero; BS-77 → EVRF2019 via EPSG:9902 is the manuscript's
+    step, not the yearbook's.
+  note: 'manual: data/historical/sea_posts_2023/annual_stats_2023.csv'
+H1.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Distribution per year only; no change claim (H1.2).
+  note: 'manual: audit_runs/20260918T175108Z/pilots/icesat2/out/summary.json'
+H1.2:
+  audit_status: NOT_TESTABLE
+  findings:
+  - 'Audit C-29: NOT_IDENTIFIABLE_CURRENT_DESIGN (n_pairs < 50).'
+  required_actions:
+  - SlideRule photon pull on repeat RGTs, or accept as limitation
+  note: 'manual: audit_runs/20260918T175108Z/pilots/icesat2/out/repeat_track_canopy_pairs_former_pool.csv'
+I1.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: outputs/tables/p27_zone_shoreline_uncertainty.csv'
+I1.2:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: outputs/tables/p27_zone_shoreline_uncertainty.csv'
+K1.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Water contour ≠ geomorphic bank; bank displacement at the 40 m detection limit;
+    arms counted along transects (no RivGraph).
+  note: 'manual: audit_runs/20260918T175108Z/pilots/channel/out/width_summary_by_year.csv'
+K1.1a:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: audit_runs/20260918T175108Z/pilots/channel/out/width_summary_by_year.csv'
+K1.1b:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: audit_runs/20260918T175108Z/pilots/channel/out/width_summary_by_year.csv'
+K1.2:
+  audit_status: SUPPORTED
+  note: 'manual: audit_runs/20260918T175108Z/pilots/channel/out/summary.json'
+M1.1:
+  audit_status: SUPPORTED
+  findings:
+  - Each per-date slope is a fit through ≤6 beam-median points (gt1l…gt3r) over ~20–70
+    km along a reservoir-axis centreline (make_longitudinal.py), NOT SWORD; footprint-wide,
+    not channel-restricted (M1.4).
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+M1.2:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - n=5 dates. No confidence interval is quoted for the drawdown median.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+M1.3:
+  audit_status: SUPPORTED
+  findings:
+  - Theil-Sen is primary because per-date profiles contain outlying segments; OLS
+    is the sensitivity check.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+M1.4:
+  audit_status: REVISE_UNCERTAINTY
+  findings:
+  - 'Only 6 post-breach dates qualify for a channel-restricted fit (expanded from
+    4). This must be reported alongside M1.1 as an honest limitation: part of the
+    all-water contrast may come from including residual water bodies at differing
+    levels, and this test cannot yet separate the two.'
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+M2.1:
+  audit_status: SUPPORTED
+  findings:
+  - This is metric F4 on ALL ATL13 dates in the footprint (n=192/23). It must NOT
+    be confused with the within-profile WSE range of the 14/14 slope-profile sample
+    (median 0.090 m pre vs 1.827 m post, kakhovka_pre_post_slope_summary.csv), which
+    is a different sample AND a different spatial restriction. Measured by the altimeter,
+    so it is independent of Sentinel-2 tile coverage.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+M3.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - ONLY ONE pre-breach date (2023-06-05) has near-complete footprint coverage, so
+    n_pre = 1 and NO p-value may be computed for a pre/post fragmentation contrast.
+    The earlier fragmentation significance test used partial pre-breach scenes as
+    if they were full-reservoir observations and is INVALID. This is descriptive planform
+    evidence supporting the altimetric result, never the primary inferential evidence.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+M3.2:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - The high-confidence population (B) is used. The all-classified figure (-0.44 m,
+    max +12.59 m) is contaminated by a 2023-09-01 non-water cluster 5.6 km off the
+    stem and is not quoted.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+N1.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - A translation of class change through literature priors (n_base per class), not
+    a hydraulic measurement; validation_ref = none for every class.
+  required_actions:
+  - hydraulic calibration against observed stages (HEC-RAS sensitivity design exists,
+    not run)
+  note: 'manual: audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_roughness_transition_summary.csv'
+N1.1a:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_roughness_transition_summary.csv'
+N1.1b:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_roughness_transition_summary.csv'
+N1.2:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_class_areas_by_state.csv'
+N1.2a:
+  audit_status: SUPPORTED
+  note: 'manual: audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_1_pool_class_areas_by_state.csv'
+N1.3:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Only ~1 000 km² of the 10 348 km² ZONE_4 frame is valid after the breach; BREACH_2023
+    row covers 6 918 km².
+  note: 'manual: audit_runs/20260918T175108Z/pilots/roughness/out/ZONE_4_roughness_transition_summary.csv'
+N1.4:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - validation_ref = none; literature prior.
+  note: 'manual: audit_runs/20260918T175108Z/roughness_class_table.csv'
+N1.4a:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: audit_runs/20260918T175108Z/roughness_class_table.csv'
+R1.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Methods/negative-results block; M3 remains the baseline; change-detection variants
+    fail the recall guard in all zones.
+  note: 'manual: outputs/tables/p34_variant_ranking.csv'
+R1.2:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - 3 of 5 orbit folds low-confidence; cross-orbit generalisation within one event,
+    not to the next flood.
+  note: 'manual: outputs/tables/p38c_operating_points_ZONE_4_DAM_TO_KHERSON_FLOODWAY_pre.csv'
+R1.3:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: outputs/tables/p37_false_water_summary.csv'
+S1.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - 'Class shares are measured, not accuracy-assessed: the 320-point stratified sample
+    is unlabelled (T27); Kuzemko et al. 2025 publish a field-based habitat map of
+    the same bed.'
+  required_actions:
+  - label validation_sample_design_2025.csv before any accuracy or area-error statement
+  note: 'manual: audit_runs/20260918T175108Z/pilots/vegetation/out/class_shares_by_year_summary.csv'
+S1.1a:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: audit_runs/20260918T175108Z/pilots/vegetation/out/class_shares_by_year_summary.csv'
+S1.1b:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: audit_runs/20260918T175108Z/pilots/vegetation/out/class_shares_by_year_summary.csv'
+S1.2:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Area with ≥2 leaf-on observations shrinks to 1 258 km² in 2025 (12 dates but partial
+    coverage).
+  note: 'manual: audit_runs/20260918T175108Z/pilots/vegetation/out/mode_class_areas_by_year_former_water.csv'
+S1.2a:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: audit_runs/20260918T175108Z/pilots/vegetation/out/mode_class_areas_by_year_former_water.csv'
+S1.2b:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: audit_runs/20260918T175108Z/pilots/vegetation/out/mode_class_areas_by_year_former_water.csv'
+S1.3:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Mode classes on leaf-on dates; area with ≥2 observations in both years only.
+  note: 'manual: audit_runs/20260918T175108Z/pilots/vegetation/out/summary.json'
+S1.4:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Interval-censored by the Sentinel-2 revisit; quantiles are the upper interval
+    bound.
+  note: 'manual: audit_runs/20260918T175108Z/pilots/vegetation/out/summary.json'
+S1.5:
+  audit_status: SUPPORTED
+  note: 'manual: audit_runs/20260918T175108Z/pilots/vegetation/out/summary.json'
+V1.1:
+  audit_status: SUPPORTED
+  findings:
+  - Mykolaiv 98027 has coordinates but no level series; 8 further reservoir stations
+    in the donor CSVs carry no coordinates and cannot be transformed.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V1.2:
+  audit_status: SUPPORTED
+  findings:
+  - The 0.068 m grid accuracy is larger than the spread it resolves; the spatial variation
+    is used, the absolute level carries that accuracy.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V1.3:
+  audit_status: SUPPORTED
+  findings:
+  - Using the reservoir zero at Kherson would introduce a 17 m blunder; the two domains
+    must never share a zero.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V2.1:
+  audit_status: SUPPORTED
+  findings:
+  - 'RiverSP derives from the same SWOT observation: an internal product-chain check,
+    never ''independent validation''.'
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V3.1:
+  audit_status: SUPPORTED
+  findings:
+  - n=3 overpasses. The residual orders with |dt|, which is suggestive of temporal
+    mismatch rather than a datum offset, but no regression is fitted and NO universal
+    centimetric agreement is claimed. Sign convention is H_SWOT - H_ICESat-2.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V4.1:
+  audit_status: SUPPORTED
+  findings:
+  - The point estimate lies marginally outside its own bootstrap CI because the two
+    are computed over different aggregations (see QC report); the radius dependence
+    is the along-channel gradient entering the window, so the radius is a real methodological
+    choice, not noise.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V4.2:
+  audit_status: NOT_TESTABLE
+  findings:
+  - An 18 cm daily excursion is a ~99th-percentile event at this site (|dH| median
+    3.0, p90 9.0, max 20.0 cm/day, n=96 days). No local wind or pressure record exists,
+    so wind setup can be neither confirmed nor excluded. Reported as unresolved.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V5.1:
+  audit_status: SUPPORTED
+  findings:
+  - A rank test cannot reach significance with 5 stations against 1 (p floor 0.200)
+    and is not relied on. This is a local contextual term, NOT a global sensor bias
+    and NOT a datum fix. No post-breach constant exists at any station.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V6.1:
+  audit_status: SUPPORTED
+  findings:
+  - 14.00 m is the only PUBLISHED level of the four candidates (Table 19). The honest
+    uncertainty is the 0.40 m spread among three independent estimates (13.71 capacity-curve,
+    14.00 published, 14.11 ICESat-2), not the CI, and it is deliberately not folded
+    in. The source does not state its Baltic realisation (BS-42 vs BS-77), so a further
+    few-centimetre step may be unaccounted for. The 14.11 m estimate is CIRCULAR against
+    ICESat-2 and is never used as the working reference.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V6.2:
+  audit_status: SUPPORTED
+  findings:
+  - For quoting, 14.19 m EVRF2019; for computing, the per-sounding value.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V7.1:
+  audit_status: SUPPORTED
+  findings:
+  - 'The large deviations on the steep upper backwater limb (>=210 km, -0.77/-0.66/-0.10
+    m) are NOT digitisation error: Table 20 has only two points across the limb and
+    the true curve is convex, so the linear reference is itself wrong there by decimetres.
+    The vertical axis is non-linear and was calibrated on detected gridlines; on a
+    linear axis the same symbols read 0.2-0.4 m too high. Curve 4 (dash-dot) remains
+    NOT digitised - it cannot be separated from dashed curve 3 by the enclosed-region
+    method.'
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V7.2:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Per-date fits span a median of only 8.3 km (p75 13.1 km, max 74.4 km), so no reach
+    value is a hydraulic gradient measured across that reach. The 180-210 km band
+    is a geometric artefact (see V7.3) and must not be read as a hydraulic slope.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V7.3:
+  audit_status: SUPPORTED
+  findings:
+  - 'The first hypothesis - that chainage assignment fails where the pool is widest
+    - was tested and REJECTED: that band has the smallest median offset from the channel
+    line (2.5 km) of any reach.'
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V8.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - 'NO causal attribution is made for any individual satellite date: no simultaneous
+    wind or pressure forcing data exist. This is a scale-of-magnitude argument, and
+    it must not be confused with the mean hydraulic slope. Documented seiche periods:
+    13.4 h uninodal, 7.3 h binodal, 3.5 h trinodal.'
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V9.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - SWORD is a MODERN-CHANNEL PROXY. This does not claim reconstruction of any specific
+    pre-1956 channel, nor that any individual depression is one. The +7.38 m threshold
+    is descriptive only - see V9.4.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V9.2:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - 'Stated narrowly: this validates the DRY-BED MASK and the shallow-platform selection.
+    S7 contains no observations from the deepest 20 m of the sounding range (deepest
+    S7 +0.86 m vs -19.38 m in the soundings), because the deep depressions still carry
+    the river. It is NOT independent proof of the drowned-valley morphology.'
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V9.3:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - The clearance must be taken against max(soundings, S7) because S7 reaches higher
+    (15.45 m) than the soundings (15.32 m); using soundings alone would overstate
+    the clearance as 5.87 m. A bed at terrace height would have indicated the survey
+    or the reference level was wrong.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V9.4:
+  audit_status: UNSUPPORTED
+  findings:
+  - Earlier framing as two populations is WITHDRAWN and retained only as an audit
+    trail. The words 'bimodal' and 'antimode' must not appear. The +7.38 m value survives
+    only as a descriptive classification threshold, not a geomorphological boundary.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V9.5:
+  audit_status: REVISE_UNCERTAINTY
+  findings:
+  - Nearly vanishes without one band. Reported, not relied on.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V9.6:
+  audit_status: UNSUPPORTED
+  findings:
+  - Table 21 reports an AREA fraction, but the survey follows the navigable channel
+    and avoids the shallow margins where drying occurs, so a point sample cannot estimate
+    it. Superseded by V10.1.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V10.1:
+  audit_status: SUPPORTED
+  findings:
+  - DRAFT v1 (2026-09-10) still quotes the P20-era 12.38 % / −0.57 pp; hist17 rerun
+    2026-09-13 (b3255e4, registry domain) gives 12.77 % / −0.18 pp (audit CHK-006
+    FAIL). The 0.2 pp agreement is inside the ±1.14 pp datum band (C-12) and must
+    not be quoted as precision.
+  required_actions:
+  - replace 12.38/−0.57 everywhere in the draft; requote with a datum-propagated band
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V10.2:
+  audit_status: SUPPORTED
+  findings:
+  - 'Two quantities must not be conflated: the INTERPOLATION BOUNDARY elevation (17.08
+    m EVRF2019, the observed 2023-06-05 waterline, independently constrained by the
+    Rozumivka gauge at 16.88 m BS-77 AND by the historical level-area curve at ~17.1
+    m BS-77 for 2 192 km2) and the EXPOSURE DENOMINATOR (NPG 16.18 m EVRF2019, restricting
+    the domain to the reservoir at NPG as Table 21 does). The 2023 shoreline sat ~1
+    m ABOVE project NPG - the pool had been raised - so a constraint at NPG would
+    itself have been wrong. The unconstrained run is retained as an audit trail and
+    is used for no result.'
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V10.3:
+  audit_status: SUPPORTED
+  findings:
+  - '1 km blocks are PRIMARY, matched to the ~357 m median sounding spacing. 5 km
+    blocks are a STRESS TEST only: the fitted variogram range is ~2 km, so they hold
+    out cells beyond the correlation range of any training point and score extrapolation,
+    which no method can pass. Random holdout is an OPTIMISTIC reference because survey
+    lines put a near-twin of each held-out point in the training set. Residuals are
+    largest within 1-3 km of the corridor where the bed is steepest - a resolution
+    limit, not a bias.'
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V10.4:
+  audit_status: SUPPORTED
+  findings:
+  - 'The datum is EXCLUDED as a cause: overall bias -0.032 m, per-reach bias spans
+    only -0.105 to +0.102 m, and the elevation-dependent bias changes sign, which
+    no constant offset can do. Decisive against a blocked-CV artefact: the worst 20
+    residuals are as large under RANDOM hold-out (median |e| 14.54 m) as under blocked
+    (15.26 m), so the hold-out does not create them. NOT claimed: that this relief
+    is mathematically unrecoverable -- it cannot be reliably recovered FROM THE SOUNDING
+    POINTS ALONE BY AN ORDINARY UNCONSTRAINED INTERPOLATOR; adding the historical
+    channel axis, breaklines, hydrographic cross-sections or old charts as constraints
+    could do considerably better. The problem is under-determined by the present data,
+    not impossible.'
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V10.5:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - 'CRITICAL: this curve must NOT be used to condition the DEM. Table 21''s drying
+    area is arithmetically the same information -- A(NPG) - A(GMO) = 2155 - 1876 =
+    279 km2 equals Table 21''s summed reach drying area of 279 km2 exactly -- so conditioning
+    on A(H) would make the V10.1 validation circular. Kept as validation, deliberately
+    not as a constraint. The multi-level SATELLITE water-extent route was tested and
+    rejected: only one pre-breach polygon has usable coverage (2023-06-05, 17.08 m,
+    already the constraint in use), post-breach waterlines sit a median 1.69 km inside
+    the pre-breach shore with only 12% of their length within 500 m of it, and ICESat-2
+    profiles coincide with a usable polygon date on only 2 of 14 dates, each spanning
+    <15 km, so H(x) cannot be reconstructed.'
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V11.1:
+  audit_status: SUPPORTED
+  findings:
+  - Draft quotes 12.38/12.32 (stale); hist17 2026-09-13 gives 12.77/12.79/12.79.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+W1.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Land-cover probability, not a field measurement; the 2023/2024 composites include
+    post-breach scenes; probability ≥0.5 remains <1 %.
+  required_actions:
+  - DW 2025/2026 frames once EE quota allows
+  note: 'manual: audit_runs/20260918T175108Z/pilots/vegetation/out/summary.json'
+W1.2:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - Segment counts depend on track geometry per year; not an area.
+  note: 'manual: audit_runs/20260918T175108Z/pilots/vegetation/out/summary.json'
+X1.1:
+  audit_status: REVISE_UNCERTAINTY
+  findings:
+  - Historical reach boundaries are therefore NOT used in final statistics beyond
+    the merged 1+2 / 3 / 4 grouping, and reaches 1 and 2 are merged because the Babyne
+    boundary cannot be placed. Reach 5 lies outside the mapped domain.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+X2.1:
+  audit_status: NOT_TESTABLE
+  findings:
+  - Therefore NO claim of bed stability or bed change is made anywhere. The residual
+    structure after re-referencing (Theil-Sen of residual vs depth +0.0148 m/m, CI
+    [+0.0008, +0.0295]) sits inside the reference-level uncertainty and is not interpreted
+    as morphology.
+  note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
