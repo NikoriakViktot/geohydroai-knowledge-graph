@@ -68,6 +68,12 @@ CONTROL_STAGES = ("semantic_retrieval", "citation_expansion", "kg_expansion")
 CRITICAL_THESES = ("T09", "T10", "T14", "T15", "T16", "T17", "T22",
                    "T25", "T27", "T31", "T33")
 
+#: Theses kept in the evidence system but confined to the supplement (a
+#: future remote-sensing methods paper), decided 2026-09-19 so the manuscript
+#: keeps one scientific axis: vertical frame → WSE geometry → transition →
+#: reconstructed bed → hydraulic consequence of the surface transformation.
+SUPPLEMENT_ONLY_THESES = ("T35", "T36")
+
 
 #: What a control may be used for.
 #:

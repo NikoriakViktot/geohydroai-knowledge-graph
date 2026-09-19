@@ -191,3 +191,10 @@ def test_on_topic_min_other_is_configurable(theses):
     text = "ICESat-2 ATL13 was used to measure the water surface slope of the river."
     assert t.is_on_topic(text, min_other=2)
     assert not t.is_on_topic(text, min_other=5)
+
+
+def test_supplement_only_theses_exist_and_stay_in_block_k(theses):
+    from src.paper_3.theses import SUPPLEMENT_ONLY_THESES
+    by_id = {t.id: t for t in theses}
+    for tid in SUPPLEMENT_ONLY_THESES:
+        assert by_id[tid].block == "K"

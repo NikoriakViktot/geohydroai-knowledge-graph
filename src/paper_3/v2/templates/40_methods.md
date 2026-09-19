@@ -24,9 +24,9 @@ The reduction level of the S-57 soundings is tested by three routes: closure of 
 
 For the reservoir, the bed is interpolated from soundings only (ordinary kriging, inverse distance, linear and radial-basis interpolators) on a 250 m canonical grid, pinned at the observed 5 June 2023 shoreline, and scored by spatially blocked cross-validation at 1 km, matched to the median sounding spacing. For the downstream zones the same design is repeated with three arms — soundings only, soundings with Sentinel-2 shoreline soft constraints, and soundings with p18 pseudo-points — and the arm is chosen on the soundings-only score.
 
-## 4.7 Sentinel-2 indices and surface classes
+## 4.7 Sentinel-2 indices, surface classes and Sentinel-1 water masks
 
-Seven indices are computed per date on the 20 m registry grid with the BOA offset applied and scene-classification masking; the ten-class rule uses NDVI thresholds of 0.15 and 0.30, NDMI 0.10 and BSI 0.10 with morphological cleaning. Classes are: open water, shallow or mixed water, wet sediment, dry bare sediment, sparse herbaceous, dense herbaceous, reed or flooded vegetation, built surface and ambiguous. Shrub and tree cover are not separable from herbaceous cover by these indices alone.
+Seven indices are computed per date on the 20 m registry grid with the BOA offset applied and scene-classification masking; the ten-class rule uses NDVI thresholds of 0.15 and 0.30, NDMI 0.10 and BSI 0.10 with morphological cleaning. Classes are: open water, shallow or mixed water, wet sediment, dry bare sediment, sparse herbaceous, dense herbaceous, reed or flooded vegetation, built surface and ambiguous. Shrub and tree cover are not separable from herbaceous cover by these indices alone. Sentinel-1 water masks use an anchored two-class discriminant on VV/VH validated against optical water; the variants tested and rejected are described in Supplementary Methods S2 and play no part in the argument of this paper.
 
 ## 4.8 Vegetation succession and first-event timing
 
@@ -40,14 +40,10 @@ Dynamic World annual composites (2022–2024) supply the trees-plus-shrub probab
 
 {{claim:K1.2}}. On each date the water mask is intersected with each transect; the wetted width, the main-arm width and the number of arms are recorded, and dates are compared at matched Kherson stage.
 
-## 4.11 Sentinel-1 water masks
+## 4.11 Roughness translation
 
-The baseline classifier is an anchored two-class Fisher discriminant on VV and VH with a midpoint cut and a 0.05 km² sieve. Variants add speckle filtering, majority filtering, minimum mapping units, same-orbit change detection, a terrain veto from FABDEM slope and height above nearest water, and — in a pilot — a logistic and a random-forest rejection stage evaluated leave-one-orbit-out against optical water.
+Each pixel of a state map (breach 2023, first exposure 2023, 2024, 2025, and for the floodway 2026) is assigned one of eleven roughness classes from its surface class, hydroperiod and Dynamic World woody probability, and each class carries a low, base and high Manning n from published priors (Table 5). Area-weighted n and the change between states are computed per zone. The product is a hydraulically interpreted roughness layer derived from mapped surface classes; no hydraulic observation enters this step and no value is a calibrated Manning coefficient.
 
-## 4.12 Roughness translation
-
-Each pixel of a state map (breach 2023, first exposure 2023, 2024, 2025, and for the floodway 2026) is assigned one of eleven roughness classes from its surface class, hydroperiod and Dynamic World woody probability, and each class carries a low, base and high Manning n from published priors (Table 5). Area-weighted n and the change between states are computed per zone. No hydraulic observation enters this step.
-
-## 4.13 Statistical rules
+## 4.12 Statistical rules
 
 Every statistic names its independent unit. Absence statements about the literature are made only for a screened sample with a stated denominator, and only after retrieval has been validated against hold-out controls.

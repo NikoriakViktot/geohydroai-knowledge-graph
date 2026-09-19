@@ -653,7 +653,7 @@ claims:
     n: "{n_pre_events} pre-breach events"
     status_source: manual
     audit_status: SUPPORTED_WITH_LIMITATION
-    manuscript_section: "5.16 Sentinel-1 classifier validation"
+    manuscript_section: "S2 (supplement)"
     article_thesis: AT11
     literature_thesis_ids: [T35, T36]
     scientific_caveat: "Methods/negative-results block; M3 remains the baseline; change-detection variants fail the recall guard in all zones."
@@ -668,7 +668,7 @@ claims:
     n: "{n_pairs} S1×S2 pairs; prevalence {prevalence:.4f}"
     status_source: manual
     audit_status: SUPPORTED_WITH_LIMITATION
-    manuscript_section: "5.16"
+    manuscript_section: "S2 (supplement)"
     article_thesis: AT11
     literature_thesis_ids: [T35, T36]
     scientific_caveat: "3 of 5 orbit folds low-confidence; cross-orbit generalisation within one event, not to the next flood."
@@ -721,6 +721,7 @@ overrides:
 
 article_theses:
   - id: AT1
+    scope: main
     thesis: "A hydraulic regime transition occurred within the former reservoir footprint: per-overpass longitudinal slope near-zero → persistently positive (~+3.3 cm/km), present during drawdown and persisting through 2025."
     claims: [M1.1, M1.2, M1.3, M1.4, V7.2]
     literature_layers: "K: LK1.1; T: LT1.1, LT1.2; D: LD1.1"
@@ -728,6 +729,7 @@ article_theses:
     tables: "T3"
     publication_readiness: "ready with limitation wording; P1 channel control"
   - id: AT2
+    scope: main
     thesis: "Water-surface geometry (slope + within-overpass heterogeneity) is a stronger indicator than water area; extent-based fragmentation contrasts are coverage-confounded."
     claims: [M2.1, M3.1, M3.2, C-02, C-03]
     literature_layers: "K: LK1.2; T: LT1.2"
@@ -735,6 +737,7 @@ article_theses:
     tables: "T3"
     publication_readiness: "ready if fragmentation is descriptive without counts"
   - id: AT3
+    scope: main
     thesis: "SWOT and ICESat-2 agree at the cm level only under close temporal collocation; SWOT enters only downstream at Kherson; the 2023 surge is recorded by the estuary posts."
     claims: [V2.1, V3.1, V4.1, V4.2, G3.1]
     literature_layers: "D: LD1.1, LD1.2"
@@ -742,6 +745,7 @@ article_theses:
     tables: "T2;T1"
     publication_readiness: "ready as validation block"
   - id: AT4
+    scope: main
     thesis: "Cross-sensor interpretation requires explicit vertical-reference harmonisation: one EPSG:9902 grid, EGG2015, permanent tide handled, station correctors that do not transfer."
     claims: [V1.1, V1.2, V1.3, G1, G2, C-11, V5.1, V6.2]
     literature_layers: "D: LD1.2, LD1.3"
@@ -749,6 +753,7 @@ article_theses:
     tables: "T2"
     publication_readiness: "blocked by G2 citation"
   - id: AT5
+    scope: main
     thesis: "Legacy soundings and design documentation constrain both ends: the 1970 free surface bounds pre-breach slopes; the bed reconstruction (ZONE_1 hist14; ZONE_2/3/4 p28 soundings-only) reproduces the historical drawdown exposure within a datum band; shoreline-contour constraints do not help."
     claims: [V6.1, V6.2, V7.1, V7.2, V10.1, V10.2, V10.3, V10.4, V10.5, V11.1, X1.1, X2.1, B2.1, B2.2, B2.3, B3.1, B3.2, I1.1, I1.2, C-04, C-05, C-16]
     literature_layers: "K: LK1.3; D: LD1.4"
@@ -756,6 +761,7 @@ article_theses:
     tables: "T3;T7"
     publication_readiness: "P0: update exposure numbers, regenerate V12/V13/V15, propagate datum band"
   - id: AT6
+    scope: main_limitation
     thesis: "The slope–discharge relationship after the breach is NOT TESTABLE (no 2024–2025 discharge overlap)."
     claims: [C-14]
     literature_layers: "T: LT1.2"
@@ -763,6 +769,7 @@ article_theses:
     tables: ""
     publication_readiness: "limitation statement only"
   - id: AT7
+    scope: main_blocked
     thesis: "Literature positioning in three layers (Kakhovka novelty / physical precedent / method validity)."
     claims: []
     literature_layers: "K/T/D"
@@ -770,6 +777,7 @@ article_theses:
     tables: "T4"
     publication_readiness: "blocked: acceptance gate NOT READY"
   - id: AT8
+    scope: main
     thesis: "The exposed bed revegetated within two seasons (27 → 72 → 84 % of the former water surface), with reed peaking in 2024 and woody cover emerging by 2024–2025; ICESat-2 gives canopy-height distributions but no change."
     claims: [S1.1, S1.1a, S1.1b, S1.2, S1.2a, S1.2b, S1.3, S1.4, S1.5, W1.1, W1.2, H1.1, H1.2]
     literature_layers: "K: LK2.1; D: LD2.1"
@@ -777,6 +785,7 @@ article_theses:
     tables: "T6;T1"
     publication_readiness: "ready as area/transition series; no accuracy statement (T27)"
   - id: AT9
+    scope: main
     thesis: "The channel below the dam is wider after the breach at matched stage (+~100 m, main arm 500 → 560 m) with transient braiding in June 2023."
     claims: [K1.1, K1.1a, K1.1b, K1.2]
     literature_layers: "T: LT2.1"
@@ -784,16 +793,18 @@ article_theses:
     tables: "T3"
     publication_readiness: "ready with contour≠bank caveat"
   - id: AT10
-    thesis: "Translated through literature priors, the area-weighted roughness of the former pool doubles (n 0.032 → 0.063) by 2025; the floodway also roughens; no hydraulic calibration exists."
+    scope: main_secondary
+    thesis: "Translated through literature priors, the mapped surface classes of the former pool imply roughly twice the area-weighted flow resistance by 2025 (a derived roughness layer, not a calibrated Manning coefficient); the floodway also roughens; no hydraulic calibration exists."
     claims: [N1.1, N1.1a, N1.1b, N1.2, N1.2a, N1.3, N1.4, N1.4a]
     literature_layers: "T: LT2.1; D: LD2.1"
     figures: "F10"
     tables: "T5;T6"
     publication_readiness: "ready as translation; calibration = P2"
   - id: AT11
+    scope: supplement_only
     thesis: "Over freshly exposed sediment an anchored single-date SAR discriminant is the usable baseline; change detection fails recall; false water is land-cover conditioned and needs a rejection stage."
     claims: [R1.1, R1.2, R1.3, C-17, C-18, C-19, C-20, C-21, C-22]
     literature_layers: "D: LD2.1"
     figures: "S-P31"
     tables: ""
-    publication_readiness: "methods / negative results"
+    publication_readiness: "supplement_only / future RS paper — methods and negative results"

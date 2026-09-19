@@ -224,7 +224,7 @@ def build(snapshot_dir: Path = snapshot.SNAPSHOT_DIR,
             raise KeyError(f"{at['id']}: claims not in registry: {missing}")
         sub = evidence[evidence.claim_id.isin(at["claims"])]
         at_rows.append({
-            "article_thesis_id": at["id"], "thesis": at["thesis"],
+            "article_thesis_id": at["id"], "scope": at.get("scope", "main"), "thesis": at["thesis"],
             "claim_ids": ";".join(at["claims"]),
             "literature_layers": at.get("literature_layers", ""),
             "n_claims": len(sub),

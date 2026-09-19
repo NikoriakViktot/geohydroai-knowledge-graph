@@ -1,6 +1,6 @@
 # 2. STUDY AREA AND OBSERVATION GEOMETRY
 
-The study system is registered in four analysis zones defined once in a geometry registry and loaded by every script: ZONE_1 (the former reservoir and the lower Dnipro, 11 412 km², with the 2 144 km² reservoir core), ZONE_2 (the Kherson delta, 1 677 km²), ZONE_3 (the Dnipro–Buh estuary, 7 621 km²) and ZONE_4 (the dam-to-Kherson floodway, defined as the June 2023 Sentinel-1 flood envelope plus a 1 km buffer, 695 km²). Chainage for the reservoir profiles is measured from the dam along a reservoir-axis centreline; the historical reach boundaries of the design documentation are placed on it where tie points allow ({{claim:X1.1}}), and reach 5 lies outside the mapped domain. SWOT's calibration-phase orbit never covered the pool, so SWOT enters this study only downstream at Kherson.
+The study system is registered in four analysis zones defined once in a geometry registry and loaded by every script: ZONE_1 (the former reservoir and the lower Dnipro, 11 412 km², with the 2 144 km² reservoir core), ZONE_2 (the Kherson delta, 1 677 km²), ZONE_3 (the Dnipro–Buh estuary, 7 621 km²) and ZONE_4 (the dam-to-Kherson floodway, defined as the June 2023 Sentinel-1 flood envelope plus a 1 km buffer, 695 km²). Chainage for the reservoir profiles is measured from the dam along a reservoir-axis centreline; the historical reach boundaries of the design documentation are placed on it where tie points allow — a limitation, since only two of five ties are usable ({{claim:X1.1}}) — and reach 5 lies outside the mapped domain. SWOT's calibration-phase orbit never covered the pool, so SWOT enters this study only downstream at Kherson.
 
 {{pending:FIG01|Figure 1 — study system, gauges, zones, ICESat-2 tracks by period, SWOT coverage|backs=V1.3,M1.1|section=2 Study area|produces=SWOT-DNIPRO scripts (V0 gauge network + SFig01 + Fig12 composite)|status=not_started|blocks_submission=yes}}
 
@@ -20,11 +20,11 @@ SWOT PIXC and RiverSP granules over Kherson (cycles 482, 511 and 521, April–Ma
 
 ## 3.4 Sentinel-2 and Sentinel-1
 
-Sentinel-2 L2A scenes were processed on a 20 m registry grid (EPSG:32636) with the BOA additive offset applied, into seven indices (NDVI, NDWI, MNDWI, NDMI, BSI, AWEIsh, NDTI), a ten-class surface classification and regime composites per zone; 53 dates cover the former pool. Sentinel-1 RTC γ⁰ (VV, VH) was classified with an anchored two-class discriminant and its variants (Section 4.11). Dynamic World annual composites for 2022–2024 and FABDEM-derived slope and height-above-nearest-water complete the surface layers.
+Sentinel-2 L2A scenes were processed on a 20 m registry grid (EPSG:32636) with the BOA additive offset applied, into seven indices (NDVI, NDWI, MNDWI, NDMI, BSI, AWEIsh, NDTI), a ten-class surface classification and regime composites per zone; 53 dates cover the former pool. Sentinel-1 RTC γ⁰ (VV, VH) supplies the water masks for the channel transects (Section 4.7; Supplementary Methods S2). Dynamic World annual composites for 2022–2024 and FABDEM-derived slope and height-above-nearest-water complete the surface layers.
 
 ## 3.5 Legacy hydrography
 
-Eight photographed pages of the Dnipro reservoirs monograph (Tables 19–21, Figures 13–16) and 7 514 S-57 chart soundings, whose survey epoch is unrecorded ({{claim:X2.1}}), are the historical sources. Which reduction level the soundings carry is not stated in the source and is established in Section 5.7.
+Eight photographed pages of the Dnipro reservoirs monograph (Tables 19–21, Figures 13–16) and 7 514 S-57 chart soundings are the historical sources; the survey epoch of the soundings is unrecorded, a limitation that rules out any rate of bed change ({{claim:X2.1}}). Which reduction level the soundings carry is not stated in the source and is established in Section 5.7.
 
 ## 3.6 Geodetic reference data
 

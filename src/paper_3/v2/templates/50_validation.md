@@ -54,10 +54,6 @@ In the delta, estuary and floodway the soundings-only arm wins in every zone: {{
 
 {{table:T7}}
 
-## 5.14 Sentinel-1 classifier validation
+## 5.14 Validation synthesis
 
-{{claim:R1.1}}. Every change-detection variant fails the new-water recall guard in all four zones because the pre-event reference over bare sediment is itself dark. {{claim:R1.2}}. {{claim:R1.3}}.
-
-## 5.15 Validation synthesis
-
-Six independent checks were performed before any hydraulic or surface result was interpreted; one (the 5 April 2023 anomaly) failed and is reported as failed. The class maps of Section 6.9 have no accuracy assessment yet, and the roughness values of Section 6.12 have no hydraulic calibration; both are stated as such wherever they are used.
+Six independent checks were performed before any hydraulic or surface result was interpreted; one (the 5 April 2023 anomaly) failed and is reported as failed. The surface-class maps of Section 6.9 have no accuracy assessment yet — the 320-point stratified sample is unlabelled — and the roughness layer has no hydraulic calibration; both are stated as such wherever they are used, and the Sentinel-1 classifier study is confined to Supplementary Methods S2.
