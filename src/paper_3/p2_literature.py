@@ -48,6 +48,10 @@ PRECEDENTS = {
     "kuzemko2025": "10.15407/ukrbotj82.05.488",
 }
 ABSTRACT_FALLBACK_FAMILIES = 3
+#: Density gate on the distinguishing family (same constants as briefs.discovery):
+#: a paper that names "Manning" once in a parameter table is not about roughness.
+MIN_PRIMARY_OCCURRENCES = 4
+MIN_PRIMARY_PER_10K = 1.5
 CROSSREF_MIN_SCORE = 88
 _CROSSREF = "https://api.crossref.org/works"
 _UA = "GeoHydroAI/paper_3 (mailto:nikoriakviktor@gmail.com)"
@@ -63,13 +67,35 @@ def paper2_theses() -> list[Thesis]:
 
 # ── 1. corpus scan ───────────────────────────────────────────────────────────
 
+def primary_density(thesis: Thesis, text: str) -> tuple[int, float]:
+    """(occurrences, per 10k chars) of the distinguishing family in the text."""
+    low = text.lower()
+    occ = sum(low.count(term.lower()) for term in thesis.primary_family)
+    return occ, occ * 10_000 / max(len(low), 1)
+
+
+def passes_density(thesis: Thesis, text: str) -> bool:
+    occ, per10k = primary_density(thesis, text)
+    return occ >= MIN_PRIMARY_OCCURRENCES and per10k >= MIN_PRIMARY_PER_10K
+
+
 def matched_theses(text: str, theses: list[Thesis], abstract_mode: bool = False) -> list[str]:
-    """Thesis ids whose on-topic rule the text satisfies (pure)."""
+    """Thesis ids the text is genuinely about (pure).
+
+    Full text: the on-topic rule *and* the density gate on the distinguishing
+    family. Abstract: the distinguishing family plus two further families, or
+    three families with the primary present — one mention is never enough.
+    """
     hits = []
     for t in theses:
         if t.has_negative(text):
             continue
-        if t.is_on_topic(text) or (abstract_mode and t.families_hit(text) >= ABSTRACT_FALLBACK_FAMILIES):
+        if abstract_mode:
+            ok = t.primary_hit(text) and (t.is_on_topic(text, min_other=2)
+                                          or t.families_hit(text) >= ABSTRACT_FALLBACK_FAMILIES)
+        else:
+            ok = t.is_on_topic(text) and passes_density(t, text)
+        if ok:
             hits.append(t.id)
     return hits
 
@@ -88,13 +114,15 @@ def scan_corpus(theses: list[Thesis], normalized_dir: Path) -> pd.DataFrame:
             continue
         hit = matched_theses(text, theses)
         if hit:
-            rows.append({"paper_id": f.stem, "doi": normalize_doi(str(paper.get("doi") or "")),
-                         "title": str(paper.get("title") or "")[:200],
-                         "year": paper.get("year") or "", "matched_thesis_ids": ";".join(hit),
-                         "n_families_max": max(t.families_hit(text) for t in theses if t.id in hit)})
+            meta = paper.get("metadata") or {}
+            rows.append({"paper_id": f.stem, "doi": normalize_doi(str(meta.get("doi") or paper.get("doi") or "")),
+                         "title": str(meta.get("title") or paper.get("title") or "")[:200],
+                         "year": meta.get("year") or paper.get("year") or "", "matched_thesis_ids": ";".join(hit),
+                         "n_families_max": max(t.families_hit(text) for t in theses if t.id in hit),
+                         "primary_per_10k": round(max(primary_density(t, text)[1] for t in theses if t.id in hit), 2)})
         if i % 1000 == 0:
             logger.info("corpus scan %d/%d — %d on-topic so far", i, len(files), len(rows))
-    return pd.DataFrame(rows, columns=["paper_id", "doi", "title", "year", "matched_thesis_ids", "n_families_max"])
+    return pd.DataFrame(rows, columns=["paper_id", "doi", "title", "year", "matched_thesis_ids", "n_families_max", "primary_per_10k"])
 
 
 # ── 2. precedent references ─────────────────────────────────────────────────
@@ -249,7 +277,7 @@ def render_report(in_corpus: pd.DataFrame, refs: pd.DataFrame, cands: pd.DataFra
     if len(in_corpus):
         per = in_corpus.matched_thesis_ids.str.split(";").explode().value_counts()
         lines += [f"- {t}: {n}" for t, n in per.items()] + [""]
-        for r in in_corpus.sort_values("n_families_max", ascending=False).head(40).itertuples():
+        for r in in_corpus.sort_values("primary_per_10k", ascending=False).head(60).itertuples():
             lines.append(f"- [{r.matched_thesis_ids}] {r.title} ({r.year}) doi:{r.doi} — `{r.paper_id}`")
     lines += ["", f"## 2. Precedent references: {len(refs)} entries", ""]
     if len(refs):

@@ -993,6 +993,22 @@
       source_of_control: external_search
       manually_checked: false
       note: "Didukh et al. 2024, Chornomorski Bot J — first year of floodplain forest on the former Kakhovka bed (Salix × rubens)."
+    - doi: "10.15421/012528"
+      role: development
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: hard
+      source_of_control: external_search
+      manually_checked: false
+      note: "Hemeroby / spectral-index Procrustean analysis of the Kakhovka bed transformation (SRC-19; found in corpus 2026-09-19 by the T25 density scan)."
+    - doi: "10.30970/sbi.1903.838"
+      role: holdout
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: hard
+      source_of_control: external_search
+      manually_checked: false
+      note: "Tutova et al. 2025, Studia Biologica — afforestation and ecosystem-service recovery through willow/poplar communities (SRC-20; in corpus)."
   expected_relations: [SUPPORTS, ANALOGUE, METHOD_RELEVANT]
   manuscript_anchor: "6.9 Vegetation succession on the exposed bed"
   numeric_anchor: "84 %"
