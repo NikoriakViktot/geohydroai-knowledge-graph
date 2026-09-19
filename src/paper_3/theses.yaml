@@ -1369,6 +1369,43 @@
       source_of_control: external_search
       manually_checked: false
       note: "Nepf 2012 — flow and transport in regions with aquatic vegetation."
+    - doi: "10.5194/isprs-archives-xlviii-3-2024-251-2024"
+      role: holdout
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: expert_known
+      manually_checked: true
+      quote: "The Manning roughness coefficient value is assumed to be 0.025 for bare ground, 0.08 for trees, 0.04 for water, 0.05 for crops, 0.03 for urban, 0.05 for wet, and 0.035 for no data"
+      section: "Methodology, HEC-RAS model set-up"
+      supports_what: >
+        That a land-cover-class lookup for Manning n is the established way to
+        parameterise a HEC-RAS model of THIS dam break: Kadam et al. run 1D and 2D
+        unsteady HEC-RAS on an ALOS DEM and report 300 m breach Qpeak 35 962 m3/s
+        with 823 km2 inundated, 600 m breach 48 466 m3/s with 873 km2, and 681 km2
+        from the 1D run.
+      does_not_support: >
+        Any statement about how roughness CHANGED after the breach: the class
+        values are a single static assumption, there is no post-breach land-cover
+        series, no calibration against observed stage and no uncertainty on n.
+      note: "Kadam et al. 2024, ISPRS Archives XLVIII-3. READ 2026-09-19. The HEC-RAS modelling of the Kakhovka breach is therefore NOT new; Paper 2 must claim the evolving roughness and the current-state model, not the breach simulation."
+    - doi: "10.59490/jcrfr.2024.0016"
+      role: development
+      relevance: direct
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: expert_known
+      manually_checked: true
+      quote: "The Manning value varied in the model based on land-use data (ESRI Land Cover, Sentinel 2, 10 m resolution)"
+      section: "Model set-up"
+      supports_what: >
+        That deriving a spatially varying Manning field from a satellite land-cover
+        product for the Kakhovka breach has already been done (Tygron platform,
+        near-real-time, reservoir modelled as a 2 155 km2 storage).
+      does_not_support: >
+        A multi-year roughness series: the land cover is one static ESRI snapshot,
+        and the Manning value is additionally raised ad hoc "to account for debris".
+      note: "Agerbeek et al. 2024, J. Coastal and Riverine Flood Risk 3:16. READ 2026-09-19."
   expected_relations: [SUPPORTS, METHOD_RELEVANT]
   manuscript_anchor: "6.12 Roughness translation"
   numeric_anchor: "0.063"
@@ -1428,6 +1465,23 @@
       source_of_control: external_search
       manually_checked: false
       note: "2004, River Research and Applications — cyclic floodplain rejuvenation on the Rhine: effects on flood levels and biodiversity (not OA)."
+    - doi: "10.1080/02508060.2023.2247679"
+      role: development
+      relevance: analogue
+      expected_stage: semantic_retrieval
+      difficulty: easy
+      source_of_control: expert_known
+      manually_checked: true
+      quote: "The destruction of the Kakhovka dam and its consequences"
+      section: "whole viewpoint"
+      supports_what: >
+        The foundational description of the event and its consequences, and the
+        source of the desert/dust-storm scenarios that the vegetation literature
+        (Didukh 2024) later tested against observation.
+      does_not_support: >
+        Any roughness, conveyance or hydraulic-model statement: it is a viewpoint
+        article, not a modelling study.
+      note: "Vyshnevskyi et al. 2023, Water International. READ 2026-09-19."
   expected_relations: [SUPPORTS, ANALOGUE]
   manuscript_anchor: "7.6 Conveyance implications"
   numeric_anchor: "0.032 → 0.063"

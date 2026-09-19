@@ -891,6 +891,11 @@ article_theses:
     paper: 2
     scope: main
     status: NOT_YET_SUPPORTED
+    novelty_boundary: >
+      Deriving Manning n from a satellite land-cover product is established for
+      this very site (Kadam 2024; Agerbeek 2024). The claim here is the CHANGE of
+      the area-weighted roughness across states as the succession proceeds, which
+      a single static land-cover snapshot cannot express.
     thesis: "Vegetation succession materially changes hydraulic resistance relative to bare/exposed-bed conditions."
     claims: [N1.1, N1.1b, S1.1]
     literature_layers: "T: LT2.1; D: LD2.1"
@@ -901,6 +906,13 @@ article_theses:
     paper: 2
     scope: main
     status: NOT_YET_SUPPORTED
+    novelty_boundary: >
+      Hydraulic modelling of the breach flood itself is NOT available as a claim:
+      Kadam et al. 2024 (HEC-RAS 1D+2D, class-based n, 823 km2 at a 300 m breach),
+      Agerbeek et al. 2024 (Tygron, ESRI land-cover n) and Shumilova et al.
+      (Flow-3D, single n = 0.035, 29 000 m3/s inflow) have each modelled it. What
+      none of them has is a CURRENT-state model on a vegetated bed with a
+      time-resolved roughness field, which is what this thesis must claim.
     thesis: "The current channel/floodplain configuration changes conveyance and stage relative to the pre-breach state under matched discharges."
     claims: []
     literature_layers: "T: LT1.1"
