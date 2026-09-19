@@ -41,3 +41,7 @@ Each pixel of a state map (breach 2023, first exposure 2023, 2024, 2025; floodwa
 {{pending:OPEN62|HEC-RAS model description: pre-breach (legacy DniproGES1D as comparison only; new 1D on Table 20 backwater profiles) and current (2D on Paper 1 terrain + roughness layer)|backs=P2-AT01,P2-AT03|section=4.5 Hydraulic models|produces=SWOT-DNIPRO pilots/roughness + HEC-RAS project|blocks_submission=yes}}
 
 Calibration uses only the legacy backwater profiles, historical levels and the Kherson gauge. Validation uses the per-overpass ICESat-2 slopes and within-overpass heterogeneity of the companion paper and the observed channel width; none of these enters calibration. Roughness sensitivity runs use n_low, n_base and n_high per class.
+
+## 3.6 Canopy height by surface class
+
+Height is not roughness, but it is the observable that says whether a class called "young woody" is woody at all. On a season-matched window GEDI gives {{claim:H2.1a}} for the dense young woody class in 2024 against {{claim:H2.1}} a year later ({{claim:H2.1.unc}}; n = {{claim:H2.1.n}}), while the bare and open-water classes do not move. Cross-checked against ICESat-2 on shared cells the two sensors agree on direction but not level — {{claim:H2.2}} — so canopy height is used here as support for the class assignment and never as an input to the coefficient ({{claim:H2.2.caveat}}).

@@ -37,6 +37,8 @@ The quantities that change first and persist — slope and within-overpass heter
 
 ## 7.9 Limitations
 
+A limitation of the delivered terrain must be stated plainly rather than averaged away: {{claim:B8.2}}, while FABDEM agrees with GEDI to within half a metre over the same ground ({{claim:B8.2.caveat}}). The pooled accuracy of Section 5.11.1 does not see it, because the night-time validation points do not fall there. The terrain is not fit to carry a hydraulic model until the seam is repaired.
+
 The channel-restricted slope control is underpowered ({{claim:M1.4}}). The slope–discharge relation after the breach is not testable: {{claim:C-14}}. The survey epoch of the soundings is unrecorded ({{claim:X2.1}}), the Baltic realisation of the historical tables is unstated, three co-located SWOT–ICESat-2 overpasses exist, and no wind record covers the 5 April 2023 anomaly. The 1′×1′ EGG2015 raster has no citable upstream source; this is a citation problem, not a numerical one, and it blocks submission until resolved. {{pending:OPEN99|EGG2015 provenance (G2) unresolved|backs=G2|section=7.9 Limitations|unblock_by=obtain the 1′ EGG2015 grid with licence, or re-run on the public 10′×15′ grid and report the difference|blocks_submission=yes}}
 
 # 8. CONCLUSIONS

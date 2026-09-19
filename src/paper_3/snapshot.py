@@ -150,6 +150,14 @@ SNAPSHOT_FILES: tuple[tuple[str, str], ...] = (
     ("swot", "outputs/tables/p61_pool_level_snapshots.csv"),
     ("swot", "outputs/tables/p61_swot_vs_kasperivka.csv"),
     ("swot", "outputs/tables/p61_yi2025_reservoir_area.csv"),
+    # p62 GEDI (2026-09-19): a second, orthogonal check on the delivered terrain
+    # and the field support for the roughness classes — plus the seam defect it found.
+    ("swot", "outputs/tables/p62_gedi_ground_accuracy.csv"),
+    ("swot", "outputs/tables/p62_gedi_canopy_by_class.csv"),
+    ("swot", "outputs/tables/p62_gedi_canopy_matched_window.csv"),
+    ("swot", "outputs/tables/p62_gedi_vs_icesat2_cells.csv"),
+    ("swot", "outputs/tables/p62_gedi_growth_paired.csv"),
+    ("swot", "config/roughness_classes.yaml"),
     # geometry registry
     ("swot", "config/spatial_domains.yaml"),
 )

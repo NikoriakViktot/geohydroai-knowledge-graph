@@ -42,3 +42,9 @@ Restricted to the pool the roughness change is a statement about one water body;
 ## 5.8 Roughness uncertainty
 
 {{pending:OPEN66|Stage/conveyance response to n_low / n_base / n_high per class (manning_n_scenarios.csv from make_manning_scenarios.py, not yet run)|backs=P2-AT05|section=5.8 Roughness uncertainty|produces=SWOT-DNIPRO audit_runs/20260918T175108Z/tools/make_manning_scenarios.py|blocks_submission=yes}}
+
+{{table:P2-T1}}
+
+Figure P2-4 shows the area-weighted value against the spread of the class priors that produce it.
+
+{{table:P2-T2}}

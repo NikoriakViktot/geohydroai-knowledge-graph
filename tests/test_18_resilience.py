@@ -128,6 +128,17 @@ def test_non_pdf_bytes_raise_pdf_io_error(tmp_path: Path):
         extract_pages_text(fake)
 
 
+def test_page_geometry_helpers_raise_pdf_io_error_on_bad_bytes(tmp_path: Path):
+    """Facade additions for the yearbook extractor fail the same named way."""
+    from src.document.pdf_io import (PdfIOError, extract_page_tables,
+                                     extract_page_text, extract_page_words)
+    fake = tmp_path / "fake.pdf"
+    fake.write_bytes(b"%PDF-1.4 but nothing else")
+    for fn in (extract_page_text, extract_page_words, extract_page_tables):
+        with pytest.raises(PdfIOError):
+            fn(fake, 1)
+
+
 def test_corrupt_parquet_detected(tmp_path: Path):
     import pyarrow.parquet as pq
     bad = tmp_path / "regions.parquet"

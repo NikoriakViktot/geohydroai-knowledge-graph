@@ -867,7 +867,7 @@ claims:
     article_thesis: AT7
     figure_id: F14
     table_id: T7
-    scientific_caveat: "Accuracy is strongly land-cover dependent: cropland RMSE 0.52 m against 3.16 m under tree cover, where the residual is canopy, not terrain error."
+    scientific_caveat: "Accuracy is strongly land-cover dependent: cropland RMSE 0.52 m against 3.16 m under tree cover, where the residual is canopy, not terrain error. The pooled figure also conceals a seam defect the night points do not reach (B8.2)."
     blocks_submission: "no"
   - id: D1.1
     paper: 1
@@ -947,6 +947,112 @@ claims:
     manuscript_section: "5.4"
     article_thesis: AT10
     literature_thesis_ids: [T33]
+    blocks_submission: "no"
+
+  # ── p62 GEDI. A second spaceborne lidar, with a different footprint and a
+  #    different failure mode, checking the same terrain — and finding a defect
+  #    in it that the ICESat-2 night validation did not reach.
+  - id: B8.1
+    paper: 1
+    family: bed_dem
+    claim_type: validation
+    statement: >
+      GEDI ground returns over the exposed bed confirm the delivered terrain
+      independently of ICESat-2, on the stratum chosen to match the ICESat-2
+      night comparison.
+    table: p62_gedi_ground_accuracy.csv
+    select: {stratum: "bare/sparse class + night + power  [comparable to p57 ICESat-2 night ground]"}
+    value: "bias {bias:+.3f} m, RMSE {RMSE:.2f} m, LE90 {LE90:.2f} m"
+    uncertainty: "NMAD {NMAD:.2f} m"
+    n: "{n} quality shots"
+    unit: m
+    status_source: manual
+    audit_status: SUPPORTED
+    manuscript_section: "5.11.2 A second lidar on the same terrain"
+    article_thesis: AT7
+    literature_thesis_ids: [T28, T30]
+    figure_id: F16
+    table_id: T8
+    spatial_domain: "exposed reservoir bed"
+    scientific_caveat: "GEDI's lowest-mode ground estimate sits about 0.6 m above ICESat-2 under vegetation, a known positive bias of the retrieval, so the agreement is of the same order as that offset rather than independent of it."
+    blocks_submission: "no"
+  - id: B8.2
+    paper: 1
+    family: bed_dem
+    claim_type: defect
+    statement: >
+      Using FABDEM as an external control, the seamed terrain is found to sit far
+      below it in two of its source classes: the gap-filled pool margin is a
+      pit, not a surface.
+    table: p62_gedi_ground_accuracy.csv
+    select: {stratum: "CONTROL FABDEM - GEDI, DEM source 5 pool gap fill"}
+    value: "gap-fill class {area_km2:.1f} km² lying {seamless_minus_FABDEM_median:.2f} m below FABDEM"
+    n: "{n} GEDI shots in the class"
+    unit: m
+    status_source: manual
+    audit_status: CONTRADICTED
+    manuscript_section: "7.9 Limitations"
+    article_thesis: AT7
+    figure_id: F16
+    scientific_caveat: "FABDEM agrees with GEDI to within half a metre over the same class, so the discrepancy is a defect of the seam, not of the control; the feathered class adds a further 133.1 km² at -4.36 m."
+    remaining_action: "repair the p55 seam before the terrain is used as a hydraulic model input; re-run B7.1 afterwards"
+    blocks_submission: "yes"
+  - id: H2.1
+    paper: 2
+    family: canopy
+    claim_type: transition
+    statement: >
+      On a season-matched window, GEDI canopy height rises in the woody classes
+      while the bare and open-water classes stand still, so the growth is in the
+      surface and not in the sampling.
+    table: p62_gedi_canopy_matched_window.csv
+    select: {year: "2025", manning_class: "young_woody_dense"}
+    value: "dense young woody rh98 {rh98_p50:.2f} m in 2025, {share_rh98_ge4m:.0%} of shots above 4 m"
+    uncertainty: "p90 {rh98_p90:.2f} m"
+    n: "{n_shots} shots"
+    unit: m
+    status_source: manual
+    audit_status: SUPPORTED_WITH_LIMITATION
+    manuscript_section: "5.3.1 Canopy height by surface class"
+    article_thesis: AT8
+    literature_thesis_ids: [T25, T28]
+    figure_id: P2-F7
+    table_id: P2-T2
+    time_period: "1 June - 9 July, 2024 and 2025"
+    scientific_caveat: "GEDI cannot resolve below its noise floor near 2.7 m, so the bare and water classes are floor values rather than measurements; the woody share also rose a few points in the control classes, which bounds the residual sampling effect."
+    blocks_submission: "no"
+  - id: H2.1a
+    paper: 2
+    family: canopy
+    claim_type: transition
+    statement: "The same class one year earlier on the same window."
+    table: p62_gedi_canopy_matched_window.csv
+    select: {year: "2024", manning_class: "young_woody_dense"}
+    value: "rh98 {rh98_p50:.2f} m in 2024, {share_rh98_ge4m:.0%} above 4 m"
+    n: "{n_shots} shots"
+    status_source: manual
+    audit_status: SUPPORTED_WITH_LIMITATION
+    manuscript_section: "5.3.1"
+    article_thesis: AT8
+    literature_thesis_ids: [T28]
+    blocks_submission: "no"
+  - id: H2.2
+    paper: 2
+    family: canopy
+    claim_type: comparison
+    statement: >
+      GEDI and ICESat-2 agree on the direction of woody expansion but not on its
+      level, so neither is used as a height measurement for the roughness layer.
+    table: p62_gedi_vs_icesat2_cells.csv
+    select: {year: "2025"}
+    value: "woody cells GEDI {gedi_cells_woody:.0%} vs ICESat-2 {icesat2_cells_woody:.0%} (Spearman {spearman_share:.2f})"
+    n: "{n_cells} shared 250 m cells"
+    status_source: manual
+    audit_status: SUPPORTED_WITH_LIMITATION
+    manuscript_section: "5.3.1"
+    article_thesis: AT8
+    literature_thesis_ids: [T28]
+    scientific_caveat: "A 25 m GEDI footprint is lit by a single tall shrub, so the two sensors are not measuring the same quantity; canopy height supports the class assignment but does not calibrate the roughness coefficient."
     blocks_submission: "no"
 
 overrides:

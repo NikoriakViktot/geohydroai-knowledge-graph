@@ -81,8 +81,30 @@ TABLE_SPECS: dict[str, dict] = {
            "claims": ["S1.5", "S1.1a", "S1.1b", "S1.1", "S1.2a", "S1.2b", "S1.2", "S1.3", "N1.2a", "N1.2", "W1.1"],
            "columns": ["claim_id", "claim_text", "value_resolved", "n_resolved", "audit_status"]},
     "T7": {"title": "Table 7. Bed-surface cross-validation and shoreline uncertainty by zone.",
-           "claims": ["V10.3", "V10.4", "B2.1", "B2.2", "B2.3", "B3.1", "B3.2", "I1.1", "I1.2"],
+           "claims": ["V10.3", "V10.4", "B2.1", "B2.2", "B2.3", "B6.1", "B3.1", "B3.2", "I1.1", "I1.2"],
            "columns": ["claim_id", "claim_text", "value_resolved", "n_resolved", "audit_status"]},
+    # The cross-validation above withholds soundings from a sounding-built surface.
+    # T8 is the test against an observation that entered none of it.
+    "T8": {"title": "Table 8. Independent validation of the reconstructed bed and of the delivered terrain "
+                    "against ICESat-2, by support and by product.",
+           "claims": ["B4.1", "B4.2a", "B4.2", "B4.3", "B7.1"],
+           "columns": ["claim_id", "claim_text", "value_resolved", "uncertainty_resolved", "n_resolved",
+                       "audit_status"]},
+    "T2": {"title": "Table 2. The vertical chain: each sensor's native frame, the correction applied, "
+                    "and the residual against the gauges.",
+           "claims": ["V1.1", "V1.2", "V2.1", "V3.1", "V4.1", "V4.2", "V5.1", "V6.1", "V6.2",
+                      "V7.1", "V7.2", "V8.1", "G1", "G2"],
+           "columns": ["claim_id", "claim_text", "value_resolved", "n_resolved", "audit_status"]},
+    "T4": {"title": "Table 4. The drawdown and the flood wave as observed from orbit.",
+           "claims": ["D1.1", "D2.1", "M1.2"],
+           "columns": ["claim_id", "claim_text", "value_resolved", "n_resolved", "audit_status"]},
+    "P2-T1": {"title": "Table P2-1. Area-weighted base roughness of the mapped surface by state "
+                       "(literature priors per class, not calibrated).",
+              "claims": ["N2.1a", "N2.1", "N1.1a", "N1.1b", "N1.1", "N1.2a", "N1.2", "N1.3", "N1.4", "N1.4a"],
+              "columns": ["claim_id", "claim_text", "value_resolved", "uncertainty_resolved", "audit_status"]},
+    "P2-T2": {"title": "Table P2-2. Channel geometry below the dam and the canopy layers.",
+              "claims": ["K1.1", "K1.1a", "K1.1b", "K1.2", "H1.1", "H1.2"],
+              "columns": ["claim_id", "claim_text", "value_resolved", "n_resolved", "audit_status"]},
 }
 
 

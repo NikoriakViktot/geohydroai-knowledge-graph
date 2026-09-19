@@ -1,11 +1,11 @@
 {
   "run_id": "20260916T092929Z",
-  "pulled_at": "2026-09-19T17:29:05+00:00",
+  "pulled_at": "2026-09-19T18:07:19+00:00",
   "repos": {
     "swot": {
       "path": "/home/niko/repo/SWOT-DNIPRO",
       "commit": "6bf0c4087545fdcd2fb6e107cfb71a14827d9710",
-      "dirty_paths": 430
+      "dirty_paths": 437
     },
     "icesat": {
       "path": "/home/niko/repo/icesat2-atl13-kakhovka",
@@ -13,7 +13,7 @@
       "dirty_paths": 18
     }
   },
-  "n_files": 153,
+  "n_files": 159,
   "missing_patterns": [],
   "files": [
     {
@@ -1079,6 +1079,48 @@
       "local_path": "swot/outputs/tables/p61_yi2025_reservoir_area.csv",
       "sha256": "7fe40bd4d2b33dcaed569b7c8eb1d0f395ebc43ae7a250577654809165f07577",
       "bytes": 268
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p62_gedi_ground_accuracy.csv",
+      "local_path": "swot/outputs/tables/p62_gedi_ground_accuracy.csv",
+      "sha256": "b5d82b3ecd5fb5cceab6ee9a7a19165614507c84011a8cb667aa61c23083f080",
+      "bytes": 3162
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p62_gedi_canopy_by_class.csv",
+      "local_path": "swot/outputs/tables/p62_gedi_canopy_by_class.csv",
+      "sha256": "2e34d31fe61370116a8b536734d89bea2c778116451069d1da9c0a850a758bdc",
+      "bytes": 3915
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p62_gedi_canopy_matched_window.csv",
+      "local_path": "swot/outputs/tables/p62_gedi_canopy_matched_window.csv",
+      "sha256": "e4447afa06fcd5fadf9f6bb7936406e979c40763dde764017717108d69a9c118",
+      "bytes": 766
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p62_gedi_vs_icesat2_cells.csv",
+      "local_path": "swot/outputs/tables/p62_gedi_vs_icesat2_cells.csv",
+      "sha256": "f1979d67018e6acec5640aa168602d2c772dc0652e9a3b9531b96699dbd5915a",
+      "bytes": 299
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p62_gedi_growth_paired.csv",
+      "local_path": "swot/outputs/tables/p62_gedi_growth_paired.csv",
+      "sha256": "9709b5ff0fc59d74fe75a5035fc1a5b3e6070fdb98e9d4f46cc02cb79ce84c9c",
+      "bytes": 243
+    },
+    {
+      "repo": "swot",
+      "rel_path": "config/roughness_classes.yaml",
+      "local_path": "swot/config/roughness_classes.yaml",
+      "sha256": "6c03d953a93eab750e2c9b4b1bbad957130f19c6bddcb440f218dcc46f6fd47e",
+      "bytes": 6690
     },
     {
       "repo": "swot",

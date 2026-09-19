@@ -57,8 +57,26 @@ B7.1:
   audit_status: SUPPORTED
   findings:
   - 'Accuracy is strongly land-cover dependent: cropland RMSE 0.52 m against 3.16
-    m under tree cover, where the residual is canopy, not terrain error.'
+    m under tree cover, where the residual is canopy, not terrain error. The pooled
+    figure also conceals a seam defect the night points do not reach (B8.2).'
   note: 'manual: outputs/tables/p57_dem_accuracy_night.csv'
+B8.1:
+  audit_status: SUPPORTED
+  findings:
+  - GEDI's lowest-mode ground estimate sits about 0.6 m above ICESat-2 under vegetation,
+    a known positive bias of the retrieval, so the agreement is of the same order
+    as that offset rather than independent of it.
+  note: 'manual: outputs/tables/p62_gedi_ground_accuracy.csv'
+B8.2:
+  audit_status: CONTRADICTED
+  findings:
+  - FABDEM agrees with GEDI to within half a metre over the same class, so the discrepancy
+    is a defect of the seam, not of the control; the feathered class adds a further
+    133.1 km² at -4.36 m.
+  required_actions:
+  - repair the p55 seam before the terrain is used as a hydraulic model input; re-run
+    B7.1 afterwards
+  note: 'manual: outputs/tables/p62_gedi_ground_accuracy.csv'
 C-01:
   audit_status: SUPPORTED
   findings:
@@ -434,6 +452,23 @@ H1.2:
   required_actions:
   - SlideRule photon pull on repeat RGTs, or accept as limitation
   note: 'manual: audit_runs/20260918T175108Z/pilots/icesat2/out/repeat_track_canopy_pairs_former_pool.csv'
+H2.1:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - GEDI cannot resolve below its noise floor near 2.7 m, so the bare and water classes
+    are floor values rather than measurements; the woody share also rose a few points
+    in the control classes, which bounds the residual sampling effect.
+  note: 'manual: outputs/tables/p62_gedi_canopy_matched_window.csv'
+H2.1a:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  note: 'manual: outputs/tables/p62_gedi_canopy_matched_window.csv'
+H2.2:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - A 25 m GEDI footprint is lit by a single tall shrub, so the two sensors are not
+    measuring the same quantity; canopy height supports the class assignment but does
+    not calibrate the roughness coefficient.
+  note: 'manual: outputs/tables/p62_gedi_vs_icesat2_cells.csv'
 I1.1:
   audit_status: SUPPORTED_WITH_LIMITATION
   note: 'manual: outputs/tables/p27_zone_shoreline_uncertainty.csv'
