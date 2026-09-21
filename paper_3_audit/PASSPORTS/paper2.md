@@ -16,8 +16,13 @@ The passport requirement is that these are **not** averaged together; they have 
 
 The independent test is the contribution: blocked cross-validation withholds soundings from a surface built of soundings and measures interpolation error only. ICESat-2 and GEDI entered none of the reconstruction.
 
-## 3. The defect that blocks submission
-Against FABDEM as an external control, the seam's gap-fill class — **30.8 km² — sits 21.75 m below it**, with a further 133.1 km² of feathered class at −4.36 m, while FABDEM and GEDI agree there to within half a metre. Recorded as `B8.2`, status CONTRADICTED. The pooled night-time accuracy does not see it because no validation point falls there. **The terrain is not fit to carry a hydraulic model until the seam is repaired**, which also blocks paper 5.
+## 3. The seam defect — found, and since repaired
+
+On 19 September, sampled against FABDEM as an external control, the seam's gap-fill class (30.8 km²) sat **21.75 m** below it and a feathered class of 133.1 km² sat 4.36 m below. Re-checked on 21 September after the repair: the gap-fill class no longer exists and the feathered class, now 59.6 km², agrees with FABDEM to **+0.02 m**. `B8.2` moves from CONTRADICTED to SUPPORTED and **no longer blocks submission, nor paper 5**.
+
+The pool bed still reads about −4.7 m against FABDEM over 2 144 km². That is not a seam error: FABDEM carries the pre-breach water surface there, and the reconstruction carries the dry bed. The difference is the drained depth, and it is the expected sign and magnitude.
+
+The episode is worth one sentence in the paper's methods: the defect was invisible to the night-time ICESat-2 validation because no validation point fell in those classes, and only an external control with independent coverage exposed it.
 
 ## 4. Borrowed foundation
 Paper 1: the vertical frame, and the finding that the S-57 soundings are reduced to the 14.00 m navigation drawdown level (V6.1) — a datum result established there and consumed here.
@@ -29,4 +34,4 @@ Error against ICESat-2 stratified by distance to the nearest sounding. The strat
 The soundings' survey epoch is unrecorded, so no rate of bed change can be stated and genuine 2019-22→2023-24 change sits inside the residual. Multi-level optical contours cannot constrain the shallow bed (reported as a negative result). Four fifths of the estuary rests on EMODnet, not on soundings.
 
 ## 7. Verdict
-**Sufficient evidence for the pool and the downstream beds; the merged terrain is blocked** by §3 until the seam is repaired and B7.1 re-run.
+**Sufficient evidence.** The pool, the downstream beds and — since the 21 September repair — the merged terrain all carry their own validation. B7.1 should be re-run on the repaired surface so the quoted accuracy describes what is actually shipped.

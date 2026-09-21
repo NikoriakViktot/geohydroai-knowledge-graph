@@ -1,5 +1,7 @@
 # 4. METHODS
 
+The harmonisation of Section 4.1 is the method of this paper, not preparation for it: the corrections between the four surfaces are of the same order as the hydraulic signal sought, so the result exists only if the frame does. Section 5 therefore tests the frame before Section 6 uses it.
+
 ## 4.1 Vertical harmonisation: the four surfaces
 
 Gauge stages are carried into EVRF2019 normal heights by the official EPSG:9902 operation, sampled from the production grid at each station ({{claim:V1.1}}); the offset is spatially varying, {{claim:V1.2}}, so no single national constant is admissible. ICESat-2 ATL13 heights are reduced with the EGG2015 quasigeoid after adding the ATL03 tide-free-to-mean-tide term, which moves the six-station corrector by {{claim:C-11}}. SWOT PIXC heights are reduced by subtracting the solid-earth, load and pole tides that the product supplies but does not apply, never the geoid field, and then by the same quasigeoid. The residual permanent-tide term between a mean-tide crust and a zero-tide quasigeoid (1–4 cm at this latitude) is carried as its own line in the uncertainty budget.
@@ -20,14 +22,11 @@ Heterogeneity is the within-overpass p95–p05 range of water-surface elevation 
 
 The reduction level of the S-57 soundings is tested by three routes: closure of the sounding-implied capacity curve against the published level–volume table, the elevation of the exposed bed under ICESat-2, and the published navigation drawdown level. The 1970 field-measured free-surface curve is digitised from the monograph figure and validated against the tabulated backwater profile.
 
-## 4.6 Bed reconstruction
 
-For the reservoir, the bed is interpolated from soundings only (ordinary kriging, inverse distance, linear and radial-basis interpolators) on a 250 m canonical grid, pinned at the observed 5 June 2023 shoreline, and scored by spatially blocked cross-validation at 1 km, matched to the median sounding spacing. For the downstream zones the same design is repeated with three arms — soundings only, soundings with Sentinel-2 shoreline soft constraints, and soundings with p18 pseudo-points — and the arm is chosen on the soundings-only score.
-
-## 4.7 Sentinel-2 water masks and shoreline contours
+## 4.6 Sentinel-2 water masks
 
 Water masks follow a frozen NDWI/MNDWI/scene-classification rule on the 20 m registry grid with the BOA offset applied; a coverage gate admits a date for the pre/post planform contrast only when at least 80 % of the footprint is observed, and both periods need three such dates before any inferential statistic is formed. Shoreline contours at three pre-breach levels are extracted with a sub-pixel marching-squares estimator whose numerical correctness was tested against an analytic field before use.
 
-## 4.8 Statistical rules
+## 4.7 Statistical rules
 
 Every statistic names its independent unit. Absence statements about the literature are made only for a screened sample with a stated denominator, and only after retrieval has been validated against hold-out controls.

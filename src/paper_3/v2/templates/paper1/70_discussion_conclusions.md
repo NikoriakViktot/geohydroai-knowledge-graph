@@ -1,9 +1,13 @@
-# 7. DISCUSSION
+# 7. INTERPRETATION
 
 
 Reaches released from an impoundment adjust in ways that are neither uniform nor immediate ({{cite:nichols2017}}), and incisional channels formed after dam removal widen and narrow through migrating fronts rather than settling monotonically ({{cite:cantelli2004}}; {{cite:cantelli2007}}).
 
-## 7.1 From a reservoir-like to a river-dominated regime
+## 7.1 From an impounded to a river-dominated state
+
+A pool held at a normal impoundment level has no longitudinal gradient to speak of: its surface is set by the dam, and the hydraulic rise over the reach is smaller than the wind setup and seiche that cross it ({{claim:V8.1}}). A river's surface is set by its bed and its discharge, and it slopes. The measured change is between those two conditions, and it is the persistence that distinguishes it from the drawdown transient: the gradient is present in the drawdown overpasses and still present through 2025 ({{claim:M1.2}}).
+
+Reaches released from an impoundment adjust in ways that are neither uniform nor immediate ({{cite:nichols2017}}), and incisional channels formed after dam removal widen and narrow through migrating fronts rather than settling monotonically ({{cite:cantelli2004}}; {{cite:cantelli2007}}). What is observed here is the surface expression of the earliest part of that adjustment, over a reach two orders of magnitude larger than the removals from which the canon is drawn.
 
 Before the breach the sign of the per-overpass slope was indistinguishable from a coin flip and the surface varied by centimetres over tens of kilometres; after it, every overpass shows water rising upstream at a few centimetres per kilometre, with metre-scale variability, and the change was already present during drainage. The comparison with reservoir-to-river transitions documented elsewhere belongs to Section 7.8 and is withheld until the literature retrieval has been validated.
 
@@ -25,22 +29,20 @@ The design documentation fixes the pre-breach surface twice — the operating le
 
 ## 7.6 What the geometry is for
 
-The bed reconstructed here — one surface for the reservoir, three for the downstream zones, each with a soundings-only cross-validation score and a stated boundary condition — is the terrain a hydraulic model of the current system needs, and the per-overpass slopes are the independent observation such a model must reproduce without having been calibrated on them. Both are handed to the companion paper as fixed inputs.
+The per-overpass slopes are the independent observation a hydraulic model of the current system must reproduce without having been calibrated on them, and they are handed to Paper 5 on that condition. The terrain such a model stands on is reconstructed in Paper 2.
 
-## 7.7 Comparison with literature
 
 {{section:7_8}}
 
-## 7.8 Implications for monitoring and reconstruction
+## 7.8 Implications for monitoring
 
 The quantities that change first and persist — slope and within-overpass heterogeneity — are derivable from open satellite archives once a vertical frame is fixed; the quantities that cannot yet be derived — post-breach discharge and a rate of bed change — name the observations still needed.
 
 ## 7.9 Limitations
 
-A limitation of the delivered terrain must be stated plainly rather than averaged away: {{claim:B8.2}}, while FABDEM agrees with GEDI to within half a metre over the same ground ({{claim:B8.2.caveat}}). The pooled accuracy of Section 5.11.1 does not see it, because the night-time validation points do not fall there. The terrain is not fit to carry a hydraulic model until the seam is repaired.
 
 The channel-restricted slope control is underpowered ({{claim:M1.4}}). The slope–discharge relation after the breach is not testable: {{claim:C-14}}. The survey epoch of the soundings is unrecorded ({{claim:X2.1}}), the Baltic realisation of the historical tables is unstated, three co-located SWOT–ICESat-2 overpasses exist, and no wind record covers the 5 April 2023 anomaly. The 1′×1′ EGG2015 raster has no citable upstream source; this is a citation problem, not a numerical one, and it blocks submission until resolved. {{pending:OPEN99|EGG2015 provenance (G2) unresolved|backs=G2|section=7.9 Limitations|unblock_by=obtain the 1′ EGG2015 grid with licence, or re-run on the public 10′×15′ grid and report the difference|blocks_submission=yes}}
 
 # 8. CONCLUSIONS
 
-Within the former Kakhovka Reservoir footprint the per-overpass longitudinal water-surface slope changed from {{claim:M1.1}}, with every post-breach overpass positive, and within-overpass heterogeneity rose from {{claim:M2.1}}. These statements rest on harmonised elevations — one official transformation grid, one quasigeoid, an explicit permanent-tide term — and on a legacy survey whose reduction level was established by three independent routes. The soundings-only bed reproduces the historical drawdown exposure ({{claim:V10.1}}), and in the downstream zones shoreline constraints degrade rather than improve the bed ({{claim:B2.3}}). What the data cannot yet say — a post-breach slope–discharge law, a rate of bed change — is stated as such; what the new geometry means for roughness, conveyance and stage is the question of the companion paper, which starts from the bed and the profiles fixed here.
+Within the former Kakhovka Reservoir footprint the per-overpass longitudinal water-surface slope changed from {{claim:M1.1}}, with every post-breach overpass positive, and within-overpass heterogeneity rose from {{claim:M2.1}}. These statements rest on harmonised elevations — one official transformation grid, one quasigeoid, an explicit permanent-tide term — and on a legacy survey whose reduction level was established by three independent routes rather than assumed. The same frame let the drawdown itself be read from orbit ({{claim:D1.1}}). What the data cannot yet say — a post-breach slope–discharge law — is stated as such rather than inferred. The bed beneath this surface is reconstructed in Paper 2; what the new geometry means for roughness, conveyance and stage is the question of Papers 4 and 5, which take these profiles as a target they must meet without being calibrated on them.

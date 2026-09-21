@@ -68,14 +68,15 @@ B8.1:
     as that offset rather than independent of it.
   note: 'manual: outputs/tables/p62_gedi_ground_accuracy.csv'
 B8.2:
-  audit_status: CONTRADICTED
+  audit_status: SUPPORTED
   findings:
-  - FABDEM agrees with GEDI to within half a metre over the same class, so the discrepancy
-    is a defect of the seam, not of the control; the feathered class adds a further
-    133.1 km² at -4.36 m.
-  required_actions:
-  - repair the p55 seam before the terrain is used as a hydraulic model input; re-run
-    B7.1 afterwards
+  - 'Before the repair this class covered 133.1 km² at -4.36 m and a further 30.8
+    km² of gap fill sat 21.75 m below FABDEM; both are gone. The bed of the pool itself
+    still reads about -4.7 m against FABDEM over 2 144 km², but that is the expected
+    difference between a pre-breach surface, which is what FABDEM carries there, and
+    the reconstructed dry bed - not a seam error.
+
+    '
   note: 'manual: outputs/tables/p62_gedi_ground_accuracy.csv'
 C-01:
   audit_status: SUPPORTED
@@ -428,12 +429,21 @@ G1:
     one breath (marker REF01).
   note: 'manual: outputs/tables/kakhovka_datum_comparison.csv'
 G2:
-  audit_status: UNKNOWN
+  audit_status: SUPPORTED_WITH_LIMITATION
   findings:
-  - Citation problem, not a numerical one (egm2008_minus_evrs −0.145 ± 0.027 m).
+  - 'Verified 2026-09-21: the production raster is 7 200 x 3 600 at exactly 1.0''
+    x 1.0'', spanning 50 W - 70 E and 25 N - 85 N, which is the declared domain of
+    EGG2015; the file carries no embedded provenance metadata and no licence, so its
+    chain of custody is undocumented even though its geometry identifies the product.
+    Cite Denker (2015) and state the resolution as verified from the raster, not from
+    the distribution.
+
+    '
   required_actions:
-  - obtain the 1′ EGG2015 grid with licence, or re-run on the public grid and report
-    the difference
+  - 'Confirm against the EGG2015 specification whether the official release is 1''
+    x 1'' or whether this file has been resampled; obtain the licence.
+
+    '
 G3.1:
   audit_status: SUPPORTED
   findings:

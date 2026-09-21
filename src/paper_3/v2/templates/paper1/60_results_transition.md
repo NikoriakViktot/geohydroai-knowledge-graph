@@ -1,4 +1,4 @@
-# 6. HYDRAULIC TRANSITION RESULTS
+# 6. THE MEASUREMENT
 
 ## 6.1 Pre-breach water-surface geometry
 

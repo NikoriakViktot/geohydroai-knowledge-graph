@@ -20,11 +20,12 @@ SWOT PIXC and RiverSP granules over Kherson (cycles 482, 511 and 521, April–Ma
 
 ## 3.4 Sentinel-2 water masks
 
-Sentinel-2 L2A scenes processed on a 20 m registry grid (EPSG:32636) with the BOA additive offset applied supply the coverage-gated water masks of the planform analysis (Section 4.7) and the shoreline contours used to test the bed reconstruction; 53 dates cover the former pool. The full surface classification and the Sentinel-1 masks are the subject of the companion paper.
+Sentinel-2 L2A scenes processed on a 20 m registry grid (EPSG:32636) with the BOA additive offset applied supply the coverage-gated water masks of the planform analysis (Section 4.6); 53 dates cover the former pool. The full surface classification, the Sentinel-1 masks and the supervised inundation work belong to Paper 3.
 
 ## 3.5 Legacy hydrography
 
-Eight photographed pages of the Dnipro reservoirs monograph (Tables 19–21, Figures 13–16) and 7 514 S-57 chart soundings are the historical sources; the survey epoch of the soundings is unrecorded, a limitation that rules out any rate of bed change ({{claim:X2.1}}). Which reduction level the soundings carry is not stated in the source and is established in Section 5.7.
+Eight photographed pages of the Dnipro reservoirs monograph (Tables 19–21, Figures 13–16) supply the design values and the 1970 longitudinal free-surface survey used here as an independent check. The 7 514 chart soundings are the subject of the bed-reconstruction paper (Paper 2); this paper uses them only to establish which reduction level they carry (Section 5.7).
+
 
 ## 3.6 Geodetic reference data
 

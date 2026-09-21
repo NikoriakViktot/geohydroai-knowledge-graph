@@ -838,7 +838,10 @@ claims:
       cross-validation error and the share of area actually supported by soundings
       are reported together, because the second governs the first.
     table: p53_bed_v2_summary.csv
-    select: {zone: "ZONE_3_DNIPRO_BUG_ESTUARY"}
+    # Two rows per zone since the 2026-09-21 re-run: one over the whole zone and
+    # one restricted to the `core` domain, where the support share is 1.0 by
+    # construction. The honest denominator is the whole zone, so pin to it.
+    select: {zone: "ZONE_3_DNIPRO_BUG_ESTUARY", domain: ""}
     value: "CV RMSE {cv_rmse_snd_only:.2f} m over {water_km2:.0f} km², {sounding_supported_share:.1%} of it sounding-supported"
     n: "{soundings} soundings, {emodnet_points} EMODnet points"
     unit: m
@@ -977,26 +980,32 @@ claims:
     scientific_caveat: "GEDI's lowest-mode ground estimate sits about 0.6 m above ICESat-2 under vegetation, a known positive bias of the retrieval, so the agreement is of the same order as that offset rather than independent of it."
     blocks_submission: "no"
   - id: B8.2
-    paper: 1
+    paper: 2
     family: bed_dem
-    claim_type: defect
+    claim_type: validation
     statement: >
-      Using FABDEM as an external control, the seamed terrain is found to sit far
-      below it in two of its source classes: the gap-filled pool margin is a
-      pit, not a surface.
+      The seam defect found on 19 September is repaired: sampled against FABDEM
+      as an external control, the feathered source class now agrees to within
+      two centimetres, and the gap-filled class no longer exists.
     table: p62_gedi_ground_accuracy.csv
-    select: {stratum: "CONTROL FABDEM - GEDI, DEM source 5 pool gap fill"}
-    value: "gap-fill class {area_km2:.1f} km² lying {seamless_minus_FABDEM_median:.2f} m below FABDEM"
+    select: {stratum: "CONTROL FABDEM - GEDI, DEM source 4 FABDEM feathered"}
+    value: "feathered class {area_km2:.1f} km², seamless minus FABDEM {seamless_minus_FABDEM_median:+.2f} m"
     n: "{n} GEDI shots in the class"
     unit: m
     status_source: manual
-    audit_status: CONTRADICTED
-    manuscript_section: "7.9 Limitations"
+    audit_status: SUPPORTED
+    manuscript_section: "5.11.2"
     article_thesis: AT7
     figure_id: F16
-    scientific_caveat: "FABDEM agrees with GEDI to within half a metre over the same class, so the discrepancy is a defect of the seam, not of the control; the feathered class adds a further 133.1 km² at -4.36 m."
-    remaining_action: "repair the p55 seam before the terrain is used as a hydraulic model input; re-run B7.1 afterwards"
-    blocks_submission: "yes"
+    table_id: T8
+    scientific_caveat: >
+      Before the repair this class covered 133.1 km² at -4.36 m and a further
+      30.8 km² of gap fill sat 21.75 m below FABDEM; both are gone. The bed of
+      the pool itself still reads about -4.7 m against FABDEM over 2 144 km²,
+      but that is the expected difference between a pre-breach surface, which is
+      what FABDEM carries there, and the reconstructed dry bed - not a seam
+      error.
+    blocks_submission: "no"
   - id: H2.1
     paper: 2
     family: canopy
@@ -1056,6 +1065,19 @@ claims:
     blocks_submission: "no"
 
 overrides:
+  G2:
+    audit_status: SUPPORTED_WITH_LIMITATION
+    scientific_caveat: >
+      Verified 2026-09-21: the production raster is 7 200 x 3 600 at exactly
+      1.0' x 1.0', spanning 50 W - 70 E and 25 N - 85 N, which is the declared
+      domain of EGG2015; the file carries no embedded provenance metadata and no
+      licence, so its chain of custody is undocumented even though its geometry
+      identifies the product. Cite Denker (2015) and state the resolution as
+      verified from the raster, not from the distribution.
+    remaining_action: >
+      Confirm against the EGG2015 specification whether the official release is
+      1' x 1' or whether this file has been resampled; obtain the licence.
+
   C-15: {audit_status: REQUIRES_REANALYSIS}
   # Paper 1 produces the observed and reconstructed physical basis; Paper 2 uses it
   # as a fixed input and never re-derives or re-sells it.

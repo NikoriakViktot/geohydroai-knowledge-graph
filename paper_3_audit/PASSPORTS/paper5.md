@@ -9,7 +9,7 @@ How do the reconstructed terrain and the changed surface roughness alter stage, 
 **None. No model has been run.** All five theses (P5-AT01…P5-AT05) stand at `NOT_YET_SUPPORTED`, and this passport exists to record that honestly rather than to imply otherwise.
 
 ## 3. What must exist before this is a paper
-1. **The seam defect of paper 2 repaired** (B8.2: 30.8 km² at −21.75 m below FABDEM, plus 133.1 km² at −4.36 m). A model run on the present terrain would be modelling artificial pits.
+1. ~~The seam defect of paper 2 repaired~~ — **done 21 September**: the gap-fill class is gone and the feathered class agrees with FABDEM to +0.02 m (B8.2). The terrain is no longer the obstacle.
 2. HEC-RAS pre-breach and current-state runs on the repaired terrain.
 3. `manning_n_scenarios.csv` — the script exists and has never been run, so the n_low / n_base / n_high sensitivity has no output.
 4. Post-breach discharge, which has not been recovered; without it the current-state runs are **scenario** runs, not calibrated simulations.
@@ -24,4 +24,4 @@ Paper 2 supplies the terrain; paper 4 the roughness field; paper 1 the observed 
 Modelled against observed longitudinal water surface, current state, with the observed slope as a target the model either meets or does not.
 
 ## 7. Verdict
-**Exploratory direction, not a paper.** It should be described as planned work and not drafted beyond a skeleton until item 1 of §3 is done.
+**Exploratory direction, not a paper.** It should be described as planned work and not drafted beyond a skeleton. With the terrain now repaired, the binding constraint is items 2-4 of §3: the model runs themselves, the roughness scenarios, and the missing post-breach discharge.

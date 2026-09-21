@@ -1,4 +1,72 @@
-# ARTICLE_MASTER_PLAN — Paper 3
+# ARTICLE_MASTER_PLAN
+
+> **Superseded in part, 2026-09-21.** The work is now five papers, each with a
+> passport in `paper_3_audit/PASSPORTS/`. Sections below that speak of one
+> manuscript describe Paper 1 plus material that has since moved to papers 2–4.
+> The narrative contract for Paper 1 is the block immediately following, agreed
+> with the author on 2026-09-21; the passport `PASSPORTS/paper1.md` is its
+> companion.
+
+## PAPER 1 — CORE CONTRACT
+
+```text
+Main question:
+Can vertically harmonised multi-sensor observations reveal
+a measurable hydraulic regime transition after the Kakhovka breach?
+
+Primary result:
+Longitudinal WSE slope increased from ~0.09 to ~3.31 cm/km
+and remained positive in all 14 post-breach overpasses.
+
+Secondary geometric result:
+Within-overpass WSE heterogeneity increased from 0.117 to 0.397 m.
+
+Event-scale result:
+SWOT observed the outlet drawdown from 17.53 to 5.63 m
+between 31 May and 13 June.
+
+Enabling method:
+Spatially varying vertical harmonisation across gauges,
+ICESat-2, SWOT and historical data.
+
+Independent physical check:
+1970 historical free-surface profile + pre-breach ICESat-2
+near-zero slopes.
+```
+
+**Three levels of evidence, and the paper is built in this order.**
+
+1. **Frame** (Methods + Validation) — why BS-77, ICESat-2, SWOT and the legacy
+   survey cannot be compared directly; why the offset varies 0.1715–0.2157 m
+   along the reach so a constant is inadmissible; why the documented PIXC chain
+   reproduces RiverSP to −0.0010 m while three alternatives do not. This is the
+   method, not supporting technique.
+2. **Measurement** (Results) — the slope transition, the heterogeneity rise, the
+   outlet drawdown.
+3. **Physical interpretation** (Discussion) — what this means for a transition
+   from an impounded to a river-dominated state. **The dam-breach, drawdown and
+   hydraulic-transition literature belongs here, not in Methods.**
+
+**Kept out of the central story**, by decision: slope–discharge (NOT TESTABLE —
+the discharge record ends 2023-12-31, all 14 post dates are 2024–25), the
+channel-restricted control (CI includes zero), and fragmentation
+(coverage-confounded). They appear as limitations.
+
+**Novelty boundary.** Lehnigk, Pavelsky & Lang (2026, GRL) have already
+published SWOT observation of this flood below the dam. The contribution here is
+the outlet series in the same vertical frame as the gauges, plus the
+longitudinal geometry — stated before the result, never as "first SWOT
+observation of Kakhovka".
+
+**P0 before Methods — closed 2026-09-21.** The EGG2015 production raster is
+7 200 × 3 600 at exactly 1.0′ × 1.0′ over 50° W–70° E and 25° N–85° N, which is
+the declared domain of EGG2015; cite Denker (2015). The file carries no embedded
+provenance metadata and no licence, so its chain of custody stays stated as
+undocumented rather than claimed. (`G2`, now SUPPORTED_WITH_LIMITATION.)
+
+---
+
+# Original plan (2026-09-18) — Paper 3 scope
 
 Kakhovka: reservoir-to-river hydraulic transition from harmonised satellite altimetry, gauges and historical hydrography. Plan built 2026-09-18 from the repository audit (`ARTICLE_REPOSITORY_AUDIT.md`), the claim registry (`ARTICLE_CLAIM_REGISTRY.csv`, 54 rows) and the data-evidence matrix (7 article theses AT1–AT7). Statuses come from the SWOT-DNIPRO audit, not from the v1 prose.
 
