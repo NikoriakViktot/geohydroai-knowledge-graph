@@ -2,7 +2,7 @@
 
 ## 5.1 The gauge network in one geodetic frame
 
-{{claim:V1.1}} ({{claim:V1.1.unc}}). {{claim:V1.2}} ({{claim:V1.2.unc}}).
+All seven gauge records are carried into EVRF2019 by the official operation applied at each station's own coordinates, not by a national mean: {{claim:V1.1}} ({{claim:V1.1.unc}}). The offset is not constant along the reach — {{claim:V1.2}} ({{claim:V1.2.unc}}) — which is why a single number would have been wrong at both ends of the pool.
 
 {{table:T2}}
 
@@ -12,11 +12,11 @@ The documented correction chain reproduces RiverSP node heights: {{claim:V2.1}} 
 
 ## 5.3 SWOT against ICESat-2
 
-{{claim:V3.1}} ({{claim:V3.1.unc}}). With three co-located overpasses no regression is fitted and no universal centimetric agreement is claimed.
+Where the two sensors pass within hours of each other they agree at the centimetre level with nothing applied between them: {{claim:V3.1}} ({{claim:V3.1.unc}}). With three co-located overpasses no regression is fitted and no universal centimetric agreement is claimed.
 
 ## 5.4 Kherson as a local anchor
 
-{{claim:V4.1}} ({{claim:V4.1.unc}}; n = {{claim:V4.1.n}}).
+Against the one continuous in-situ record in the downstream reach, the satellite branch sits within a few centimetres of the gauge: {{claim:V4.1}} ({{claim:V4.1.unc}}; n = {{claim:V4.1.n}}). The agreement is local to Kherson and is not evidence for the pool.
 
 ## 5.5 A validated negative result
 
@@ -24,7 +24,7 @@ The documented correction chain reproduces RiverSP node heights: {{claim:V2.1}} 
 
 ## 5.6 Spatial limits of an empirical correction
 
-{{claim:V5.1}} ({{claim:V5.1.unc}}).
+An alignment constant estimated in the reservoir does not survive the journey downstream: {{claim:V5.1}} ({{claim:V5.1.unc}}). The two estimates have disjoint intervals, so the correction is treated as local rather than as a property of the sensor.
 
 ## 5.7 The historical sounding datum
 
@@ -40,7 +40,7 @@ The documented correction chain reproduces RiverSP node heights: {{claim:V2.1}} 
 
 ## 5.9.1 An independent test of the reconstructed bed
 
-The cross-validation of Section 5.9 withholds soundings from a surface built out of soundings, so it measures interpolation error and nothing else. ICESat-2 ground returns acquired over the bed after it dried are independent of every input to the reconstruction, and against them the surface holds to {{claim:B4.1}} ({{claim:B4.1.unc}}; n = {{claim:B4.1.n}}). The residual is not uniform, but neither does it grow smoothly with distance: it is essentially flat within a kilometre of a sounding ({{claim:B4.2a}} in the nearest band, and marginally better between 250 and 500 m, where the bed is less steep than in the near-shore belt that holds most of the survey) and only degrades once the interpolation is extrapolating — {{claim:B4.2}}, on a handful of points. What the stratification shows is a threshold of support rather than a gradient of it. Part of what remains is real — the soundings predate the breach and the photons postdate it, so bed change is inside the residual and cannot be separated from reconstruction error ({{claim:B4.1.caveat}}).
+The cross-validation of Section 5.9 withholds soundings from a surface built out of soundings, so it measures interpolation error and nothing else. ICESat-2 ground returns acquired over the bed after it dried are independent of every input to the reconstruction, and against them the surface holds to {{claim:B4.1}} ({{claim:B4.1.unc}}; n = {{claim:B4.1.n}}). The residual is not uniform, but neither does it grow smoothly with distance: it is essentially flat within a kilometre of a sounding ({{claim:B4.2a}} in the nearest band, and marginally better between 250 and 500 m, where the bed is less steep than in the near-shore belt that holds most of the survey) and only degrades once the interpolation is extrapolating — {{claim:B4.2}}, on a handful of points. What the stratification shows is a threshold of support rather than a gradient of it. Part of what remains is real: the soundings predate the breach and the photons postdate it, so genuine bed change sits inside the residual and cannot be separated from reconstruction error.
 
 {{table:T8}}
 
@@ -80,7 +80,7 @@ That second view also found something the first could not. Sampled against FABDE
 
 ## 5.13 Shoreline elevation uncertainty
 
-{{claim:I1.1}}. {{claim:I1.2}}.
+The elevation attached to an optical shoreline carries its own spread, which sets the floor for any contour-based constraint: {{claim:I1.1}}. Broken out by zone, {{claim:I1.2}}.
 
 
 

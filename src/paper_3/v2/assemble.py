@@ -71,40 +71,137 @@ assert set(FORBIDDEN_NOVELTY_WORDS) >= {"novel", "unprecedented", "unique", "pio
 
 #: Machine tables: id → (title, claim-id filter, columns shown)
 TABLE_SPECS: dict[str, dict] = {
-    "T3": {"title": "Table 3. Hydraulic-state comparison, pre- and post-breach.",
-           "claims": ["M1.1", "M1.3", "M1.2", "M1.4", "M2.1", "M3.1", "M3.2", "V10.1"],
-           "columns": ["claim_id", "claim_text", "value_resolved", "uncertainty_resolved", "n_resolved", "audit_status"]},
-    "T5": {"title": "Table 5. Manning roughness priors per surface class (literature-supported, not calibrated).",
-           "claims": ["N1.4", "N1.4a"],
-           "columns": ["claim_id", "claim_text", "value_resolved", "audit_status"]},
-    "T6": {"title": "Table 6. Surface-class areas of the former water surface by year / state (km²).",
-           "claims": ["S1.5", "S1.1a", "S1.1b", "S1.1", "S1.2a", "S1.2b", "S1.2", "S1.3", "N1.2a", "N1.2", "W1.1"],
-           "columns": ["claim_id", "claim_text", "value_resolved", "n_resolved", "audit_status"]},
-    "T7": {"title": "Table 7. Bed-surface cross-validation and shoreline uncertainty by zone.",
-           "claims": ["V10.3", "V10.4", "B2.1", "B2.2", "B2.3", "B6.1", "B3.1", "B3.2", "I1.1", "I1.2"],
-           "columns": ["claim_id", "claim_text", "value_resolved", "n_resolved", "audit_status"]},
-    # The cross-validation above withholds soundings from a sounding-built surface.
-    # T8 is the test against an observation that entered none of it.
-    "T8": {"title": "Table 8. Independent validation of the reconstructed bed and of the delivered terrain "
-                    "against ICESat-2, by support and by product.",
-           "claims": ["B4.1", "B4.2a", "B4.2", "B4.3", "B7.1"],
-           "columns": ["claim_id", "claim_text", "value_resolved", "uncertainty_resolved", "n_resolved",
-                       "audit_status"]},
-    "T2": {"title": "Table 2. The vertical chain: each sensor's native frame, the correction applied, "
-                    "and the residual against the gauges.",
-           "claims": ["V1.1", "V1.2", "V2.1", "V3.1", "V4.1", "V4.2", "V5.1", "V6.1", "V6.2",
-                      "V7.1", "V7.2", "V8.1", "G1", "G2"],
-           "columns": ["claim_id", "claim_text", "value_resolved", "n_resolved", "audit_status"]},
-    "T4": {"title": "Table 4. The drawdown and the flood wave as observed from orbit.",
-           "claims": ["D1.1", "D2.1", "M1.2"],
-           "columns": ["claim_id", "claim_text", "value_resolved", "n_resolved", "audit_status"]},
-    "P2-T1": {"title": "Table P2-1. Area-weighted base roughness of the mapped surface by state "
-                       "(literature priors per class, not calibrated).",
-              "claims": ["N2.1a", "N2.1", "N1.1a", "N1.1b", "N1.1", "N1.2a", "N1.2", "N1.3", "N1.4", "N1.4a"],
-              "columns": ["claim_id", "claim_text", "value_resolved", "uncertainty_resolved", "audit_status"]},
-    "P2-T2": {"title": "Table P2-2. Channel geometry below the dam and the canopy layers.",
-              "claims": ["K1.1", "K1.1a", "K1.1b", "K1.2", "H1.1", "H1.2"],
-              "columns": ["claim_id", "claim_text", "value_resolved", "n_resolved", "audit_status"]},
+    "T2": {
+        "title": "Table 2. The vertical chain: each step of the harmonisation and the residual it leaves.",
+        "columns": [("Step", "__label__"), ("Result", "value_resolved"), ("n", "n_resolved")],
+        "rows": [
+            ("Gauge stages carried to EVRF2019 (EPSG:9902)", "V1.1"),
+            ("Spatial variation of the BS-77 → EVRF2019 offset", "V1.2"),
+            ("SWOT PIXC correction chain against RiverSP", "V2.1"),
+            ("SWOT against ICESat-2, best collocation", "V3.1"),
+            ("SWOT against the Kherson gauge", "V4.1"),
+            ("Transfer of the reservoir alignment constant to Kherson", "V5.1"),
+            ("Reduction level of the legacy soundings", "V6.1"),
+            ("Historical reference level in EVRF2019", "V6.2"),
+            ("Digitised 1970 free-surface curve against Table 20", "V7.1"),
+            ("Pre-breach ICESat-2 slopes in the impounded reach", "V7.2"),
+            ("Production BS-77 → EVRF2019 grid", "G1"),
+        ],
+        "note": "Residuals are medians unless a confidence interval is given. The quasigeoid raster in production (G2) has no citable upstream source; see Section 7.9.",
+    },
+    "T3": {
+        "title": "Table 3. Water-surface geometry before and after the breach.",
+        "columns": [("Quantity", "__label__"), ("Pre → post", "value_resolved"),
+                    ("Uncertainty", "uncertainty_resolved"), ("n", "n_resolved")],
+        "rows": [
+            ("Per-overpass longitudinal slope, footprint-wide", "M1.1"),
+            ("Slope during the drawdown", "M1.2"),
+            ("Slope, sensitivity to the chainage span", "M1.3"),
+            ("Slope, channel-restricted control", "M1.4"),
+            ("Within-overpass water-surface heterogeneity", "M2.1"),
+            ("Planform: water area", "M3.1"),
+            ("Planform: residual water bodies", "M3.2"),
+            ("Drawdown exposure, reconstructed vs historical", "V10.1"),
+        ],
+    },
+    "T4": {
+        "title": "Table 4. The drawdown and the flood wave, as recorded by SWOT.",
+        "columns": [("Quantity", "__label__"), ("Value", "value_resolved"), ("n", "n_resolved")],
+        "rows": [
+            ("Outlet water surface, 31 May → 13 June 2023", "D1.1"),
+            ("Rise above the pre-breach surface, 15 km below the dam", "D2.1"),
+            ("Longitudinal slope during the drawdown overpasses", "M1.2"),
+        ],
+        "note": "Node counts per date are small; the series is a sequence of observed surfaces, not a gauged hydrograph.",
+    },
+    "T7": {
+        "title": "Table 7. Bed reconstruction: cross-validation, boundary condition and shoreline uncertainty.",
+        "columns": [("Zone / test", "__label__"), ("Result", "value_resolved"), ("n", "n_resolved")],
+        "rows": [
+            ("Reservoir pool, blocked cross-validation", "V10.3"),
+            ("Pool, error structure", "V10.4"),
+            ("Kherson delta, soundings-only arm", "B2.1"),
+            ("Dnipro–Buh estuary, soundings-only arm", "B2.2"),
+            ("Dam-to-Kherson floodway, soundings-only arm", "B2.3"),
+            ("Estuary, share of area within sounding support", "B6.1"),
+            ("Multi-level contour constraint (negative result)", "B3.1"),
+            ("Contour experiment, position bias", "B3.2"),
+            ("Shoreline elevation uncertainty", "I1.1"),
+            ("Shoreline uncertainty by zone", "I1.2"),
+        ],
+    },
+    "T8": {
+        "title": "Table 8. Independent validation of the reconstructed bed and of the delivered terrain.",
+        "columns": [("Test", "__label__"), ("Result", "value_resolved"),
+                    ("Uncertainty", "uncertainty_resolved"), ("n", "n_resolved")],
+        "rows": [
+            ("Bed vs ICESat-2 ground returns, dry bed", "B4.1"),
+            ("… within 250 m of a sounding", "B4.2a"),
+            ("… beyond 2 km from a sounding", "B4.2"),
+            ("FABDEM vs ICESat-2, stable bare land (datum check)", "B4.3"),
+            ("Seamless terrain vs night-time ICESat-2", "B7.1"),
+            ("Seamless terrain vs GEDI ground returns", "B8.1"),
+        ],
+        "note": "The cross-validation of Table 7 withholds soundings from a sounding-built surface; the tests here use observations that entered none of it.",
+    },
+    "T5": {
+        "title": "Table 5. Manning roughness priors per surface class (literature values, not calibrated).",
+        "columns": [("Class / quantity", "__label__"), ("Value", "value_resolved")],
+        "rows": [("Roughness prior per mapped class", "N1.4"),
+                 ("Spread of the class priors", "N1.4a")],
+    },
+    "T6": {
+        "title": "Table 6. Surface-class composition of the former water surface, by season.",
+        "columns": [("Quantity", "__label__"), ("Value", "value_resolved"), ("n", "n_resolved")],
+        "rows": [
+            ("Former water surface, area analysed", "S1.5"),
+            ("Class shares, 2023", "S1.1a"),
+            ("Class shares, 2024", "S1.1b"),
+            ("Class shares, 2025", "S1.1"),
+            ("Mode-class areas, 2023", "S1.2a"),
+            ("Mode-class areas, 2024", "S1.2b"),
+            ("Mode-class areas, 2025", "S1.2"),
+            ("Class transitions between seasons", "S1.3"),
+            ("Roughness-class areas, 2024", "N1.2a"),
+            ("Roughness-class areas, current", "N1.2"),
+            ("Woody probability, Dynamic World", "W1.1"),
+        ],
+        "note": "Class shares are measured, not accuracy-assessed: the stratified validation sample is unlabelled.",
+    },
+    "P2-T1": {
+        "title": "Table P2-1. Area-weighted base roughness of the mapped surface, by state.",
+        "columns": [("State / quantity", "__label__"), ("Value", "value_resolved"),
+                    ("Spread", "uncertainty_resolved")],
+        "rows": [
+            ("Whole mosaic at the breach (2023)", "N2.1a"),
+            ("Whole mosaic, current (2026)", "N2.1"),
+            ("Pool only, at the breach", "N1.1a"),
+            ("Pool only, first exposure", "N1.1b"),
+            ("Pool only, current", "N1.1"),
+            ("Roughness-class areas, 2024", "N1.2a"),
+            ("Roughness-class areas, current", "N1.2"),
+            ("Area with a roughness change above 0.02", "N1.3"),
+            ("Class priors", "N1.4"),
+            ("Spread of the class priors", "N1.4a"),
+        ],
+        "note": "A literature prior per mapped class. No hydraulic calibration is applied, and none is implied.",
+    },
+    "P2-T2": {
+        "title": "Table P2-2. Channel geometry below the dam and canopy height by class.",
+        "columns": [("Quantity", "__label__"), ("Value", "value_resolved"), ("n", "n_resolved")],
+        "rows": [
+            ("Wetted width at matched stage", "K1.1"),
+            ("Width, main arm", "K1.1a"),
+            ("Width, secondary arms", "K1.1b"),
+            ("Bank displacement", "K1.2"),
+            ("Canopy, dense young woody, 2024", "H2.1a"),
+            ("Canopy, dense young woody, 2025", "H2.1"),
+            ("GEDI vs ICESat-2, woody-cell agreement", "H2.2"),
+            ("ATL08 canopy layers", "H1.1"),
+            ("Canopy change identifiability", "H1.2"),
+        ],
+        "note": "Canopy height supports the class assignment; it is not an input to the roughness coefficient.",
+    },
 }
 
 
@@ -191,14 +288,36 @@ def render_cite(key: str, refs: pd.DataFrame, cited: set[str]) -> str:
 
 
 def render_table(tid: str, ev: pd.DataFrame, used: set[str]) -> str:
+    """Render a table the way a journal prints one.
+
+    A spec gives ``rows`` as (row label, claim id) pairs and ``columns`` as
+    (heading, field) pairs. The row label is the scientific name of the
+    quantity, written for the reader; the claim id is how the value is
+    fetched, and it stays out of the printed table. Traceability lives in the
+    supplementary registry, not in the manuscript body — printing ``claim_id``
+    and ``audit_status`` in a results table is an internal artefact, not a
+    finding.
+    """
     spec = TABLE_SPECS[tid]
-    rows = [dict(ev.loc[c], claim_id=c) for c in spec["claims"] if c in ev.index]
-    used.update(c for c in spec["claims"] if c in ev.index)
     cols = spec["columns"]
-    head = "| " + " | ".join(cols) + " |"
+    rows = [(label, cid) for label, cid in spec["rows"] if cid in ev.index]
+    used.update(cid for _, cid in rows)
+
+    head = "| " + " | ".join(h for h, _ in cols) + " |"
     sep = "|" + "---|" * len(cols)
-    body = ["| " + " | ".join(str(r[c]).replace("|", "/").replace("\n", " ")[:220] for c in cols) + " |" for r in rows]
-    return "\n".join([f"**{spec['title']}**", "", head, sep, *body, ""])
+    body = []
+    for label, cid in rows:
+        r = ev.loc[cid]
+        cells = []
+        for _, field in cols:
+            v = label if field == "__label__" else str(r.get(field, ""))
+            cells.append(v.replace("|", "/").replace("\n", " ").strip()[:200] or "—")
+        body.append("| " + " | ".join(cells) + " |")
+    note = spec.get("note", "")
+    out = [f"**{spec['title']}**", "", head, sep, *body, ""]
+    if note:
+        out += [f"*{note}*", ""]
+    return "\n".join(out)
 
 
 def render_pending(spec: str) -> str:

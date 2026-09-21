@@ -77,3 +77,40 @@ def test_shipped_templates_reference_only_known_placeholders():
         for m in asm._PH.finditer(p.read_text(encoding="utf-8")):
             assert m.group(1) in ("claim", "cite", "section", "table", "pending"), p.name
         assert not re.search(r"\{\{(?!claim:|cite:|section:|table:|pending:)", p.read_text(encoding="utf-8")), p.name
+
+
+# ── tables print science, not the claim registry (2026-09-21) ────────────────
+
+def test_table_prints_row_labels_and_hides_internal_fields():
+    """A results table with columns claim_id / audit_status is an internal QA
+    artefact. The reader gets the name of the quantity; traceability lives in
+    the supplementary registry."""
+    asm.TABLE_SPECS["_t"] = {
+        "title": "Table X.", "note": "a note",
+        "columns": [("Step", "__label__"), ("Result", "value_resolved")],
+        "rows": [("Slope, footprint-wide", "M1.1"), ("Absent claim", "ZZ.9")],
+    }
+    try:
+        used = set()
+        out = asm.render_table("_t", _inputs()["evidence"], used)
+        assert "| Step | Result |" in out
+        assert "| Slope, footprint-wide | +0.09 → +3.31 cm/km |" in out
+        assert "claim_id" not in out and "audit_status" not in out and "M1.1 |" not in out
+        assert "Absent claim" not in out          # a missing claim drops its row
+        assert "*a note*" in out
+        assert used == {"M1.1"}
+    finally:
+        del asm.TABLE_SPECS["_t"]
+
+
+def test_every_shipped_table_row_resolves_to_a_real_claim():
+    import pandas as pd
+    from src.paper_3._utils import OUT_DIR
+    ev_path = OUT_DIR / "OWN_EVIDENCE.csv"
+    if not ev_path.exists():
+        pytest.skip("OWN_EVIDENCE not built")
+    ev = pd.read_csv(ev_path, dtype=str, keep_default_na=False).set_index("claim_id")
+    for tid, spec in asm.TABLE_SPECS.items():
+        missing = [c for _, c in spec["rows"] if c not in ev.index]
+        assert not missing, f"{tid} references unknown claims: {missing}"
+        assert spec["columns"][0][1] == "__label__", f"{tid} must lead with the row label"
