@@ -150,6 +150,23 @@ SNAPSHOT_FILES: tuple[tuple[str, str], ...] = (
     ("swot", "outputs/tables/p61_pool_level_snapshots.csv"),
     ("swot", "outputs/tables/p61_swot_vs_kasperivka.csv"),
     ("swot", "outputs/tables/p61_yi2025_reservoir_area.csv"),
+    # p51 rewritten 2026-09-21: nested spatial CV, spatial transfer, calibration.
+    # The 2026-09-19 tables it supersedes are NOT snapshotted — they carry an
+    # optimistic operating point chosen on the sample it was scored on.
+    ("swot", "outputs/tables/p51_rf_metrics.csv"),
+    ("swot", "outputs/tables/p51_rf_fold_metrics.csv"),
+    ("swot", "outputs/tables/p51_rf_leave_one_zone_out.csv"),
+    ("swot", "outputs/tables/p51_rf_block_sensitivity.csv"),
+    ("swot", "outputs/tables/p51_rf_block_scale.csv"),
+    ("swot", "outputs/tables/p51_rf_calibration.csv"),
+    ("swot", "outputs/tables/p51_rf_perm_importance.csv"),
+    ("swot", "outputs/tables/p51_rf_input_manifest.csv"),
+    ("swot", "outputs/tables/p51_rf_hand_check.csv"),
+    ("swot", "outputs/tables/p51_rf_fusion.csv"),
+    ("swot", "outputs/tables/p51_s1_observation_support_2.csv"),
+    ("swot", "outputs/tables/p51_s1_observation_support_4.csv"),
+    ("swot", "outputs/tables/p51c_domain_clipping.csv"),
+    ("swot", "outputs/tables/p51_zone4_validity_impact.csv"),
     # p62 GEDI (2026-09-19): a second, orthogonal check on the delivered terrain
     # and the field support for the roughness classes — plus the seam defect it found.
     ("swot", "outputs/tables/p62_gedi_ground_accuracy.csv"),
