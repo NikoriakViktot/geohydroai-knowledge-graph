@@ -4,9 +4,9 @@
 
 Before the breach the impounded pool was near-level. Per-reach ICESat-2 slopes ({{claim:V7.2}}) lie inside the historical discharge envelope of the design tables, and the 22–25 April 1970 field-measured free-surface curve, digitised and validated against Table 20 ({{claim:V7.1}}), bounds them from above. The apparent slope in the 180–210 km band is a chainage-geometry artefact, not a hydraulic signal ({{claim:V7.3}}).
 
-## 6.2 Drawdown
+## 6.2 Early establishment of the post-breach gradient
 
-The five overpasses of July–September 2023 already carry the post-breach gradient: {{claim:M1.2}} (n = {{claim:M1.2.n}}). The structural change is therefore visible during the transient drainage itself, not only once the system had settled.
+The pool had drained by the end of June 2023, so the first ICESat-2 overpasses available over the residual system — five between 7 July and 7 September — observe an already-emptied reach rather than the drainage transient. They carry the post-breach gradient from the start: {{claim:M1.2}} (n = {{claim:M1.2.n}}). The new geometry was therefore established within weeks of depletion and is not a feature only of the settled 2024–25 sample. These passes are not used to reconstruct the drainage itself; that is the subject of the next section.
 
 ## 6.2.1 The drawdown and the flood wave from orbit
 
@@ -22,6 +22,16 @@ Across the 14 pre-breach and 14 post-breach overpasses with a chainage span of a
 
 {{table:T3}}
 
+## 6.3.1 What one overpass can and cannot show
+
+The interval quoted above is on the difference of medians *across* overpasses. It is not a statement about any single pass, and the two must not be read as one. Fitted through six beam-median points over some 25 km, an individual post-breach slope is poorly resolved: {{claim:M1.5}} ({{claim:M1.5.unc}}; n = {{claim:M1.5.n}}). Before the breach the same fit is far tighter — {{claim:M1.5a}} — because a level surface offers no leverage for disagreement between beams, whereas a sloping, spatially heterogeneous one does.
+
+The transition is therefore evidenced by repetition rather than by precision: every post-breach pass is positive where only ten of fourteen were before, and it is that consistency, not the sharpness of any one measurement, which the confidence interval of Section 6.3 summarises ({{claim:M1.5.caveat}}).
+
+## 6.3.2 Sensitivity to the fitted span
+
+{{claim:M1.6}} (n = {{claim:M1.6.n}}). {{claim:M1.6.caveat}}
+
 ## 6.4 The channel-restricted control
 
 Restricting both periods to the classified main channel weakens the contrast and its interval includes zero: {{claim:M1.4}} on {{claim:M1.4.n}}. This is reported as a limitation of the headline result, which must therefore be read as a statement about the water surface within the former reservoir footprint, not strictly about the channel.
@@ -32,7 +42,7 @@ On all ATL13 dates in the footprint, the within-overpass p95–p05 range of wate
 
 ## 6.6 Planform transformation
 
-Sentinel-2 water masks with a coverage gate show the transition from one continuous impounded surface to a channel with disconnected remnants: {{claim:M3.1}}. Only one pre-breach date has near-complete coverage, so this contrast is descriptive and carries no significance test; water-body counts are not reported because they scale with the observed fraction of the footprint.
+The optical record independently documents the loss of a single connected impounded surface ({{claim:M3.1}}). Component counts are not used inferentially: only one pre-breach date has near-complete coverage, and observed connectivity scales with the observed fraction, so the contrast is reported as corroboration of the geometric result rather than as a measurement in its own right.
 
 ## 6.7 Residual water bodies
 

@@ -1064,6 +1064,77 @@ claims:
     scientific_caveat: "A 25 m GEDI footprint is lit by a single tall shrub, so the two sensors are not measuring the same quantity; canopy height supports the class assignment but does not calibrate the roughness coefficient."
     blocks_submission: "no"
 
+  # Two layers of uncertainty, kept apart. M1.1's interval is on the difference
+  # of medians ACROSS overpasses; M1.5 says how well a SINGLE overpass measures
+  # its own slope, which is the weaker of the two and must not be implied by the
+  # first. M1.6 answers the minimum-span robustness the Methods section promises.
+  - id: M1.5
+    paper: 1
+    family: slope
+    claim_type: uncertainty
+    statement: >
+      A single overpass does not resolve the post-breach gradient: a Theil-Sen
+      fit through six beam-median points over some 25 km carries an interval
+      far wider than the slope itself, and only a minority of individual
+      post-breach passes exclude zero on their own.
+    derived: slope_per_pass_uncertainty.csv
+    select: {period: "post-breach"}
+    value: "median per-pass interval half-width {half_width_median_cm_km} cm/km; {n_interval_above_zero} of {n_passes} passes exclude zero individually"
+    uncertainty: "half-width p25-p75 {half_width_p25_cm_km}-{half_width_p75_cm_km} cm/km"
+    n: "{n_passes} passes, {n_points_median} beam medians each"
+    unit: cm/km
+    status_source: manual
+    audit_status: SUPPORTED
+    manuscript_section: "6.3 Post-breach longitudinal gradient"
+    article_thesis: AT1
+    literature_thesis_ids: [T06, T14]
+    figure_id: F3
+    table_id: T3
+    scientific_caveat: >
+      The evidence for the transition is therefore the ensemble - every
+      post-breach pass positive, and the difference of medians - not the
+      precision of any one measurement. Per-pass precision here is poorer than
+      published reach-scale ICESat-2 slope benchmarks because the fits use six
+      beam medians over a short span rather than a dense reach dataset.
+    blocks_submission: "no"
+  - id: M1.5a
+    paper: 1
+    family: slope
+    claim_type: uncertainty
+    statement: "The same quantity before the breach, where the level surface is fitted far more tightly."
+    derived: slope_per_pass_uncertainty.csv
+    select: {period: "pre-breach"}
+    value: "median per-pass interval half-width {half_width_median_cm_km} cm/km; {n_interval_above_zero} of {n_passes} passes exclude zero"
+    n: "{n_passes} passes"
+    status_source: manual
+    audit_status: SUPPORTED
+    manuscript_section: "6.3"
+    article_thesis: AT1
+    blocks_submission: "no"
+  - id: M1.6
+    paper: 1
+    family: slope
+    claim_type: sensitivity
+    statement: >
+      The contrast survives a stricter minimum chainage span, at the cost of
+      sample size.
+    derived: slope_span_sensitivity.csv
+    select: {min_span_km: "30"}
+    value: "at a 30 km minimum span, {median_pre_cm_km} -> {median_post_cm_km} cm/km, difference {difference_cm_km}"
+    n: "{n_pre} pre / {n_post} post"
+    unit: cm/km
+    status_source: manual
+    audit_status: SUPPORTED
+    manuscript_section: "6.3"
+    article_thesis: AT1
+    table_id: T3
+    scientific_caveat: >
+      The 10 km and 20 km thresholds are not binding: the shortest fitted span
+      in the sample is 20.3 km, so those rows repeat the headline rather than
+      testing it. At 40 km only three passes per period remain and the
+      difference falls to +2.988 cm/km.
+    blocks_submission: "no"
+
 overrides:
   G2:
     audit_status: SUPPORTED_WITH_LIMITATION

@@ -142,7 +142,8 @@ def build_imports(spec: dict, snapshot_dir: Path) -> list[dict]:
             "claim_text": str(r[cols["statement"]]),
             "audit_status": map_status(r[cols["status"]], spec["status_map"]),
             "status_source": spec["status_map"],
-            "source_table": entry["rel_path"], "snapshot_path": entry["local_path"],
+            "source_table": entry["rel_path"],
+            "snapshot_path": str(entry["local_path"]),
             "snapshot_sha256": entry["sha256"], "row_selector": json.dumps({cols["id"]: cid}),
             "value_field": cols.get("value", ""),
             "value_resolved": str(r[cols["value"]]) if cols.get("value") else "",
@@ -169,12 +170,24 @@ def build_claim(spec: dict, snapshot_dir: Path) -> dict:
     row["claim_id"] = spec["id"]
     row["claim_text"] = spec["statement"]
     row["status_source"] = spec.get("status_source", "manual")
-    if spec.get("table"):
+    if spec.get("derived"):
+        # Computed by src.paper_3.derived from a snapshot table, not taken from
+        # upstream; the derived manifest records which input it came from, so
+        # the value stays as traceable as a snapshot one.
+        from src.paper_3 import derived as _derived
+        local = _derived.DERIVED_DIR / spec["derived"]
+        if not local.exists():
+            raise FileNotFoundError(f"derived table missing: {local} — run derived.build()")
+        entry = {"rel_path": f"derived/{spec['derived']}", "local_path": str(local),
+                 "sha256": _derived._sha256(local)}
+        frame = _read_table(local)
+    elif spec.get("table"):
         entry = snapshot.entry_for(spec["table"], snapshot_dir)
         frame = _read_table(snapshot_dir / entry["local_path"])
         r = select_row(frame, spec.get("select", {})) if spec.get("select") else frame.iloc[0]
         row.update({
-            "source_table": entry["rel_path"], "snapshot_path": entry["local_path"],
+            "source_table": entry["rel_path"],
+            "snapshot_path": str(entry["local_path"]),
             "snapshot_sha256": entry["sha256"],
             "row_selector": json.dumps(spec.get("select", {})),
             "value_field": spec.get("value", ""),

@@ -95,13 +95,15 @@ TABLE_SPECS: dict[str, dict] = {
                     ("Uncertainty", "uncertainty_resolved"), ("n", "n_resolved")],
         "rows": [
             ("Per-overpass longitudinal slope, footprint-wide", "M1.1"),
-            ("Slope during the drawdown", "M1.2"),
-            ("Slope, sensitivity to the chainage span", "M1.3"),
+            ("Slope in the first passes after drainage", "M1.2"),
+            ("Slope, estimator sensitivity (ordinary least squares)", "M1.3"),
             ("Slope, channel-restricted control", "M1.4"),
+            ("Per-overpass measurement uncertainty, post-breach", "M1.5"),
+            ("Per-overpass measurement uncertainty, pre-breach", "M1.5a"),
+            ("Minimum fitted span, 30 km", "M1.6"),
             ("Within-overpass water-surface heterogeneity", "M2.1"),
             ("Planform: water area", "M3.1"),
             ("Planform: residual water bodies", "M3.2"),
-            ("Drawdown exposure, reconstructed vs historical", "V10.1"),
         ],
     },
     "T4": {
@@ -110,7 +112,7 @@ TABLE_SPECS: dict[str, dict] = {
         "rows": [
             ("Outlet water surface, 31 May → 13 June 2023", "D1.1"),
             ("Rise above the pre-breach surface, 15 km below the dam", "D2.1"),
-            ("Longitudinal slope during the drawdown overpasses", "M1.2"),
+
         ],
         "note": "Node counts per date are small; the series is a sequence of observed surfaces, not a gauged hydrograph.",
     },

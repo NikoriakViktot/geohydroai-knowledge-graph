@@ -36,4 +36,4 @@ An alignment constant estimated in the reservoir does not survive the journey do
 
 ## 5.9 What the frame is worth
 
-Six independent checks were performed before any hydraulic or surface result was interpreted; one (the 5 April 2023 anomaly) failed and is reported as failed. The reconstructed bed carries a cross-validated point accuracy and a validated area statistic; it carries no rate of change and no accuracy beyond 250 m, and it is released with those limits stated.
+Six validation and consistency checks were made before any hydraulic result was interpreted, and one — the 5 April 2023 anomaly — failed and is reported as failed. Not all six are independent of one another: RiverSP and PIXC come from the same SWOT observation, so their agreement establishes the correction chain rather than accuracy. The genuinely independent constraints are the gauge records and the 1970 field survey.

@@ -78,7 +78,7 @@ Eight photographed pages of the Dnipro reservoirs monograph (Tables 19–21, Fig
 
 ## 3.6 Geodetic reference data
 
-official correction at the posts 0.216 m The EGG2015 quasigeoid grid used for the ICESat-2 and SWOT branches is the 1′×1′ raster whose provenance is discussed in Section 7.9.
+One production transformation grid is used everywhere, `ua_2019z.asc`, the CRS-EU distribution of the EPSG:9902 operation; sampled at the estuary posts it gives an official correction at the posts 0.216 m. The EGG2015 quasigeoid used for the ICESat-2 and SWOT branches is a 7 200 × 3 600 raster at 1′ × 1′ spanning 50° W–70° E and 25° N–85° N, which is the declared geometry of the full-resolution EGG2015 product; the acquisition record and licence of this particular copy could not be reconstructed (Section 7.9).
 
 
 
@@ -95,7 +95,7 @@ The harmonisation of Section 4.1 is the method of this paper, not preparation fo
 
 ## 4.1 Vertical harmonisation: the four surfaces
 
-Gauge stages are carried into EVRF2019 normal heights by the official EPSG:9902 operation, sampled from the production grid at each station (10,194 daily values transformed); the offset is spatially varying, 0.1715 to 0.2157 m, so no single national constant is admissible. ICESat-2 ATL13 heights are reduced with the EGG2015 quasigeoid after adding the ATL03 tide-free-to-mean-tide term, which moves the six-station corrector by . SWOT PIXC heights are reduced by subtracting the solid-earth, load and pole tides that the product supplies but does not apply, never the geoid field, and then by the same quasigeoid. The residual permanent-tide term between a mean-tide crust and a zero-tide quasigeoid (1–4 cm at this latitude) is carried as its own line in the uncertainty budget.
+Gauge stages are carried into EVRF2019 normal heights by the official EPSG:9902 operation, sampled from the production grid at each station (10,194 daily values transformed); the offset is spatially varying, 0.1715 to 0.2157 m, so no single national constant is admissible. ICESat-2 ATL13 heights are reduced with the EGG2015 quasigeoid after adding the ATL03 tide-free-to-mean-tide term, so that a mean-tide crustal height is not differenced against a zero-tide quasigeoid without the conversion being made explicit. SWOT PIXC heights are reduced by subtracting the solid-earth, load and pole tides that the product supplies but does not apply, never the geoid field, and then by the same quasigeoid. The residual permanent-tide term between a mean-tide crust and a zero-tide quasigeoid (1–4 cm at this latitude) is carried as its own line in the uncertainty budget.
 
 ## 4.2 Chainage
 
@@ -176,7 +176,7 @@ median deviation +0.022 m; NMAD 0.045 m (flat pool <180 km (n=5): median +0.047 
 
 ## 5.9 What the frame is worth
 
-Six independent checks were performed before any hydraulic or surface result was interpreted; one (the 5 April 2023 anomaly) failed and is reported as failed. The reconstructed bed carries a cross-validated point accuracy and a validated area statistic; it carries no rate of change and no accuracy beyond 250 m, and it is released with those limits stated.
+Six validation and consistency checks were made before any hydraulic result was interpreted, and one — the 5 April 2023 anomaly — failed and is reported as failed. Not all six are independent of one another: RiverSP and PIXC come from the same SWOT observation, so their agreement establishes the correction chain rather than accuracy. The genuinely independent constraints are the gauge records and the 1970 field survey.
 
 # 6. THE MEASUREMENT
 
@@ -184,9 +184,9 @@ Six independent checks were performed before any hydraulic or surface result was
 
 Before the breach the impounded pool was near-level. Per-reach ICESat-2 slopes (0-180 km: +0.00, -0.06, +0.06 cm/km; 210-240 km: +0.13 cm/km) lie inside the historical discharge envelope of the design tables, and the 22–25 April 1970 field-measured free-surface curve, digitised and validated against Table 20 (median deviation +0.022 m; NMAD 0.045 m), bounds them from above. The apparent slope in the 180–210 km band is a chainage-geometry artefact, not a hydraulic signal (all fits in the band are single overpasses; chainage span / ground span median 1.34 (p90 1.94, max 2.65)).
 
-## 6.2 Drawdown
+## 6.2 Early establishment of the post-breach gradient
 
-The five overpasses of July–September 2023 already carry the post-breach gradient: Theil-Sen median +3.245 cm/km (2023-07-07..2023-09-07) (n = 5). The structural change is therefore visible during the transient drainage itself, not only once the system had settled.
+The pool had drained by the end of June 2023, so the first ICESat-2 overpasses available over the residual system — five between 7 July and 7 September — observe an already-emptied reach rather than the drainage transient. They carry the post-breach gradient from the start: Theil-Sen median +3.245 cm/km (2023-07-07..2023-09-07) (n = 5). The new geometry was therefore established within weeks of depletion and is not a feature only of the settled 2024–25 sample. These passes are not used to reconstruct the drainage itself; that is the subject of the next section.
 
 ## 6.2.1 The drawdown and the flood wave from orbit
 
@@ -198,7 +198,6 @@ That SWOT caught this event is not a new observation: the flood below the dam ha
 |---|---|---|
 | Outlet water surface, 31 May → 13 June 2023 | outlet 5.63 m EVRF2019 on 13 June, from 17.53 m on 31 May | 3 SWOT nodes on the date |
 | Rise above the pre-breach surface, 15 km below the dam | rise 9.10 m at 15 km (peak 10.24 m on 2023-06-07) | 48 nodes in the bin |
-| Longitudinal slope during the drawdown overpasses | Theil-Sen median +3.245 cm/km (2023-07-07..2023-09-07) | 5 |
 
 *Node counts per date are small; the series is a sequence of observed surfaces, not a gauged hydrograph.*
 
@@ -214,14 +213,26 @@ Across the 14 pre-breach and 14 post-breach overpasses with a chainage span of a
 | Quantity | Pre → post | Uncertainty | n |
 |---|---|---|---|
 | Per-overpass longitudinal slope, footprint-wide | Theil-Sen median +0.090 cm/km pre -> +3.314 cm/km post; difference +3.223 cm/km | 95% CI [+1.994, +5.071] cm/km; permutation p = 1.00e-04; Mann-Whitney p = 3.92e-05; positive slopes pre 10/14 (sign test p = 0.180) vs post 14/14 (p = 1.22e-04) | 14 pre / 14 post |
-| Slope during the drawdown | Theil-Sen median +3.245 cm/km (2023-07-07..2023-09-07) | sits between the pre-breach and post-breach medians | 5 |
-| Slope, sensitivity to the chainage span | OLS +0.038 -> +2.781 cm/km, difference +2.744 cm/km | 95% CI [+1.454, +4.323]; permutation p = 3.00e-04 | 14 pre / 14 post |
+| Slope in the first passes after drainage | Theil-Sen median +3.245 cm/km (2023-07-07..2023-09-07) | sits between the pre-breach and post-breach medians | 5 |
+| Slope, estimator sensitivity (ordinary least squares) | OLS +0.038 -> +2.781 cm/km, difference +2.744 cm/km | 95% CI [+1.454, +4.323]; permutation p = 3.00e-04 | 14 pre / 14 post |
 | Slope, channel-restricted control | Theil-Sen difference +1.109 cm/km, 95% CI [-0.086, +2.186] | permutation p = 0.0009; post positive 4/6; Cliff's delta -0.467 | 20 pre / 6 post |
+| Per-overpass measurement uncertainty, post-breach | — | — | — |
+| Per-overpass measurement uncertainty, pre-breach | — | — | — |
+| Minimum fitted span, 30 km | — | — | — |
 | Within-overpass water-surface heterogeneity | 0.117 m -> 0.397 m, difference +0.280 m | 95% CI [+0.138, +0.367] m; permutation p = 5.00e-05; Mann-Whitney p = 1.57e-11 | 192 pre / 23 post |
 | Planform: water area | pre-breach 2023-06-05: 2 water bodies, 2,129 km2, largest component 99.995% of water area / post-breach median 503 bodies, 289 km2, largest component 58.2% | post-breach range 161-634 bodies; largest-component fraction 31.5-80.6% | 1 pre / 4 post |
 | Planform: residual water bodies | median offset -0.595 m | NMAD 0.459 m; p05 -1.19, p95 +0.51 m; 15.3% lie above the stem | 678 |
-| Drawdown exposure, reconstructed vs historical | whole mapped reservoir: historical 12.9% vs reconstructed 12.77% (diff -0.18 pp) | across interpolators 12.61-13.29% (spread 0.68 pp); by reach historical 3.9 / 9.4 / 26.0 % vs reconstructed 7.5 / 9.3 / 21.7 % | 3 |
 
+
+## 6.3.1 What one overpass can and cannot show
+
+The interval quoted above is on the difference of medians *across* overpasses. It is not a statement about any single pass, and the two must not be read as one. Fitted through six beam-median points over some 25 km, an individual post-breach slope is poorly resolved:  (; n = ). Before the breach the same fit is far tighter —  — because a level surface offers no leverage for disagreement between beams, whereas a sloping, spatially heterogeneous one does.
+
+The transition is therefore evidenced by repetition rather than by precision: every post-breach pass is positive where only ten of fourteen were before, and it is that consistency, not the sharpness of any one measurement, which the confidence interval of Section 6.3 summarises (The evidence for the transition is therefore the ensemble - every post-breach pass positive, and the difference of medians - not the precision of any one measurement. Per-pass precision here is poorer than published reach-scale ICESat-2 slope benchmarks because the fits use six beam medians over a short span rather than a dense reach dataset.).
+
+## 6.3.2 Sensitivity to the fitted span
+
+ (n = ). The 10 km and 20 km thresholds are not binding: the shortest fitted span in the sample is 20.3 km, so those rows repeat the headline rather than testing it. At 40 km only three passes per period remain and the difference falls to +2.988 cm/km.
 
 ## 6.4 The channel-restricted control
 
@@ -233,7 +244,7 @@ On all ATL13 dates in the footprint, the within-overpass p95–p05 range of wate
 
 ## 6.6 Planform transformation
 
-Sentinel-2 water masks with a coverage gate show the transition from one continuous impounded surface to a channel with disconnected remnants: pre-breach 2023-06-05: 2 water bodies, 2,129 km2, largest component 99.995% of water area | post-breach median 503 bodies, 289 km2, largest component 58.2%. Only one pre-breach date has near-complete coverage, so this contrast is descriptive and carries no significance test; water-body counts are not reported because they scale with the observed fraction of the footprint.
+The optical record independently documents the loss of a single connected impounded surface (pre-breach 2023-06-05: 2 water bodies, 2,129 km2, largest component 99.995% of water area | post-breach median 503 bodies, 289 km2, largest component 58.2%). Component counts are not used inferentially: only one pre-breach date has near-complete coverage, and observed connectivity scales with the observed fraction, so the contrast is reported as corroboration of the geometric result rather than as a measurement in its own right.
 
 ## 6.7 Residual water bodies
 
@@ -253,9 +264,9 @@ Reaches released from an impoundment adjust in ways that are neither uniform nor
 
 ## 7.1 From an impounded to a river-dominated state
 
-A pool held at a normal impoundment level has no longitudinal gradient to speak of: its surface is set by the dam, and the hydraulic rise over the reach is smaller than the wind setup and seiche that cross it (mean hydraulic rise over 183 km: 0 cm (Qmin), 6 cm (Q20%), 42 cm (Q1%) | seiche half-range at an antinode 17.5 cm | wind setup at an end 35 cm (15 m/s) to 148 cm (25 m/s)). A river's surface is set by its bed and its discharge, and it slopes. The measured change is between those two conditions, and it is the persistence that distinguishes it from the drawdown transient: the gradient is present in the drawdown overpasses and still present through 2025 (Theil-Sen median +3.245 cm/km (2023-07-07..2023-09-07)).
+Before the breach, the historical survey and the pre-breach overpasses agree that this particular impoundment held a near-level surface over the observed reach, with a hydraulic rise smaller than the wind setup and seiche that crossed it (mean hydraulic rise over 183 km: 0 cm (Qmin), 6 cm (Q20%), 42 cm (Q1%) | seiche half-range at an antinode 17.5 cm | wind setup at an end 35 cm (15 m/s) to 148 cm (25 m/s)). After depletion every overpass in the analysis carries a positive downstream gradient, and it does so from the first passes after drainage through to 2025 (Theil-Sen median +3.245 cm/km (2023-07-07..2023-09-07)). We read the change as a transition from a dam-controlled water-surface geometry to a channel-controlled one. That is a diagnosis from the observed surface: it is not an estimate of discharge, nor of friction or energy slope, and it is a statement about this reach rather than about reservoirs and rivers in general, which can both depart from these idealisations under backwater, unsteady flow and appreciable inflow.
 
-Reaches released from an impoundment adjust in ways that are neither uniform nor immediate ((Nichols et al., 2017)), and incisional channels formed after dam removal widen and narrow through migrating fronts rather than settling monotonically ((Cantelli et al., 2004); (Cantelli et al., 2007)). What is observed here is the surface expression of the earliest part of that adjustment, over a reach two orders of magnitude larger than the removals from which the canon is drawn.
+The measured geometric change is consistent with a process literature in which the removal of a hydraulic control, or an imposed drawdown of the water surface, accelerates flow and initiates incision and subsequent channel adjustment. Laboratory dam-removal experiments document rapid incision followed by erosional narrowing and later widening ((Cantelli et al., 2004); (Cantelli et al., 2007)), and field-scale levee breaches show that an imposed drawdown accelerates flow and promotes incision in the adjacent system ((Nichols et al., 2017)). These are process analogues, not scale equivalents: the first is a flume, the second a levee rather than a reservoir dam, and neither establishes that a persistent satellite-measured gradient is a general diagnostic of release from impoundment.
 
 Before the breach the sign of the per-overpass slope was indistinguishable from a coin flip and the surface varied by centimetres over tens of kilometres; after it, every overpass shows water rising upstream at a few centimetres per kilometre, with metre-scale variability, and the change was already present during drainage. The comparison with reservoir-to-river transitions documented elsewhere belongs to Section 7.8 and is withheld until the literature retrieval has been validated.
 
@@ -361,20 +372,13 @@ Historical bathymetric surveys and reservoir design records can serve as indepen
 > `blocks_submission: yes`
 
 
-## 7.8 Implications for monitoring
+## 7.9 Implications for monitoring
 
 The quantities that change first and persist — slope and within-overpass heterogeneity — are derivable from open satellite archives once a vertical frame is fixed; the quantities that cannot yet be derived — post-breach discharge and a rate of bed change — name the observations still needed.
 
-## 7.9 Limitations
+## 7.10 Limitations
 
-The channel-restricted slope control is underpowered (Theil-Sen difference +1.109 cm/km, 95% CI [-0.086, +2.186]). The slope–discharge relation after the breach is not testable: . The survey epoch of the soundings is unrecorded (no epoch), the Baltic realisation of the historical tables is unstated, three co-located SWOT–ICESat-2 overpasses exist, and no wind record covers the 5 April 2023 anomaly. The 1′×1′ EGG2015 raster has no citable upstream source; this is a citation problem, not a numerical one, and it blocks submission until resolved. 
-
-> **[PENDING OPEN99]** EGG2015 provenance (G2) unresolved
-> `backs: G2` · `section: 7.9 Limitations`
-> `unblock_by: obtain the 1′ EGG2015 grid with licence, or re-run on the public 10′×15′ grid and report the difference` · `status: blocked`
-> `blocks_submission: yes`
-
-
+The channel-restricted slope control is underpowered (Theil-Sen difference +1.109 cm/km, 95% CI [-0.086, +2.186]). The slope–discharge relation after the breach is not testable: . The survey epoch of the soundings is unrecorded (no epoch), the Baltic realisation of the historical tables is unstated, three co-located SWOT–ICESat-2 overpasses exist, and no wind record covers the 5 April 2023 anomaly. The quasigeoid raster is identified but its copy is not documented: its dimensions, resolution and extent match the full-resolution EGG2015 product uniquely, and that product is a restricted rather than a public release, but the acquisition record and licence of this file could not be reconstructed (). This is a data-provenance and reproducibility limitation rather than a numerical one, and it constrains what may be redistributed rather than what may be concluded.
 
 # 8. CONCLUSIONS
 

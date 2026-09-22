@@ -29,6 +29,6 @@ Eight photographed pages of the Dnipro reservoirs monograph (Tables 19–21, Fig
 
 ## 3.6 Geodetic reference data
 
-{{claim:G1}} The EGG2015 quasigeoid grid used for the ICESat-2 and SWOT branches is the 1′×1′ raster whose provenance is discussed in Section 7.9.
+One production transformation grid is used everywhere, `ua_2019z.asc`, the CRS-EU distribution of the EPSG:9902 operation; sampled at the estuary posts it gives an {{claim:G1}}. The EGG2015 quasigeoid used for the ICESat-2 and SWOT branches is a 7 200 × 3 600 raster at 1′ × 1′ spanning 50° W–70° E and 25° N–85° N, which is the declared geometry of the full-resolution EGG2015 product; the acquisition record and licence of this particular copy could not be reconstructed (Section 7.9).
 
 {{pending:TAB01|Table 1 — data sources (machine-generated from the snapshot inventories; must state the three ICESat-2 samples and the single full-coverage pre-breach Sentinel-2 date)|backs=V1.3,M1.1,M2.1,M3.1,S1.5|section=3 Data|produces=knoweledg_graf src/paper_3/v2/assemble.py TABLE_SPECS T1|status=not_started|blocks_submission=yes}}
