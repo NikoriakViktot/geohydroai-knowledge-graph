@@ -8,9 +8,9 @@ All seven gauge records are carried into EVRF2019 by the official operation appl
 
 The tie to the gauges is not the same thing as a confirmation of the grid, and the two must be reported apart. Each station's alignment constant is well determined — {{claim:V1.5}} (n = {{claim:V1.5.n}}) — but across the six stations the empirical offset does not follow the official transformation: {{claim:V1.4}} ({{claim:V1.4.unc}}). All six matchup sets precede the breach by construction, since the reservoir gauge records end on 31 December 2021. {{claim:V1.4.caveat}}
 
-![Official transformation against the offset derived from ICESat-2 at six reservoir stations, and the per-station alignment constants with bootstrap intervals.](figures/F01_gauge_icesat_tie.png)
+![Per-station EGG2015-to-EVRF2019 corrector with bootstrap intervals, and the same corrector against longitude along the reach.](figures/F01_gauge_icesat_tie.png)
 
-**Figure 1.** The satellite branch against the gauges, pre-breach. (a) The official BS-77 to EVRF2019 correction against the offset implied by ICESat-2 at the same station; the dashed line is 1:1. (b) Station alignment constants with 95 % bootstrap intervals, ordered by the official correction. The constant is of one sign at every station and averages −17.3 cm.
+**Figure 1.** The EGG2015-to-EVRF2019 corrector at six reservoir gauges, pre-breach. (a) Station alignment constants with 95 % bootstrap intervals; every station gives the same sign and the mean is −17.3 cm. (b) The same constants against longitude along the reach, with a linear fit. The reach has only six gauges, so this fit has six independent points and cannot be read as more than a check for a gross trend — it rules out nothing subtler than that.
 
 ## 5.2 The SWOT PIXC vertical chain
 
@@ -26,7 +26,7 @@ Against the one continuous in-situ record in the downstream reach, the satellite
 
 ## 5.5 A validated negative result
 
-{{claim:V4.2}} ({{claim:V4.2.unc}}). No wind or pressure record exists for that day, so wind setup can be neither confirmed nor excluded; this remains a limitation.
+{{claim:V4.2}} ({{claim:V4.2.unc}}). No wind or pressure record exists for that day, so wind setup can be neither confirmed nor excluded {{cite:roy2017}}; this remains a limitation.
 
 ## 5.6 Spatial limits of an empirical correction
 

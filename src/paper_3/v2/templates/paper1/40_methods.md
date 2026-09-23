@@ -12,7 +12,7 @@ Reservoir profiles use a centreline built from the reservoir polygon by principa
 
 ## 4.3 Per-overpass slope and its inference
 
-For every overpass the beam-median water-surface elevation of each of the six beams is regressed on chainage; the Theil–Sen estimator {{cite:theil1992,sen1968}} is primary and ordinary least squares the sensitivity check. One overpass is the independent unit {{cite:hurlbert1984}}: segments and beams within a pass share the atmosphere and the water state and are never treated as replicates. The pre/post contrast uses a bootstrap on the difference of medians {{cite:efron1979}}, a two-sided permutation test {{cite:ernst2004}} and a sign test, and is repeated at minimum spans of 10, 20, 30 and 40 km.
+For every overpass the beam-median water-surface elevation of each of the six beams is regressed on chainage; the Theil–Sen estimator {{cite:theil1992,sen1968}} is primary and ordinary least squares the sensitivity check. One overpass is the independent unit {{cite:hurlbert1984,alston2022}}: segments and beams within a pass share the atmosphere and the water state and are never treated as replicates. The pre/post contrast uses a bootstrap on the difference of medians {{cite:efron1979}}, a two-sided permutation test {{cite:ernst2004}} and a sign test, and is repeated at minimum spans of 10, 20, 30 and 40 km.
 
 ## 4.4 Water-surface heterogeneity
 
@@ -29,4 +29,4 @@ Water masks follow a frozen NDWI/MNDWI/scene-classification rule on the 20 m reg
 
 ## 4.7 Statistical rules
 
-Every statistic names its independent unit. Absence statements about the literature are made only for a screened sample with a stated denominator, and only after retrieval has been validated against hold-out controls.
+Every statistic names its independent unit, and where a model is scored the folds are blocked in space rather than drawn at random {{cite:pohjankukka2017}}. Absence statements about the literature are made only for a screened sample with a stated denominator, and only after retrieval has been validated against hold-out controls.

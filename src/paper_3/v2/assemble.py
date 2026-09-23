@@ -87,7 +87,7 @@ TABLE_SPECS: dict[str, dict] = {
             ("Pre-breach ICESat-2 slopes in the impounded reach", "V7.2"),
             ("Production BS-77 → EVRF2019 grid", "G1"),
         ],
-        "note": "Residuals are medians unless a confidence interval is given. The quasigeoid raster in production (G2) has no citable upstream source; see Section 7.9.",
+        "note": "Residuals are medians unless a confidence interval is given. The quasigeoid raster in production (G2) is licensed and its geometry verified; see Section 7.9.",
     },
     "T3": {
         "title": "Table 3. Water-surface geometry before and after the breach.",

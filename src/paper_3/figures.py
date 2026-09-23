@@ -355,52 +355,53 @@ def fig_heterogeneity(plt) -> Path | None:
 
 
 def fig_gauge_icesat(plt) -> Path | None:
-    """The tie between the satellite branch and the gauges, station by station.
+    """The EGG2015 -> EVRF2019 corrector at each gauge, pre-breach.
 
-    Only pre-breach data can appear here: the reservoir gauge series end on
-    31 December 2021, so every matchup precedes the breach by construction.
+    An earlier version of this panel plotted the official BS-77 transformation
+    against the offset implied by ICESat-2 and reported that they do not
+    correlate. That was a category error: the two are different conversions
+    between different frames, and their disagreement is expected rather than
+    informative. What the stations do measure is the step that remains because
+    EGG2015 is EVRF2007-consistent, and that is what is shown.
     """
     import numpy as np
     a = _read_at(ICESAT, "egg2015_to_evrf2019_by_station.csv")
-    b = _read_at(ICESAT, "kakhovka_datum_comparison.csv")
-    if a is None or b is None:
+    if a is None:
         return None
-    m = a.merge(b[["station_id", "delta_empirical_m", "delta_official_m",
-                   "delta_unexplained_m"]], on="station_id").sort_values("delta_official_m")
     from scipy import stats
-    x, y = m["delta_official_m"].values, m["delta_empirical_m"].values
-    r, p_r = stats.pearsonr(x, y)
+    a = a.sort_values("lon")
+    c = a["c_station_m"].values * 100
+    lo = (a["c_station_m"] - a["bootstrap_ci95_low_m"]).abs().values * 100
+    hi = (a["bootstrap_ci95_high_m"] - a["c_station_m"]).abs().values * 100
 
     fig, (ax, bx) = plt.subplots(1, 2, figsize=(7.4, 3.2),
-                                 gridspec_kw={"width_ratios": [1, 1.25]})
-    ax.scatter(x * 100, y * 100, s=46, color=ACCENT, zorder=3)
-    for xi, yi, nm, nn in zip(x, y, m["name_en"], m["n_matchups"]):
-        ax.annotate(f"{nm} (n={nn})", (xi * 100, yi * 100), textcoords="offset points",
-                    xytext=(7, 4), fontsize=6.2, color=INK)
-    lim = [min(x.min(), y.min()) * 100 - 3, max(x.max(), y.max()) * 100 + 3]
-    ax.plot(lim, lim, color=MUTED, lw=1.0, ls="--", label="1:1")
-    ax.set_xlim(lim); ax.set_ylim(lim)
-    ax.set_xlabel("official transformation (cm)")
-    ax.set_ylabel("empirical offset from ICESat-2 (cm)")
-    ax.set_title(f"a · the two do not track each other\n"
-                 f"Pearson r = {r:+.2f} (p = {p_r:.2f}, n = {len(m)})", loc="left")
-    ax.legend(fontsize=7, loc="upper left")
-    ax.grid(alpha=0.2)
-
-    yy = np.arange(len(m))
-    lo = (m["c_station_m"] - m["bootstrap_ci95_low_m"]).abs().values * 100
-    hi = (m["bootstrap_ci95_high_m"] - m["c_station_m"]).abs().values * 100
-    bx.errorbar(m["c_station_m"].values * 100, yy, xerr=[lo, hi], fmt="o",
-                ms=5, color=ACCENT, ecolor=ACCENT, elinewidth=1.1, capsize=2.5)
-    bx.axvline(float(m["c_station_m"].mean()) * 100, color=WARM, lw=1.2,
-               label=f"mean {m['c_station_m'].mean()*100:+.1f} cm")
-    bx.set_yticks(yy)
-    bx.set_yticklabels([f"{n}  (n={k})" for n, k in zip(m["name_en"], m["n_matchups"])],
+                                 gridspec_kw={"width_ratios": [1.25, 1]})
+    yy = np.arange(len(a))
+    ax.errorbar(c, yy, xerr=[lo, hi], fmt="o", ms=5.5, color=ACCENT,
+                ecolor=ACCENT, elinewidth=1.1, capsize=2.5, zorder=3)
+    ax.axvline(float(c.mean()), color=WARM, lw=1.3,
+               label=f"mean {c.mean():+.1f} cm")
+    ax.axvspan(c.mean() - c.std(ddof=1), c.mean() + c.std(ddof=1),
+               color=WARM, alpha=0.10, lw=0)
+    ax.set_yticks(yy)
+    ax.set_yticklabels([f"{n}  (n={k})" for n, k in zip(a["name_en"], a["n_matchups"])],
                        fontsize=7.2)
-    bx.set_xlabel("alignment constant (cm), 95 % bootstrap interval")
-    bx.set_title("b · well determined at each station,\nand of one sign throughout", loc="left")
-    bx.legend(fontsize=7.5, loc="lower right")
-    bx.grid(axis="x", alpha=0.25)
+    ax.set_xlabel("EGG2015 → EVRF2019 corrector (cm), 95 % bootstrap interval")
+    ax.set_title("a · one sign at every station,\nspread 9 cm across the reach", loc="left")
+    ax.legend(fontsize=7.5, loc="lower right")
+    ax.grid(axis="x", alpha=0.25)
+
+    fit = stats.linregress(a["lon"].values, a["c_station_m"].values)
+    bx.errorbar(a["lon"].values, c, yerr=[lo, hi], fmt="o", ms=5, color=ACCENT,
+                ecolor=ACCENT, elinewidth=1.0, capsize=2.2, zorder=3)
+    xs = np.linspace(a["lon"].min() - 0.05, a["lon"].max() + 0.05, 50)
+    bx.plot(xs, (fit.intercept + fit.slope * xs) * 100, color=MUTED, lw=1.1, ls="--")
+    bx.set_xlabel("longitude (°E), the reach axis")
+    bx.set_ylabel("corrector (cm)")
+    bx.set_title(f"b · no resolvable drift along the reach\n"
+                 f"{fit.slope*100:+.1f} ± {fit.stderr*100:.1f} cm per degree (p = {fit.pvalue:.2f})",
+                 loc="left")
+    bx.grid(alpha=0.22)
 
     out = FIGURE_DIR / "F01_gauge_icesat_tie.png"
     fig.savefig(out); plt.close(fig)

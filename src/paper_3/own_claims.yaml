@@ -1138,55 +1138,61 @@ claims:
   # The frame ties the satellite to the gauges; whether the satellite then
   # CONFIRMS the official grid's spatial pattern is a separate question, and the
   # answer is no. Reporting only the tie would overstate what the frame is worth.
+  # ICESat-2 heights are reduced with EGG2015, which is EVRF2007-consistent, and
+  # the gauges are in EVRF2019. A step between the two is expected by
+  # construction; c_station measures it. It is NOT a residual of the official
+  # BS-77 transformation, and setting the two against each other would compare
+  # different frame conversions.
   - id: V1.4
     paper: 1
     family: vertical_frame
     claim_type: validation
     statement: >
-      Across the six reservoir stations the empirical offset derived from
-      ICESat-2 does not reproduce the spatial pattern of the official
-      transformation: the two are uncorrelated, and the difference between them
-      is a systematic shift of the same sign at every station.
+      ICESat-2 heights reduced with EGG2015 are EVRF2007-consistent, not
+      EVRF2019, so a frame step remains before they can be differenced against
+      the gauges. Measured at the six reservoir stations the step is of one sign
+      throughout and stable along the reach.
     derived: gauge_icesat_agreement.csv
-    value: "Pearson r {pearson_r} (p {pearson_p}, n = {n_stations} stations); residual {residual_mean_m:+.3f} m, SD {residual_sd_m:.3f} m, same sign at all stations"
-    uncertainty: "regression slope {slope} ± {slope_stderr}; residual range {residual_min_m:.3f}–{residual_max_m:.3f} m"
-    n: "{n_matchups} pre-breach matchups at {n_stations} stations"
+    value: "EGG2015 → EVRF2019 corrector {corrector_mean_m:+.3f} m (median {corrector_median_m:+.3f}), SD {corrector_sd_m:.3f} m, range {corrector_range_m:.3f} m"
+    uncertainty: "no resolvable drift along the reach, on the six points available — one per gauge, enough only to catch a gross trend: {drift_per_degree_lon_m:+.3f} ± {drift_stderr_m:.3f} m per degree of longitude (p {drift_p})"
+    n: "{n_matchups} pre-breach matchups on {n_dates} dates at {n_stations} stations"
     unit: m
     status_source: manual
     audit_status: SUPPORTED_WITH_LIMITATION
     manuscript_section: "5.1 The gauge network in one geodetic frame"
-    time_period: "pre-breach only, by construction: the reservoir gauge series end 31 December 2021"
     article_thesis: AT4
-    literature_thesis_ids: [T08, T10, T11]
+    literature_thesis_ids: [T08, T09, T11]
     figure_id: F01
     table_id: T2
+    time_period: "pre-breach only, by construction: the reservoir gauge series end 31 December 2021"
     scientific_caveat: >
-      Six stations cannot refute a spatial pattern any more than they can
-      confirm one: with n = 6 the correlation test is badly underpowered, so
-      this is an absence of confirmation rather than a contradiction of the
-      official grid. What it does establish is that the satellite branch is
-      tied to the gauges by a constant of about 0.17 m which the transformation
-      does not explain, and that constant must not be read as a validation of
-      the grid's spatial structure.
+      The step is larger than the EVRF2007-to-EVRF2019 difference alone is
+      assumed to be, which the production configuration sets to zero at the
+      centimetre level, so it also carries the ATL13 water-surface bias. The two
+      cannot be separated with these data; a national quasigeoid (UKG2025) would
+      make the geodetic part directly computable and is the strongest available
+      next test. Until then the corrector is applied as one empirical constant
+      per station and is not attributed to either cause.
+    remaining_action: "recompute c_geodetic = zeta_EGG2015 - zeta_UKG2025 to separate the frame step from the sensor bias"
     blocks_submission: "no"
   - id: V1.5
     paper: 1
     family: vertical_frame
     claim_type: validation
     statement: >
-      Each station's alignment constant is nevertheless well determined: the
-      scatter of matchups within a station is a few centimetres, an order below
-      the unexplained shift between stations and the official grid.
+      Each station determines its own corrector to a few centimetres, an order
+      below the spread between stations, so the constant is a measurement rather
+      than a fitted convenience.
     derived: gauge_icesat_agreement.csv
-    value: "per-station NMAD {per_station_nmad_min_m}–{per_station_nmad_max_m} m"
+    value: "within-station NMAD {within_station_nmad_min_m}–{within_station_nmad_max_m} m against a between-station SD of {corrector_sd_m:.3f} m"
     n: "{n_matchups} pre-breach matchups at {n_stations} stations"
-    time_period: "pre-breach only; no reservoir gauge records exist after 2021"
     unit: m
     status_source: manual
     audit_status: SUPPORTED
     manuscript_section: "5.1"
     article_thesis: AT4
     figure_id: F01
+    time_period: "pre-breach only; no reservoir gauge records exist after 2021"
     blocks_submission: "no"
 
 overrides:

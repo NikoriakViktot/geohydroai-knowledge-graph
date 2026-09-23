@@ -19,6 +19,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from src.paper_3._utils import OUT_DIR
@@ -98,37 +99,39 @@ def span_sensitivity(frame: pd.DataFrame, spans: tuple[int, ...] = SPANS_KM) -> 
 
 
 def gauge_icesat_agreement(_frame: pd.DataFrame | None = None) -> pd.DataFrame:
-    """Does the satellite confirm the official transformation, station by station?
+    """The EGG2015 -> EVRF2019 corrector, measured at the gauges.
 
-    The manuscript states that the BS-77 to EVRF2019 offset varies along the
-    reach. That is a property of the official grid. Whether ICESat-2 reproduces
-    the same spatial pattern is a separate question, and the answer decides how
-    much the satellite branch can be said to validate the frame rather than
-    merely be tied to it.
+    ICESat-2 heights are reduced with EGG2015, which is EVRF2007-consistent;
+    the gauges are in EVRF2019. A step between the two is therefore expected by
+    construction, and ``c_station = median(H_gauge_EVRF2019 - H_ICESat_EGG2015)``
+    measures it. It is NOT a residual of the official BS-77 transformation, and
+    comparing it against that transformation would set two different frame
+    conversions against each other.
+
+    What the six stations can say is whether the corrector is stable along the
+    reach and how well each station determines it.
     """
     from scipy import stats
     a = pd.read_csv(ICESAT_TABLES / "egg2015_to_evrf2019_by_station.csv")
-    b = pd.read_csv(ICESAT_TABLES / "kakhovka_datum_comparison.csv")
-    m = a.merge(b[["station_id", "delta_empirical_m", "delta_official_m",
-                   "delta_unexplained_m"]], on="station_id")
-    x, y, u = (m["delta_official_m"].values, m["delta_empirical_m"].values,
-               m["delta_unexplained_m"].values)
-    r, p_r = stats.pearsonr(x, y)
-    rho, p_rho = stats.spearmanr(x, y)
-    fit = stats.linregress(x, y)
+    c = a["c_station_m"].values
+    # does the corrector drift along the reach? longitude is the reach axis here
+    fit = stats.linregress(a["lon"].values, c)
     return pd.DataFrame([{
-        "n_stations": len(m), "n_matchups": int(m["n_matchups"].sum()),
-        "official_min_m": round(float(x.min()), 4), "official_max_m": round(float(x.max()), 4),
-        "empirical_min_m": round(float(y.min()), 4), "empirical_max_m": round(float(y.max()), 4),
-        "pearson_r": round(float(r), 3), "pearson_p": round(float(p_r), 3),
-        "spearman_rho": round(float(rho), 3), "spearman_p": round(float(p_rho), 3),
-        "slope": round(float(fit.slope), 3), "slope_stderr": round(float(fit.stderr), 3),
-        "residual_mean_m": round(float(u.mean()), 4),
-        "residual_sd_m": round(float(u.std(ddof=1)), 4),
-        "residual_min_m": round(float(u.min()), 4), "residual_max_m": round(float(u.max()), 4),
-        "residual_one_sign": bool((u > 0).all() or (u < 0).all()),
-        "per_station_nmad_min_m": round(float(a["empirical_nmad_m"].min()), 3),
-        "per_station_nmad_max_m": round(float(a["empirical_nmad_m"].max()), 3),
+        "n_stations": len(a), "n_matchups": int(a["n_matchups"].sum()),
+        "n_dates": int(a["n_dates"].sum()),
+        "corrector_mean_m": round(float(c.mean()), 4),
+        "corrector_median_m": round(float(np.median(c)), 4),
+        "corrector_sd_m": round(float(c.std(ddof=1)), 4),
+        "corrector_min_m": round(float(c.min()), 4),
+        "corrector_max_m": round(float(c.max()), 4),
+        "corrector_range_m": round(float(c.max() - c.min()), 4),
+        "one_sign": bool((c > 0).all() or (c < 0).all()),
+        "drift_per_degree_lon_m": round(float(fit.slope), 4),
+        "drift_stderr_m": round(float(fit.stderr), 4),
+        "drift_p": round(float(fit.pvalue), 3),
+        "within_station_nmad_min_m": round(float(a["empirical_nmad_m"].min()), 3),
+        "within_station_nmad_max_m": round(float(a["empirical_nmad_m"].max()), 3),
+        "assumed_evrf2019_minus_evrf2007_m": 0.0,
     }])
 
 

@@ -692,14 +692,18 @@ V1.3:
 V1.4:
   audit_status: SUPPORTED_WITH_LIMITATION
   findings:
-  - 'Six stations cannot refute a spatial pattern any more than they can confirm one:
-    with n = 6 the correlation test is badly underpowered, so this is an absence of
-    confirmation rather than a contradiction of the official grid. What it does establish
-    is that the satellite branch is tied to the gauges by a constant of about 0.17
-    m which the transformation does not explain, and that constant must not be read
-    as a validation of the grid''s spatial structure.
+  - 'The step is larger than the EVRF2007-to-EVRF2019 difference alone is assumed
+    to be, which the production configuration sets to zero at the centimetre level,
+    so it also carries the ATL13 water-surface bias. The two cannot be separated with
+    these data; a national quasigeoid (UKG2025) would make the geodetic part directly
+    computable and is the strongest available next test. Until then the corrector
+    is applied as one empirical constant per station and is not attributed to either
+    cause.
 
     '
+  required_actions:
+  - recompute c_geodetic = zeta_EGG2015 - zeta_UKG2025 to separate the frame step
+    from the sensor bias
   note: 'manual: derived/gauge_icesat_agreement.csv'
 V1.5:
   audit_status: SUPPORTED
