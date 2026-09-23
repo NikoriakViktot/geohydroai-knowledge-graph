@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -114,9 +115,33 @@ def build_sheet(out_dir: Path | None = None, theses: list[Thesis] | None = None,
 
     target.mkdir(parents=True, exist_ok=True)
     sheet_path = target / SHEET
+
+    # Labelling is the expensive step, and retrieval changes under it: adding
+    # papers to the corpus redraws the sample. Regenerating the sheet used to
+    # discard every label, so a rerun silently threw away hours of adjudication
+    # and reported "0 rows labelled". Rows that survive into the new sample keep
+    # theirs, matched on the paper and thesis rather than on row order, and the
+    # previous sheet is archived beside it.
+    carried = 0
+    if sheet_path.exists():
+        prev = pd.read_csv(sheet_path, dtype=str, keep_default_na=False)
+        if "label" in prev.columns and (prev["label"] != "").any():
+            stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            prev.to_csv(target / f"CALIBRATION_SHEET_{stamp}.csv", index=False)
+            keys = ["thesis_id", "paper_id", "doi"]
+            old_lab = prev.set_index(keys)[["label", "note"]]
+            idx = pd.MultiIndex.from_frame(sheet[keys].astype(str))
+            for col in ("label", "note"):
+                carried_vals = [old_lab[col].get(i, "") if i in old_lab.index else ""
+                                for i in idx]
+                sheet[col] = carried_vals
+            carried = int((sheet["label"] != "").sum())
+            logger.info("Carried %d label(s) forward from the previous sheet; "
+                        "archived it as CALIBRATION_SHEET_%s.csv", carried, stamp)
+
     sheet.to_csv(sheet_path, index=False)
-    logger.info("Calibration sheet: %d rows across %d theses → %s",
-                len(sheet), sheet["thesis_id"].nunique(), sheet_path)
+    logger.info("Calibration sheet: %d rows across %d theses, %d already labelled → %s",
+                len(sheet), sheet["thesis_id"].nunique(), carried, sheet_path)
     logger.info("Fill in the `label` column with one of: %s", ", ".join(LABELS))
     return sheet_path
 
