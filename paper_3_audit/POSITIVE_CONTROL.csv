@@ -19,7 +19,7 @@ T25,True,10.32999/ksu1990-553x/2024-20-3-5,10.32999_ksu1990-553x_2024-20-3-5,hol
 T25,True,10.15421/012528,10.15421_012528,development,direct,True,hard,semantic_retrieval,external_search,False,False,True,True,True,False,False,3,,False,False,False,semantic_retrieval,FAIL: on topic but retrieval missed it
 T25,True,10.30970/sbi.1903.838,10.30970_sbi.1903.838,holdout,direct,True,hard,semantic_retrieval,external_search,False,False,True,True,True,False,False,2,,False,False,False,semantic_retrieval,FAIL: on topic but retrieval missed it
 T25,True,10.26565/1992-4224-2026-45-07,10.26565_1992-4224-2026-45-07,holdout,direct,True,easy,semantic_retrieval,external_search,True,False,True,True,True,True,True,3,semantic,True,True,True,,ok
-T25,True,10.36023/ujrs.2025.12.4.296,,holdout,direct,True,easy,semantic_retrieval,citation,True,False,False,False,False,False,False,0,,False,False,False,not_in_corpus,not in corpus
+T25,True,10.36023/ujrs.2025.12.4.296,10.36023_ujrs.2025.12.4.296,holdout,direct,True,easy,semantic_retrieval,citation,True,False,True,False,False,False,False,1,,False,False,False,primary_family,FAIL: primary family too narrow — control misses it
 T25,True,10.15421/032510,,development,analogue,False,hard,semantic_retrieval,external_search,False,False,False,False,False,False,False,0,,False,False,False,not_in_corpus,not in corpus
 T26,False,10.1038/s41597-022-01307-4,10.1038_s41597-022-01307-4,development,method,False,easy,semantic_retrieval,citation,False,False,True,True,True,False,False,3,,False,False,False,semantic_retrieval,FAIL: on topic but retrieval missed it
 T27,True,10.1016/j.rse.2014.02.015,10.1016_j.rse.2014.02.015,development,method,False,easy,semantic_retrieval,expert_known,False,False,True,True,True,True,True,3,semantic,True,True,True,,ok
@@ -28,7 +28,7 @@ T29,False,10.1088/1748-9326/ac4d4f,10.1088_1748-9326_ac4d4f,development,analogue
 T30,False,10.1111/ecog.02881,,development,method,False,easy,semantic_retrieval,expert_known,False,False,False,False,False,False,False,0,,False,False,False,not_in_corpus,not in corpus
 T31,True,10.1016/j.rse.2011.05.005,,development,analogue,False,hard,semantic_retrieval,expert_known,False,False,False,False,False,False,False,0,,False,False,False,not_in_corpus,not in corpus
 T32,False,10.1109/lgrs.2019.2920225,10.1109_lgrs.2019.2920225,development,method,False,easy,semantic_retrieval,citation,False,False,True,True,True,True,True,2,semantic,True,True,True,,ok
-T33,True,10.3133/wsp2339,,development,direct,True,easy,semantic_retrieval,external_search,False,False,False,False,False,False,False,0,,False,False,False,not_in_corpus,not in corpus
+T33,True,10.3133/wsp2339,10.3133_wsp2339,development,direct,True,easy,semantic_retrieval,external_search,False,False,True,True,True,True,True,3,semantic,True,True,True,,ok
 T33,True,10.1080/15715124.2004.9635222,,development,direct,True,easy,semantic_retrieval,external_search,False,False,False,False,False,False,False,0,,False,False,False,not_in_corpus,not in corpus
 T33,True,10.1002/2013wr013819,,holdout,direct,True,hard,semantic_retrieval,external_search,False,False,False,False,False,False,False,0,,False,False,False,not_in_corpus,not in corpus
 T33,True,10.1146/annurev-fluid-120710-101048,,development,method,False,hard,citation_expansion,external_search,False,False,False,False,False,False,False,0,,False,False,False,not_in_corpus,not in corpus

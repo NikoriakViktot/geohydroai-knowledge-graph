@@ -23,7 +23,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.paper_3._utils import OUT_DIR, load_paper_json, paper_sections
+from src.paper_3._utils import OUT_DIR, doi_to_slug, load_paper_json, paper_sections
 from src.paper_3.theses import Thesis, load_theses
 
 logger = logging.getLogger(__name__)
@@ -391,12 +391,29 @@ def positive_control(theses: list[Thesis], index, candidates) -> "pd.DataFrame":
     """
     resolved, _missing = resolve_seeds(theses, index)
     doi_by_pid = dict(zip(index["paper_id"], index["doi"])) if len(index) else {}
+    # A control is "in corpus" when its text is there, not when its DOI is.
+    # Older reports carry no DOI a parser can find - the 1989 USGS roughness
+    # guide is the case that exposed this - so a DOI-only match reported a
+    # fully ingested paper as absent and sent the reader off to fetch it again.
+    # The slug is derived from the DOI by a deterministic rule, so it is a
+    # sound second key.
+    pid_by_slug = {}
+    if len(index):
+        for pid_, slug_ in zip(index["paper_id"], index.get("slug", index["paper_id"])):
+            if slug_:
+                pid_by_slug.setdefault(str(slug_), str(pid_))
+        for pid_ in index["paper_id"]:          # paper_id is itself the slug on disk
+            pid_by_slug.setdefault(str(pid_), str(pid_))
 
     rows = []
     for t in theses:
         for control in t.positive_controls:
             pid = next((p for p in resolved[t.id]
                         if doi_by_pid.get(p) == control.doi), None)
+            if pid is None:
+                want = doi_to_slug(control.doi)
+                pid = next((p for p in resolved[t.id] if str(p) == want), None) \
+                    or (pid_by_slug.get(want) if want in pid_by_slug else None)
             base = {
                 "thesis_id": t.id, "is_critical": t.is_critical,
                 "seed_doi": control.doi, "role": control.role,
