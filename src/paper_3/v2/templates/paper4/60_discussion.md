@@ -2,11 +2,11 @@
 
 ## 6.1 Novelty boundary
 
-Field-based habitat maps of the same bed exist ({{cite:kuzemko2025}}; {{cite:didukh2024}}); the contribution here is not the classification but the multi-year, whole-surface area and transition series on one grid, its translation into a roughness layer, and the hydraulic consequence of that layer once the models exist.
+Field-based habitat maps of the same bed exist {{cite:kuzemko2025,didukh2024}}; the contribution here is not the classification but the multi-year, whole-surface area and transition series on one grid, its translation into a roughness layer, and the hydraulic consequence of that layer once the models exist.
 
 ## 6.2 Succession as a hydraulic driver
 
-Two seasons turned most of the former water surface into reed, herbaceous cover and young willow; translated through published priors, the mapped surface implies roughly twice the area-weighted flow resistance of the open pool ({{claim:N1.1}}). The floodplain forest documented in the field ({{cite:didukh2024}}) is the class whose prior is widest ({{claim:N1.4a}}). {{pending:OPEN67|Discussion of modelled stage/conveyance change and of calibrated versus prior roughness|backs=P2-AT02,P2-AT03|section=6.2|blocks_submission=yes}}
+Two seasons turned most of the former water surface into reed, herbaceous cover and young willow; translated through published priors, the mapped surface implies roughly twice the area-weighted flow resistance of the open pool ({{claim:N1.1}}). The floodplain forest documented in the field {{cite:didukh2024}} is the class whose prior is widest ({{claim:N1.4a}}). {{pending:OPEN67|Discussion of modelled stage/conveyance change and of calibrated versus prior roughness|backs=P2-AT02,P2-AT03|section=6.2|blocks_submission=yes}}
 
 ## 6.3 Why calibration and validation are kept apart
 

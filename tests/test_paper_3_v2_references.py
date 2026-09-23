@@ -46,3 +46,16 @@ def test_rendered_block_carries_both_citations_and_a_parseable_marker():
 
 def test_rendering_is_deterministic():
     assert references.render_references_block() == references.render_references_block()
+
+
+def test_a_crossref_author_is_not_split_on_its_own_comma():
+    """CrossRef returns "Family, Given" per author, semicolon-separated. Splitting
+    on the inner comma turned the single author Ernst, Michael D. into
+    "Ernst & Michael"."""
+    from src.paper_3.v2.reference_registry import split_authors, first_family
+    assert split_authors("Ernst, Michael D.") == ["Ernst, Michael D."]
+    assert split_authors("Hurlbert, Stuart H.") == ["Hurlbert, Stuart H."]
+    assert split_authors("Efron, B.; Tibshirani, R.") == ["Efron, B.", "Tibshirani, R."]
+    assert first_family("Ernst, Michael D.") == "Ernst"
+    # the comma-separated form with no semicolons still splits on author boundaries
+    assert len(split_authors("Arcement G.J., Schneider V.R.")) == 2

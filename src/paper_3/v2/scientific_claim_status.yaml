@@ -429,19 +429,16 @@ G1:
     one breath (marker REF01).
   note: 'manual: outputs/tables/kakhovka_datum_comparison.csv'
 G2:
-  audit_status: SUPPORTED_WITH_LIMITATION
+  audit_status: SUPPORTED
   findings:
-  - 'Verified 2026-09-21: the production raster is 7 200 x 3 600 at exactly 1.0''
-    x 1.0'', spanning 50 W - 70 E and 25 N - 85 N, which is the declared domain of
-    EGG2015; the file carries no embedded provenance metadata and no licence, so its
-    chain of custody is undocumented even though its geometry identifies the product.
-    Cite Denker (2015) and state the resolution as verified from the raster, not from
-    the distribution.
-
-    '
-  required_actions:
-  - 'Confirm against the EGG2015 specification whether the official release is 1''
-    x 1'' or whether this file has been resampled; obtain the licence.
+  - 'Verified 2026-09-21 from the raster and 2026-09-23 from the record: the production
+    grid is 7 200 x 3 600 at exactly 1.0'' x 1.0'' over 50 W - 70 E and 25 N - 85
+    N, which is the declared geometry of the full-resolution EGG2015 product, and
+    it was licensed directly from Prof. H. Denker (Leibniz University Hannover), DRCI
+    DATA2018076013172051, as recorded in Nikoriak et al. (2026). The full-resolution
+    grid is not part of the public ISG release, whose spacing is 10'' x 15'', so the
+    absence of a public download trail is expected. The licence constrains redistribution
+    of the grid, not the conclusions drawn with it.
 
     '
 G3.1:

@@ -70,7 +70,11 @@ def test_the_shipped_file_reflects_the_imported_audit(status):
     most claims carry a verdict, and the known blockers still block."""
     assert ss.summary(status)["n_audited"] > 0
     blocking = set(ss.blocking_claims(status))
-    assert "G2" in blocking                      # EGG2015 provenance — UNKNOWN by design
+    # G2 blocked until 2026-09-23, when the grid's provenance was found recorded
+    # in the authors' own prior paper: licensed from Denker, DRCI
+    # DATA2018076013172051, the restricted full-resolution EGG2015. It is now
+    # SUPPORTED, so the assertion is that it no longer blocks.
+    assert "G2" not in blocking
     assert "M1.1" not in blocking                # the headline result is SUPPORTED
     assert 0 < len(blocking) < len(status)
 

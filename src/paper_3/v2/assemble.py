@@ -277,7 +277,13 @@ def render_claim(spec: str, ev: pd.DataFrame, used: set[str]) -> str:
     r = ev.loc[cid]
     col = {"": "value_resolved", "n": "n_resolved", "unc": "uncertainty_resolved",
            "text": "claim_text", "caveat": "scientific_caveat"}[field]
-    return str(r[col]).strip()
+    out = str(r[col]).strip()
+    if not out and field == "":
+        # Some claims are statements with no number to resolve. Rendering the
+        # empty string left dangling sentences ("... is not testable: ."), so
+        # the statement itself stands in for the value it does not have.
+        out = str(r["claim_text"]).strip()
+    return out
 
 
 def render_cite(key: str, refs: pd.DataFrame, cited: set[str]) -> str:
@@ -362,6 +368,13 @@ def render_paragraph(par: str, inputs: dict, used: set[str], cited: set[str],
         if kind == "claim":
             return render_claim(spec, ev, used)
         if kind == "cite":
+            keys = [k.strip() for k in spec.split(",") if k.strip()]
+            if len(keys) > 1:
+                # "(Theil, 1950; Sen, 1968)", not "(Theil, 1950); (Sen, 1968)"
+                parts = [render_cite(k, inputs["references"], cited) for k in keys]
+                if all(x.startswith("(") and x.endswith(")") for x in parts):
+                    return "(" + "; ".join(x[1:-1] for x in parts) + ")"
+                return " ".join(parts)
             return render_cite(spec, inputs["references"], cited)
         if kind == "section":
             return inputs["section_7_8"] if spec == "7_8" else _marker("OPEN000", f"no such section {spec}")

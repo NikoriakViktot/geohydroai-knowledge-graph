@@ -29,6 +29,7 @@
 # `formal_citation` is the reference-list entry the v2 overlay appends.
 
 - id: SWOT_PIXC_PDD
+  cite_as: "JPL D-56411 Rev C"
   source_type: mission_document
   title: "SWOT Level 2 KaRIn High Rate Pixel Cloud Product Description Document"
   identifier: "JPL D-56411 Rev C"
@@ -40,56 +41,77 @@
   note: "Establishes which tide fields are supplied but not applied in PIXC."
 
 - id: ICESAT2_ATL03_ATBD
+  cite_as: "NSIDC ATL03 ATBD"
   source_type: mission_document
   title: "ICESat-2 Algorithm Theoretical Basis Document for Global Geolocated Photons (ATL03)"
   identifier: "Release 007"
   issuer: "NASA / NSIDC"
   bears_on: [permanent_tide, icesat2_reference, height_types]
   draft_citation: "ICESat-2 ATL03 ATBD Release 007 (tide-free system, pp. 8, 20, 26; tide_earth_free2mean, pp. 125–126)"
-  url: ""
-  status: url_needed
+  url: "https://nsidc.org/sites/default/files/documents/technical-reference/icesat2_atl03_atbd_v006.pdf"
+  url_sha256: "c3313735257636dd6c9f190222bb2280988be37b2addd13c08ad0329d311e3a6"
+  url_verified_at: "2026-09-23"
+  status: url_verified
   note: "Defines the tide-free reference and the tide_earth_free2mean parameter."
 
 - id: ICESAT2_ATL13_ATBD
+  cite_as: "NSIDC ATL13 ATBD"
   source_type: mission_document
   title: "ICESat-2 Algorithm Theoretical Basis Document for Inland Water Surface Height (ATL13)"
   identifier: ""
   issuer: "NASA / NSIDC"
   bears_on: [icesat2_reference]
   draft_citation: "ICESat-2 ATL13 ATBD"
-  url: ""
-  status: url_needed
+  url: "https://nsidc.org/data/atl13/versions/6"
+  url_sha256: "524c340dbcfa9d03ff3b2e8e2baac2c13776952089d01982e141b6a51183ee8a"
+  url_verified_at: "2026-09-23"
+  status: url_verified
 
 - id: IAG_RESOLUTION_16_1983
+  cite_as: "IAG Resolution 16, 1983"
   source_type: technical_standard
   title: "IAG Resolution No. 16 on the permanent tide"
   identifier: "1983"
   issuer: "International Association of Geodesy"
   bears_on: [permanent_tide]
   draft_citation: "IAG Resolution 16 (1983) — permanent tide conventions"
-  url: ""
-  status: url_needed
+  url: "https://doi.org/10.1007/BF02520920"
+  url_sha256: "32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea"
+  url_verified_at: "2026-09-23"
+  status: url_verified
   note: "The convention that defines zero-tide as the recommended system."
 
 - id: EGG2015
+  cite_as: "Denker, 2015"
   source_type: registry
   title: "EGG2015 — European Gravimetric (Quasi)Geoid"
-  identifier: ""
+  identifier: "full-resolution 1′×1′ height-anomaly grid; DRCI DATA2018076013172051; GRS80, zero-tide, EVRF2007-consistent; the public ISG release is 10′×15′"
   issuer: "Denker, H. (2015), IfE Hannover"
   bears_on: [reference_systems, height_types]
   draft_citation: "Denker, H. (2015) — EGG2015 European Gravimetric Quasigeoid"
-  url: ""
-  status: url_needed
+  url: "https://www.isgeoid.polimi.it/Geoid/Europe/europe2015_g.html"
+  url_sha256: "b36622d34cf60a1ea2617fe2c3f7f5d46cc62e1ef8ed975fc83a943ba89f17d6"
+  url_verified_at: "2026-09-23"
+  status: url_verified
+  provenance: >-
+    Licensed directly from Prof. H. Denker (Leibniz University Hannover) and
+    recorded as such in Nikoriak, Osypov & Osadcha (2026), which uses the same
+    grid. The full-resolution product is not part of the public ISG release, so
+    the absence of a download trail is expected rather than a gap, and the
+    licence constrains redistribution rather than use.
 
 - id: EVRF2019
+  cite_as: "EVRS/BKG, EPSG:9389"
   source_type: registry
   title: "EVRF2019 — European Vertical Reference Frame 2019 realisation"
   identifier: "EPSG:9389"
   issuer: "BKG"
   bears_on: [reference_systems]
   draft_citation: "BKG — EVRF2019 realisation (EPSG:9389)"
-  url: ""
-  status: url_needed
+  url: "https://epsg.org/crs_9389/EVRF2019-height.html"
+  url_sha256: "c6d561081ee7db22b86e20da5fd3f7a5d912b6ad4e1a0415d3f99f5bcc8880df"
+  url_verified_at: "2026-09-23"
+  status: url_verified
 
 - id: EPSG_9902
   source_type: registry

@@ -241,7 +241,112 @@ def fig_canopy_by_class(plt) -> Path | None:
     return out
 
 
+
+# ── Paper 1 ──────────────────────────────────────────────────────────────────
+
+def fig_slope_per_date(plt) -> Path | None:
+    """The headline: every overpass, with the interval its own fit carries.
+
+    Plotting only the two group medians would hide what Section 6.3.1 says —
+    a single pass does not resolve the gradient. Showing each pass with its
+    Theil-Sen interval makes the argument visible: the evidence is that the
+    whole post-breach ensemble sits above zero, not that any one pass does.
+    """
+    df = _read("kakhovka_perdate_slopes_robust.csv")
+    if df is None:
+        return None
+    import numpy as np
+    d = df.copy()
+    d["date"] = pd.to_datetime(d["date"])
+    d = d.sort_values("date")
+    colour = {"PRE_BREACH": ACCENT, "BREACH_DRAWDOWN": WARM, "POST_BREACH": "#2e7d32"}
+
+    fig, (ax, bx) = plt.subplots(1, 2, figsize=(7.4, 3.1),
+                                 gridspec_kw={"width_ratios": [2.1, 1]})
+    for period, g in d.groupby("period"):
+        c = colour.get(period, MUTED)
+        ax.errorbar(g["date"], g["slope_theilsen_cm_km"],
+                    yerr=[g["slope_theilsen_cm_km"] - g["ts_lo_cm_km"],
+                          g["ts_hi_cm_km"] - g["slope_theilsen_cm_km"]],
+                    fmt="o", ms=3.6, lw=0.9, capsize=1.8, color=c,
+                    ecolor=c, elinewidth=0.7, alpha=0.9,
+                    label=period.replace("_", " ").lower())
+    ax.axhline(0, color=INK, lw=0.8)
+    ax.axvline(pd.Timestamp("2023-06-06"), color=MUTED, ls="--", lw=0.9)
+    # A handful of post-breach fits carry intervals a hundred times the signal.
+    # Left unclipped they flatten the very contrast the panel exists to show, so
+    # the axis is bounded and the clipping is stated rather than hidden.
+    lo, hi = -20.0, 30.0
+    n_clipped = int(((d["ts_lo_cm_km"] < lo) | (d["ts_hi_cm_km"] > hi)).sum())
+    ax.set_ylim(lo, hi)
+    ax.text(0.015, 0.03,
+            f"{n_clipped} of {len(d)} intervals extend beyond the axis "
+            f"(widest {d['ts_hi_cm_km'].max():.0f} cm/km); see Section 6.3.1",
+            transform=ax.transAxes, fontsize=6.3, color=MUTED)
+    ax.text(pd.Timestamp("2023-06-20"), hi * 0.9, "breach", fontsize=7, color=MUTED)
+    ax.set_ylabel("longitudinal slope (cm/km)")
+    ax.set_title("a · every overpass, with its own Theil–Sen interval", loc="left")
+    ax.legend(fontsize=7, ncol=3, loc="upper left")
+    ax.grid(axis="y")
+    for lab in ax.get_xticklabels():
+        lab.set_rotation(25); lab.set_ha("right")
+
+    order = ["PRE_BREACH", "POST_BREACH"]
+    data = [d.loc[d["period"] == p, "slope_theilsen_cm_km"].values for p in order]
+    parts = bx.boxplot(data, widths=0.55, patch_artist=True,
+                       tick_labels=["pre", "post"])
+    for patch, p_ in zip(parts["boxes"], order):
+        patch.set_facecolor(colour[p_]); patch.set_alpha(0.35)
+        patch.set_edgecolor(colour[p_])
+    for i, (p_, vals) in enumerate(zip(order, data), start=1):
+        bx.scatter(np.random.normal(i, 0.055, len(vals)), vals, s=9,
+                   color=colour[p_], zorder=3, alpha=0.85)
+        bx.text(i, np.median(vals) + 0.35, f"{np.median(vals):+.2f}",
+                ha="center", fontsize=7.5, color=colour[p_])
+    bx.axhline(0, color=INK, lw=0.8)
+    bx.set_ylabel("cm/km")
+    bx.set_title("b · the distributions compared", loc="left")
+    bx.grid(axis="y")
+
+    out = FIGURE_DIR / "F02_slope_per_overpass.png"
+    fig.savefig(out); plt.close(fig)
+    return out
+
+
+def fig_heterogeneity(plt) -> Path | None:
+    """The second, independently defined geometric observable."""
+    df = _read("kakhovka_perdate_slopes_robust.csv")
+    if df is None or "wse_p95_p05_m" not in df.columns:
+        return None
+    import numpy as np
+    d = df.copy()
+    d["date"] = pd.to_datetime(d["date"])
+    colour = {"PRE_BREACH": ACCENT, "BREACH_DRAWDOWN": WARM, "POST_BREACH": "#2e7d32"}
+    fig, ax = plt.subplots(figsize=(4.9, 2.9))
+    for period, g in d.groupby("period"):
+        ax.scatter(g["date"], g["wse_p95_p05_m"], s=18, alpha=0.85,
+                   color=colour.get(period, MUTED),
+                   label=period.replace("_", " ").lower())
+    for period in ("PRE_BREACH", "POST_BREACH"):
+        g = d[d["period"] == period]
+        if len(g):
+            ax.hlines(np.median(g["wse_p95_p05_m"]), g["date"].min(), g["date"].max(),
+                      color=colour[period], lw=1.6)
+    ax.axvline(pd.Timestamp("2023-06-06"), color=MUTED, ls="--", lw=0.9)
+    ax.set_ylabel("within-overpass WSE range, p95 − p05 (m)")
+    ax.set_title("Water-surface heterogeneity, by overpass", loc="left")
+    ax.legend(fontsize=7)
+    ax.grid(axis="y")
+    for lab in ax.get_xticklabels():
+        lab.set_rotation(25); lab.set_ha("right")
+    out = FIGURE_DIR / "F04_heterogeneity.png"
+    fig.savefig(out); plt.close(fig)
+    return out
+
+
 FIGURES = {
+    "F02": fig_slope_per_date,
+    "F04": fig_heterogeneity,
     "P2-F7": fig_canopy_by_class,
     "F13": fig_bed_validation,
     "F14": fig_terrain_accuracy,

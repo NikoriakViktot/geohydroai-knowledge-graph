@@ -1,0 +1,37 @@
+# Standard methods the manuscript uses and must cite.
+#
+# These are not findings from the corpus and not positive controls: they are the
+# textbook sources for estimators and tests. Every DOI here goes through the same
+# CrossRef resolution as any other reference, so a wrong one is caught rather
+# than printed — the assembler refuses to cite an unresolved key.
+#
+# `used_for` records which manuscript statement the citation supports, so a
+# reference cannot drift away from the sentence that needs it.
+
+- doi: 10.1080/01621459.1968.10480934
+  used_for: "Theil-Sen slope estimator (Methods 4.3, primary estimator)"
+  note: "Sen (1968), estimates of the regression coefficient based on Kendall's tau"
+
+- doi: 10.1007/978-94-011-2546-8_20
+  used_for: "Theil-Sen slope estimator, original rank-invariant formulation (Methods 4.3)"
+  note: "Theil (1950), reprinted in Henri Theil's Contributions to Economics and Econometrics"
+
+- doi: 10.1214/aos/1176344552
+  used_for: "bootstrap confidence interval for the difference of medians (Methods 4.3)"
+  note: "Efron (1979), bootstrap methods: another look at the jackknife"
+
+- doi: 10.1214/088342304000000396
+  used_for: "two-sided permutation test (Methods 4.3)"
+  note: "Ernst (2004), permutation methods: a basis for exact inference"
+
+- doi: 10.2307/1942661
+  used_for: "one overpass as the independent unit; segments within a pass are not replicates (Methods 4.3)"
+  note: "Hurlbert (1984), pseudoreplication and the design of ecological field experiments"
+
+- doi: 10.1080/01621459.1963.10500830
+  used_for: "robust location and scale, NMAD as the dispersion measure (Methods 4.4)"
+  note: "Huber-style robust statistics; Hodges-Lehmann estimator background"
+
+- doi: 10.24028/gj.v48i2.346831
+  used_for: "provenance and licence of the full-resolution EGG2015 grid; prior use of the same vertical harmonisation with ICESat-2 (Data 3.6, Limitations 7.10)"
+  note: "Nikoriak, Osypov & Osadcha (2026), Geofizychnyi Zhurnal 48(2), 35-59 — same 1' grid licensed from Denker, DRCI DATA2018076013172051"

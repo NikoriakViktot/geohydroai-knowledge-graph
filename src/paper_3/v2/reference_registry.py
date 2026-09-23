@@ -86,10 +86,18 @@ def split_authors(raw: str) -> list[str]:
     if not raw:
         return []
     text = raw.replace(" & ", "; ").replace(" and ", "; ")
-    parts: list[str] = []
-    for chunk in text.split(";"):
-        parts.extend(p.strip() for p in _AUTHOR_SPLIT.split(chunk) if p.strip())
-    return parts
+    if ";" in text:
+        # Already one author per chunk (CrossRef's "Family, Given" form).
+        return [c.strip() for c in text.split(";") if c.strip()]
+    # No semicolon: either one author as "Family, Given I." or a comma-separated
+    # list as "Arcement G.J., Schneider V.R.". The head tells them apart — a lone
+    # word before the first comma is a family name whose given names follow, so
+    # the comma binds rather than separates. Without this, the single author
+    # "Ernst, Michael D." was cited as "Ernst & Michael".
+    head = text.split(",", 1)[0].strip()
+    if "," in text and " " not in head:
+        return [text.strip()]
+    return [p.strip() for p in _AUTHOR_SPLIT.split(text) if p.strip()]
 
 
 def first_family(authors: str) -> str:
@@ -129,6 +137,21 @@ def from_technical_sources(path: Path = TECHNICAL_PATH) -> list[dict]:
                     "resolution_method": e.get("status", "url_needed"),
                     "url": e.get("url", "") or "", "note": e.get("formal_citation", "")})
     return out
+
+
+def from_method_references(path: Path | None = None) -> list[tuple[str, str]]:
+    """(doi, note) for the estimators and tests the Methods section uses.
+
+    Textbook sources, not corpus findings: they never enter retrieval and are
+    never positive controls. They resolve through CrossRef like any other DOI,
+    so a mistyped one is caught instead of printed.
+    """
+    path = path or TECHNICAL_PATH.with_name("method_references.yaml")
+    if not Path(path).exists():
+        return []
+    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or []
+    return [(normalize_doi(e["doi"]), f"method reference — {e.get('used_for', '')}")
+            for e in raw if e.get("doi")]
 
 
 def from_theses() -> list[tuple[str, str]]:
@@ -265,7 +288,8 @@ def run(out_dir: Path = OUT_DIR, snapshot_dir: Path = snapshot.SNAPSHOT_DIR,
         fetch: Callable[[str], dict | None] = fetch_meta) -> Path:
     cache_path = out_dir / CACHE_FILE
     cache = json.loads(cache_path.read_text()) if cache_path.exists() else {}
-    dois = from_theses() + from_snapshot(snapshot_dir) + from_relations(out_dir)
+    dois = (from_method_references() + from_theses()
+            + from_snapshot(snapshot_dir) + from_relations(out_dir))
     frame = build(dois, from_technical_sources(), fetch=fetch, cache=cache,
                   hints=hints_from_snapshot(snapshot_dir))
     cache_path.write_text(json.dumps(cache, indent=1, ensure_ascii=False), encoding="utf-8")

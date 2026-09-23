@@ -10,17 +10,25 @@ The pool had drained by the end of June 2023, so the first ICESat-2 overpasses a
 
 ## 6.2.1 The drawdown and the flood wave from orbit
 
-That SWOT caught this event is not a new observation: the flood below the dam has been described from the same mission and used to test outburst-flood models ({{cite:lehnigk2026}}). What is added here is the outlet itself, carried in the same vertical frame as the gauges and the bed. Because the calibration orbit repeated daily over the outlet, the emptying of the pool was recorded directly rather than inferred: {{claim:D1.1}} (n = {{claim:D1.1.n}}). Below the dam the same passes describe the wave that carried that water away, rising {{claim:D2.1}} and decaying downstream to about two metres by 80 km. Both series are snapshots from a handful of nodes per date ({{claim:D1.1.caveat}}), so they are read as a sequence of observed water surfaces, not as a hydrograph.
+That SWOT caught this event is not a new observation: the flood below the dam has been described from the same mission and used to test outburst-flood models {{cite:lehnigk2026}}. What is added here is the outlet itself, carried in the same vertical frame as the gauges and the bed. Because the calibration orbit repeated daily over the outlet, the emptying of the pool was recorded directly rather than inferred: {{claim:D1.1}} (n = {{claim:D1.1.n}}). Below the dam the same passes describe the wave that carried that water away, rising {{claim:D2.1}} and decaying downstream to about two metres by 80 km. Both series are snapshots from a handful of nodes per date ({{claim:D1.1.caveat}}), so they are read as a sequence of observed water surfaces, not as a hydrograph.
 
 {{table:T4}}
 
 Figure 15 shows the outlet series against the upstream gauge and the downstream rise profile.
+
+![SWOT observations of the outlet through the drawdown, and the longitudinal rise profile below the dam.](figures/F15_swot_drawdown_and_wave.png)
+
+**Figure 3.** The breach fortnight from orbit. (a) Outlet water surface against the upstream gauge, 28 May – 30 June 2023, in the common vertical frame. (b) Rise above the pre-breach surface with distance below the dam.
 
 ## 6.3 Post-breach longitudinal gradient
 
 Across the 14 pre-breach and 14 post-breach overpasses with a chainage span of at least 20 km, the per-overpass Theil–Sen slope moved from {{claim:M1.1}}; the difference has a 95 % bootstrap confidence interval of {{claim:M1.1.unc}}. Every one of the 14 post-breach overpasses is positive. The result is estimator-robust: ordinary least squares gives {{claim:M1.3}} ({{claim:M1.3.unc}}). Each per-overpass slope is a fit through the six beam-median points of one pass over roughly 20–70 km of a reservoir-axis centreline; the claim is about the distribution of these local slopes across dates, not about a single whole-reservoir gradient.
 
 {{table:T3}}
+
+![Per-overpass longitudinal water-surface slope, each with its own Theil–Sen interval, and the pre/post distributions compared.](figures/F02_slope_per_overpass.png)
+
+**Figure 2.** Per-overpass longitudinal slope. (a) Every overpass with the interval its own fit carries; the axis is bounded, and the count of intervals reaching beyond it is printed on the panel. (b) The two distributions. The contrast is in the ensemble, not in any single pass.
 
 ## 6.3.1 What one overpass can and cannot show
 
@@ -39,6 +47,10 @@ Restricting both periods to the classified main channel weakens the contrast and
 ## 6.5 Water-surface heterogeneity
 
 On all ATL13 dates in the footprint, the within-overpass p95–p05 range of water-surface elevation rose from {{claim:M2.1}} ({{claim:M2.1.unc}}; {{claim:M2.1.n}}). This metric is computed on the full ATL13 sample and is distinct from the within-profile range of the slope sample.
+
+![Within-overpass water-surface range by date, before and after the breach.](figures/F04_heterogeneity.png)
+
+**Figure 4.** Within-overpass water-surface heterogeneity (p95 − p05) by date. Horizontal bars are period medians. The metric is defined independently of the slope fit and uses every ATL13 date in the footprint, not only those with a 20 km span.
 
 ## 6.6 Planform transformation
 
