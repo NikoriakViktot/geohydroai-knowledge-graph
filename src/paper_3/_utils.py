@@ -21,6 +21,14 @@ logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
+#: Two parquet trees, and they are not interchangeable. `build_parquet_layer`
+#: rewrites PARQUET_DIR on every run, so papers/authors/references there are the
+#: live corpus; data/analytics additionally holds derived fact tables
+#: (numeric_facts, sensors, methods, paper_reference_edges) that nothing
+#: rebuilds mid-pipeline. Reading papers.parquet from the wrong one leaves every
+#: consumer blind to newly ingested papers, which is what happened between
+#: 2026-05-21 and 2026-09-23.
+PARQUET_DIR = PROJECT_ROOT / "data" / "parquet"
 ANALYTICS_DIR = PROJECT_ROOT / "data" / "analytics"
 PAPER_JSON_DIR = PROJECT_ROOT / "data" / "literature" / "paper_json"
 NORMALIZED_DIR = PROJECT_ROOT / "data" / "normalized"
@@ -44,9 +52,15 @@ REFUSAL = "The available evidence is insufficient to support this claim."
 
 # ── DOI / slug ────────────────────────────────────────────────────────────────
 
-def normalize_doi(raw: str) -> str:
-    """Strip resolver prefixes and lowercase. Same contract as paper_audit."""
-    doi = (raw or "").strip().lower()
+def normalize_doi(raw) -> str:
+    """Strip resolver prefixes and lowercase. Same contract as paper_audit.
+
+    Accepts whatever a parquet column yields: a missing DOI arrives as NaN
+    (a float), not as None or "".
+    """
+    if raw is None or isinstance(raw, float):      # NaN from a parquet column
+        return ""
+    doi = str(raw).strip().lower()
     for prefix in ("https://doi.org/", "http://doi.org/",
                    "http://dx.doi.org/", "https://dx.doi.org/", "doi:"):
         if doi.startswith(prefix):
@@ -74,13 +88,14 @@ def normalize_title(raw: str) -> str:
 
 _con: duckdb.DuckDBPyConnection | None = None
 
+#: (view name, file, directory). The live layer wins wherever both hold a copy.
 _VIEWS = [
-    ("papers", "papers.parquet"),
-    ("numeric_facts", "numeric_facts.parquet"),
-    ("sensors", "sensors.parquet"),
-    ("methods", "methods.parquet"),
-    ("paper_reference_edges", "paper_reference_edges.parquet"),
-    ("references_tbl", "references.parquet"),
+    ("papers", "papers.parquet", PARQUET_DIR),
+    ("numeric_facts", "numeric_facts.parquet", ANALYTICS_DIR),
+    ("sensors", "sensors.parquet", ANALYTICS_DIR),
+    ("methods", "methods.parquet", ANALYTICS_DIR),
+    ("paper_reference_edges", "paper_reference_edges.parquet", ANALYTICS_DIR),
+    ("references_tbl", "references.parquet", PARQUET_DIR),
 ]
 
 
@@ -93,8 +108,8 @@ def get_con() -> duckdb.DuckDBPyConnection:
     global _con
     if _con is None:
         _con = duckdb.connect()
-        for name, fname in _VIEWS:
-            path = ANALYTICS_DIR / fname
+        for name, fname, base in _VIEWS:
+            path = base / fname
             if not path.exists():
                 logger.warning("analytics view %s skipped — %s missing", name, fname)
                 continue

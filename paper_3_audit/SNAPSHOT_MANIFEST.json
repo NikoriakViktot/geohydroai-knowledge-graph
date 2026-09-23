@@ -1,11 +1,11 @@
 {
   "run_id": "20260916T092929Z",
-  "pulled_at": "2026-09-19T18:07:19+00:00",
+  "pulled_at": "2026-09-21T14:05:08+00:00",
   "repos": {
     "swot": {
       "path": "/home/niko/repo/SWOT-DNIPRO",
       "commit": "6bf0c4087545fdcd2fb6e107cfb71a14827d9710",
-      "dirty_paths": 437
+      "dirty_paths": 565
     },
     "icesat": {
       "path": "/home/niko/repo/icesat2-atl13-kakhovka",
@@ -13,7 +13,7 @@
       "dirty_paths": 18
     }
   },
-  "n_files": 159,
+  "n_files": 173,
   "missing_patterns": [],
   "files": [
     {
@@ -41,8 +41,8 @@
       "repo": "swot",
       "rel_path": "audit_runs/20260918T175108Z/literature_sources.csv",
       "local_path": "swot/audit_runs/20260918T175108Z/literature_sources.csv",
-      "sha256": "a414e4a86c9fe1972bdc6580a2fd603641812d01766948bee55a3b230e968cb2",
-      "bytes": 24320
+      "sha256": "402e25d8c3cecaf6850c673d0215a8524c587de4ed7300b1be0ec49e79ab8c90",
+      "bytes": 40321
     },
     {
       "repo": "swot",
@@ -475,8 +475,8 @@
       "repo": "swot",
       "rel_path": "outputs/tables/hist14_surface_summary.csv",
       "local_path": "swot/outputs/tables/hist14_surface_summary.csv",
-      "sha256": "401cabf62d136b02785755ec4ebb40da2112484e83075b0d14501fba2d89ac4c",
-      "bytes": 1048
+      "sha256": "b061e522cb6acd083154f2ae147291d3a68bc68112b94c37b9cb93328a706035",
+      "bytes": 1051
     },
     {
       "repo": "swot",
@@ -874,22 +874,22 @@
       "repo": "swot",
       "rel_path": "outputs/tables/p51_rf_metrics.csv",
       "local_path": "swot/outputs/tables/p51_rf_metrics.csv",
-      "sha256": "bdcc62417747f53387e42ec1e1fa91f18934e9531d9c63bd8eb7eab1bab0fdbb",
-      "bytes": 311
+      "sha256": "fa9835c8fd997347471da76cfc68825cb5ddefc43845d1d4f902d35d5c3c8d5a",
+      "bytes": 798
     },
     {
       "repo": "swot",
       "rel_path": "outputs/tables/p51_rf_areas.csv",
       "local_path": "swot/outputs/tables/p51_rf_areas.csv",
-      "sha256": "67dac85a226ad12107ec9d86c8c06ca68d15ed6dba09e26b448aca124f79bc30",
-      "bytes": 269
+      "sha256": "08ca99df7d2acda59477a06e8b79ef1c5737ff430dd7a9d7f8225f3c706931e0",
+      "bytes": 333
     },
     {
       "repo": "swot",
       "rel_path": "outputs/tables/p51_rf_importance.csv",
       "local_path": "swot/outputs/tables/p51_rf_importance.csv",
-      "sha256": "7889eb6e4e6cb1edc71ac221c123d34a6e6bbd63ee0ddfaa97abbd7a5db43ad6",
-      "bytes": 4207
+      "sha256": "52279ed681e2d156e0f3662d634feb7fa4f0c06fcc98bb9f8a1bf9894d1c2ab4",
+      "bytes": 3020
     },
     {
       "repo": "swot",
@@ -937,8 +937,8 @@
       "repo": "swot",
       "rel_path": "outputs/tables/p53_bed_v2_summary.csv",
       "local_path": "swot/outputs/tables/p53_bed_v2_summary.csv",
-      "sha256": "d0c66866540ceefdc3fc7526f7f71c08a8fd30175abb4b16e556a6ae54a1f4ea",
-      "bytes": 839
+      "sha256": "811be8467d5a95ce2197a8f745315e6a9ac3bf1c04a4f3f9453b6a48e04c7ef1",
+      "bytes": 2072
     },
     {
       "repo": "swot",
@@ -979,8 +979,8 @@
       "repo": "swot",
       "rel_path": "outputs/tables/p55_seam_check.csv",
       "local_path": "swot/outputs/tables/p55_seam_check.csv",
-      "sha256": "a14c2ad57a7e5d1587bdd7186ebf655b0669393b21339c2c3035b0d24beebf4b",
-      "bytes": 499
+      "sha256": "811e4664ba1202c40eea7aa4235caba90a82649b5ffffeb65a58118997adb279",
+      "bytes": 656
     },
     {
       "repo": "swot",
@@ -1000,8 +1000,8 @@
       "repo": "swot",
       "rel_path": "outputs/tables/p57_dem_accuracy_night.csv",
       "local_path": "swot/outputs/tables/p57_dem_accuracy_night.csv",
-      "sha256": "ba09f14e840e83b94d7209af8871dd635629c1fc9c0833d997eba94de2f4cc30",
-      "bytes": 5297
+      "sha256": "f9ac2e1222b0b65c18defb39d785e2db842549fc1d4039e63a937786673572c2",
+      "bytes": 5304
     },
     {
       "repo": "swot",
@@ -1082,10 +1082,108 @@
     },
     {
       "repo": "swot",
+      "rel_path": "outputs/tables/p51_rf_metrics.csv",
+      "local_path": "swot/outputs/tables/p51_rf_metrics.csv",
+      "sha256": "fa9835c8fd997347471da76cfc68825cb5ddefc43845d1d4f902d35d5c3c8d5a",
+      "bytes": 798
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_rf_fold_metrics.csv",
+      "local_path": "swot/outputs/tables/p51_rf_fold_metrics.csv",
+      "sha256": "5e4c274da1e2253d611308f9a4c9d20254bb46ac2def810cd1adf3c6700c258f",
+      "bytes": 645
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_rf_leave_one_zone_out.csv",
+      "local_path": "swot/outputs/tables/p51_rf_leave_one_zone_out.csv",
+      "sha256": "2fe8b8ecab141c971c667eb297368acafbce57a1d0d4c01e69680f2ed6ecd802",
+      "bytes": 371
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_rf_block_sensitivity.csv",
+      "local_path": "swot/outputs/tables/p51_rf_block_sensitivity.csv",
+      "sha256": "1500ff7cf21ff5b66dab41164f4d26f1f4b2bc9bb6e1ab22770e4b140ff035f1",
+      "bytes": 793
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_rf_block_scale.csv",
+      "local_path": "swot/outputs/tables/p51_rf_block_scale.csv",
+      "sha256": "e4a266c19164b856023f774dd464e8e2193b6773b2b795c0f31b73df2c445a59",
+      "bytes": 409
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_rf_calibration.csv",
+      "local_path": "swot/outputs/tables/p51_rf_calibration.csv",
+      "sha256": "bc54e467aa4e6490e5755eed0bffc56df8cb42ff3e26eb86d8a82989c9b7dcdd",
+      "bytes": 406
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_rf_perm_importance.csv",
+      "local_path": "swot/outputs/tables/p51_rf_perm_importance.csv",
+      "sha256": "344bb047d8307bb5c172f5264916378e45ad50334ef18ed1770973224c60f321",
+      "bytes": 636
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_rf_input_manifest.csv",
+      "local_path": "swot/outputs/tables/p51_rf_input_manifest.csv",
+      "sha256": "d587452e24df75c1d322022f81e1ebb7cd834af1dbe95ee5fe2277940fdd51cc",
+      "bytes": 11373
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_rf_hand_check.csv",
+      "local_path": "swot/outputs/tables/p51_rf_hand_check.csv",
+      "sha256": "37d7f726a93dff0f3a28cb408f698a953e84569cd422d7cd81e0ec5a49b3b9b6",
+      "bytes": 1254
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_rf_fusion.csv",
+      "local_path": "swot/outputs/tables/p51_rf_fusion.csv",
+      "sha256": "29c004c730ff0677583436929c59bd9be7d6c9df1b7967096c98ea1e973a8653",
+      "bytes": 469
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_s1_observation_support_2.csv",
+      "local_path": "swot/outputs/tables/p51_s1_observation_support_2.csv",
+      "sha256": "e62299b952182ec32316999bf69d7d84189dded21ecdf0f379e20ac6147626e0",
+      "bytes": 773
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_s1_observation_support_4.csv",
+      "local_path": "swot/outputs/tables/p51_s1_observation_support_4.csv",
+      "sha256": "72a21090509c2c821ad7c7f972b9f7e9e72d3e7b0f8178b70f2010eabd5aa1e2",
+      "bytes": 884
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51c_domain_clipping.csv",
+      "local_path": "swot/outputs/tables/p51c_domain_clipping.csv",
+      "sha256": "7ad486f4c528b3198468a878d64440a459099bc482035509f3014d009712e404",
+      "bytes": 211
+    },
+    {
+      "repo": "swot",
+      "rel_path": "outputs/tables/p51_zone4_validity_impact.csv",
+      "local_path": "swot/outputs/tables/p51_zone4_validity_impact.csv",
+      "sha256": "4b080e0baa9be570ce8049b4460f70cc951c5a94ea57181f837075caca4cbca8",
+      "bytes": 234
+    },
+    {
+      "repo": "swot",
       "rel_path": "outputs/tables/p62_gedi_ground_accuracy.csv",
       "local_path": "swot/outputs/tables/p62_gedi_ground_accuracy.csv",
-      "sha256": "b5d82b3ecd5fb5cceab6ee9a7a19165614507c84011a8cb667aa61c23083f080",
-      "bytes": 3162
+      "sha256": "fa1ad5b7ed15494530e7ce684433a6248ec7a95308dfdb63727cdb2d69c9f6a2",
+      "bytes": 2989
     },
     {
       "repo": "swot",

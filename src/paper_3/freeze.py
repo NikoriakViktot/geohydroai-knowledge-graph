@@ -22,7 +22,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.paper_3._utils import (
-    ANALYTICS_DIR,
+    PARQUET_DIR,
     NORMALIZED_DIR,
     OUT_DIR,
     PROJECT_ROOT,
@@ -98,7 +98,7 @@ def build(out_dir: Path | None = None, tag: str = "") -> dict:
     from src.paper_3.theses import load_theses
 
     target = Path(out_dir) if out_dir else OUT_DIR
-    papers_parquet = ANALYTICS_DIR / "papers.parquet"
+    papers_parquet = PARQUET_DIR / "papers.parquet"
 
     corpus_size = None
     if papers_parquet.exists():

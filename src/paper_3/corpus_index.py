@@ -25,7 +25,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.paper_3._utils import (
-    ANALYTICS_DIR,
+    PARQUET_DIR,
     COHORT,
     ENRICHED_DIR,
     NORMALIZED_DIR,
@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 #: The populated citation table. Schema: source_paper_id, referenced_doi,
 #: referenced_openalex_id, cited_by_count.
-REFERENCES_PARQUET = PROJECT_ROOT / "data" / "parquet" / "references.parquet"
+REFERENCES_PARQUET = PARQUET_DIR / "references.parquet"
 
 INDEX_COLUMNS = [
     "paper_id", "doi", "slug", "title", "year", "journal", "cited_by_count",
@@ -91,7 +91,7 @@ def _cohort_dois(out_dir: Path) -> set[str]:
 def build_index(out_dir: Path | None = None, write: bool = True) -> pd.DataFrame:
     """One row per corpus paper, with artefact presence and cohort tag."""
     target = Path(out_dir) if out_dir else OUT_DIR
-    papers_path = ANALYTICS_DIR / "papers.parquet"
+    papers_path = PARQUET_DIR / "papers.parquet"
     if not papers_path.exists():
         raise FileNotFoundError(
             f"{papers_path} missing — run `python -m src.enrichment.build_parquet_layer`")
