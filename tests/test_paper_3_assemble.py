@@ -114,3 +114,23 @@ def test_every_shipped_table_row_resolves_to_a_real_claim():
         missing = [c for _, c in spec["rows"] if c not in ev.index]
         assert not missing, f"{tid} references unknown claims: {missing}"
         assert spec["columns"][0][1] == "__label__", f"{tid} must lead with the row label"
+
+
+def test_technical_source_cites_its_issuer_not_its_database_key():
+    """A registry entry used to print "(CRS_EU_UA_KRON_EVRF2019ZERO)" in running
+    prose. The id is the key into the reference list, not a citation."""
+    import pandas as pd
+    refs = pd.DataFrame([
+        {"cite_key": "CRS_EU", "doi": "", "title": "UA_KRON / NH to EVRF2019zero",
+         "authors": "CRS-EU (BKG) — Information and Service System", "cite_as": "BKG, 2020",
+         "year": "2020", "journal": "", "source": "technical", "resolved": "True", "note": ""},
+        {"cite_key": "NO_CITE_AS", "doi": "", "title": "x", "authors": "IOGP EPSG Dataset",
+         "cite_as": "", "year": "", "journal": "", "source": "technical",
+         "resolved": "True", "note": ""},
+    ]).set_index("cite_key")
+    cited = set()
+    assert asm.render_cite("CRS_EU", refs, cited) == "(BKG, 2020)"
+    assert cited == {"CRS_EU"}
+    # without cite_as it still must not print the raw key verbatim as the whole citation
+    out = asm.render_cite("NO_CITE_AS", refs, set())
+    assert out.startswith("(") and "NO_CITE_AS" not in out

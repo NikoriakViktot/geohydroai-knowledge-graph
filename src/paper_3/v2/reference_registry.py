@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 REGISTRY_CSV = "REFERENCES.csv"
 REGISTRY_MD = "REFERENCES.md"
 CACHE_FILE = "crossref_cache.json"
-COLUMNS = ["cite_key", "doi", "title", "authors", "year", "journal", "source",
+COLUMNS = ["cite_key", "doi", "title", "authors", "cite_as", "year", "journal", "source",
            "resolved", "resolution_method", "url", "note"]
 _UA = "GeoHydroAI/paper_3 (mailto:nikoriakviktor@gmail.com)"
 
@@ -118,8 +118,13 @@ def from_technical_sources(path: Path = TECHNICAL_PATH) -> list[dict]:
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or []
     out = []
     for e in raw:
+        # A registry or mission document has a corporate author, and running it
+        # through family-name splitting yields nonsense ("CRS-EU & Service").
+        # `cite_as` is used verbatim in the text when the entry declares one.
         out.append({"cite_key": e["id"], "doi": "", "title": e.get("title", ""),
-                    "authors": e.get("issuer", ""), "year": "", "journal": e.get("identifier", ""),
+                    "cite_as": e.get("cite_as", ""),
+                    "authors": e.get("issuer", ""), "year": str(e.get("year", "") or ""),
+                    "journal": e.get("identifier", ""),
                     "source": "technical", "resolved": e.get("status") == "url_verified",
                     "resolution_method": e.get("status", "url_needed"),
                     "url": e.get("url", "") or "", "note": e.get("formal_citation", "")})

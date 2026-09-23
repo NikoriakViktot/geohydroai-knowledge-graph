@@ -93,6 +93,7 @@
 
 - id: EPSG_9902
   source_type: registry
+  cite_as: "IOGP, EPSG registry"
   title: "EPSG coordinate operation 9902: Baltic 1977 height to EVRF2019 height (1)"
   identifier: "EPSG:9902; source EPSG:5705 → target EPSG:9389; method EPSG:1085 (vertical offset by grid interpolation, asc); grid ua_2019z.asc; accuracy 0.068 m; determined at 154 points, SD 0.034 m; offset mean 0.151 m, min 0.079 m, max 0.285 m"
   issuer: "IOGP EPSG Geodetic Parameter Dataset (information source: EuroGeographics)"
@@ -111,6 +112,8 @@
 
 - id: CRS_EU_UA_KRON_EVRF2019ZERO
   source_type: registry
+  cite_as: "BKG, 2020"
+  year: 2020
   title: "Description of transformation — UA_KRON / NH to EVRF2019zero"
   identifier: "grid idw_ua_2019_z.asc (+ .prj); method: interpolation of a raster surface from points (IDW); operation version September 2020; target EVRF2019 zero-tide (EVRF2019_AMST / NH); valid area Ukraine; verification data: none stated"
   issuer: "CRS-EU (BKG) — Information and Service System for European Coordinate Reference Systems"
@@ -124,12 +127,15 @@
 
 - id: STOPKHAI_2026_BS77_EVRF2019
   source_type: curated_paper
+  cite_as: "Стопхай та ін., 2026"
   title: "Розроблення моделі для переходу від Балтійської системи висот 1977 р. до Європейської вертикальної референцної системи (EVRS) для території України"
   title_en: "Development of a height transformation model from the Baltic Height System 1977 to the European Vertical Reference System (EVRS) for the territory of Ukraine"
   authors: "Стопхай Ю., Матвійчук І., Данильчук Д., Жолоб О., Прищепа С., Чорнокнижний О."
   issuer: "Сучасні досягнення геодезичної науки та виробництва, вип. І (51), 2026, с. 62–67"
-  identifier: "УДК 528.2; no DOI; not indexed in OpenAlex (checked 2026-09-17)"
+  identifier: "УДК 528.2; no DOI; not indexed in OpenAlex (checked 2026-09-17); submitted 28.11.2025, accepted 14.01.2026"
   year: 2026
+  affiliation: "Управління воєнно-топографічне і навігації, Командування Сил підтримки Збройних Сил України, вул. Дегтярівська 11-В, Київ 04119, Україна; topogeo1@ukr.net"
+  orcid_first_author: "0000-0001-7429-3588"
   bears_on: [datum_transformation, reference_systems, height_types]
   draft_citation: ""
   formal_citation: "Стопхай, Ю., Матвійчук, І., Данильчук, Д., Жолоб, О., Прищепа, С., & Чорнокнижний, О. (2026). Розроблення моделі для переходу від Балтійської системи висот 1977 р. до Європейської вертикальної референцної системи (EVRS) для території України. Сучасні досягнення геодезичної науки та виробництва, І(51), 62–67. https://zgt.com.ua/wp-content/uploads/2026/06/9.pdf"

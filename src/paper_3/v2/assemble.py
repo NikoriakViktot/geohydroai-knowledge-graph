@@ -232,9 +232,14 @@ def _latin(name: str) -> str:
 
 def _author_year(row: pd.Series) -> str:
     from src.paper_3.v2.reference_registry import split_authors
+    verbatim = str(row.get("cite_as", "") or "").strip()
+    if verbatim:                      # corporate author, cited as the entry says
+        return verbatim
     fams = [_latin((a.split(",")[0] if "," in a else a).split()[0]) for a in split_authors(row["authors"])]
     if not fams:
-        return f"{row['cite_key']}"
+        # `cite_key` is the frame's index by the time a row reaches here, so it
+        # is not addressable as a column; Series.name carries it.
+        return str(row.get("cite_key", "") or getattr(row, "name", "") or "")
     if len(fams) == 1:
         head = fams[0]
     elif len(fams) == 2:
@@ -284,8 +289,10 @@ def render_cite(key: str, refs: pd.DataFrame, cited: set[str]) -> str:
         return "\n\n" + _marker(f"REF{_num(key)}", f"unresolved reference {key}",
                                 stub=r["note"][:120], blocks_submission="yes") + "\n\n"
     cited.add(key)
-    if r["source"] == "technical":
-        return f"({key})"
+    # A technical source used to print its own id, which is a database key, not
+    # a citation: "(CRS_EU_UA_KRON_EVRF2019ZERO)" in running prose. Entries that
+    # declare `cite_as` are cited the way their issuer is cited; the id remains
+    # the key into the reference list, where the full record lives.
     return f"({_author_year(r)})"
 
 
