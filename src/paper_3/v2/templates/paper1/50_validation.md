@@ -6,6 +6,12 @@ All seven gauge records are carried into EVRF2019 by the official operation appl
 
 {{table:T2}}
 
+The tie to the gauges is not the same thing as a confirmation of the grid, and the two must be reported apart. Each station's alignment constant is well determined — {{claim:V1.5}} (n = {{claim:V1.5.n}}) — but across the six stations the empirical offset does not follow the official transformation: {{claim:V1.4}} ({{claim:V1.4.unc}}). All six matchup sets precede the breach by construction, since the reservoir gauge records end on 31 December 2021. {{claim:V1.4.caveat}}
+
+![Official transformation against the offset derived from ICESat-2 at six reservoir stations, and the per-station alignment constants with bootstrap intervals.](figures/F01_gauge_icesat_tie.png)
+
+**Figure 1.** The satellite branch against the gauges, pre-breach. (a) The official BS-77 to EVRF2019 correction against the offset implied by ICESat-2 at the same station; the dashed line is 1:1. (b) Station alignment constants with 95 % bootstrap intervals, ordered by the official correction. The constant is of one sign at every station and averages −17.3 cm.
+
 ## 5.2 The SWOT PIXC vertical chain
 
 The documented correction chain reproduces RiverSP node heights: {{claim:V2.1}} ({{claim:V2.1.unc}}; n = {{claim:V2.1.n}}). RiverSP derives from the same SWOT observation, so this establishes the correction chain, not independent accuracy.

@@ -111,3 +111,26 @@ def test_shipped_claims_file_parses_and_declares_known_statuses():
     for c in spec["claims"]:
         if c.get("status_source", "manual") == "manual":
             assert c.get("audit_status") in oe.STATUSES, c["id"]
+
+
+def test_a_derived_claim_resolves_its_value_like_a_snapshot_one(tmp_path, monkeypatch):
+    """The `derived:` source loaded its table and then filled in nothing, because
+    the rendering block sat inside the `table:` branch. Every number quoted from
+    a derived table came out blank."""
+    import pandas as pd
+    from src.paper_3 import own_evidence as oe, derived as dv
+
+    d = tmp_path / "derived"
+    d.mkdir()
+    pd.DataFrame([{"r": "-0.399", "p": "0.433", "n": "6"}]).to_csv(d / "t.csv", index=False)
+    monkeypatch.setattr(dv, "DERIVED_DIR", d)
+
+    row = oe.build_claim({
+        "id": "X1", "statement": "s", "derived": "t.csv",
+        "value": "Pearson r {r} (p {p})", "n": "{n} stations",
+        "status_source": "manual", "audit_status": "SUPPORTED",
+    }, tmp_path)
+    assert row["value_resolved"] == "Pearson r -0.399 (p 0.433)"
+    assert row["n_resolved"] == "6 stations"
+    assert row["source_table"] == "derived/t.csv"
+    assert row["snapshot_sha256"]          # provenance recorded, not blank

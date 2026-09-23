@@ -1135,6 +1135,60 @@ claims:
       difference falls to +2.988 cm/km.
     blocks_submission: "no"
 
+  # The frame ties the satellite to the gauges; whether the satellite then
+  # CONFIRMS the official grid's spatial pattern is a separate question, and the
+  # answer is no. Reporting only the tie would overstate what the frame is worth.
+  - id: V1.4
+    paper: 1
+    family: vertical_frame
+    claim_type: validation
+    statement: >
+      Across the six reservoir stations the empirical offset derived from
+      ICESat-2 does not reproduce the spatial pattern of the official
+      transformation: the two are uncorrelated, and the difference between them
+      is a systematic shift of the same sign at every station.
+    derived: gauge_icesat_agreement.csv
+    value: "Pearson r {pearson_r} (p {pearson_p}, n = {n_stations} stations); residual {residual_mean_m:+.3f} m, SD {residual_sd_m:.3f} m, same sign at all stations"
+    uncertainty: "regression slope {slope} ± {slope_stderr}; residual range {residual_min_m:.3f}–{residual_max_m:.3f} m"
+    n: "{n_matchups} pre-breach matchups at {n_stations} stations"
+    unit: m
+    status_source: manual
+    audit_status: SUPPORTED_WITH_LIMITATION
+    manuscript_section: "5.1 The gauge network in one geodetic frame"
+    time_period: "pre-breach only, by construction: the reservoir gauge series end 31 December 2021"
+    article_thesis: AT4
+    literature_thesis_ids: [T08, T10, T11]
+    figure_id: F01
+    table_id: T2
+    scientific_caveat: >
+      Six stations cannot refute a spatial pattern any more than they can
+      confirm one: with n = 6 the correlation test is badly underpowered, so
+      this is an absence of confirmation rather than a contradiction of the
+      official grid. What it does establish is that the satellite branch is
+      tied to the gauges by a constant of about 0.17 m which the transformation
+      does not explain, and that constant must not be read as a validation of
+      the grid's spatial structure.
+    blocks_submission: "no"
+  - id: V1.5
+    paper: 1
+    family: vertical_frame
+    claim_type: validation
+    statement: >
+      Each station's alignment constant is nevertheless well determined: the
+      scatter of matchups within a station is a few centimetres, an order below
+      the unexplained shift between stations and the official grid.
+    derived: gauge_icesat_agreement.csv
+    value: "per-station NMAD {per_station_nmad_min_m}–{per_station_nmad_max_m} m"
+    n: "{n_matchups} pre-breach matchups at {n_stations} stations"
+    time_period: "pre-breach only; no reservoir gauge records exist after 2021"
+    unit: m
+    status_source: manual
+    audit_status: SUPPORTED
+    manuscript_section: "5.1"
+    article_thesis: AT4
+    figure_id: F01
+    blocks_submission: "no"
+
 overrides:
   G2:
     audit_status: SUPPORTED

@@ -184,6 +184,12 @@ def build_claim(spec: dict, snapshot_dir: Path) -> dict:
     elif spec.get("table"):
         entry = snapshot.entry_for(spec["table"], snapshot_dir)
         frame = _read_table(snapshot_dir / entry["local_path"])
+    else:
+        entry = frame = None
+
+    # Shared by both sources. This used to sit inside the `table` branch, so a
+    # `derived:` claim loaded its table and then filled in nothing.
+    if frame is not None:
         r = select_row(frame, spec.get("select", {})) if spec.get("select") else frame.iloc[0]
         row.update({
             "source_table": entry["rel_path"],

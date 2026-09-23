@@ -533,8 +533,10 @@ M1.5:
     dataset.
 
     '
+  note: 'manual: derived/slope_per_pass_uncertainty.csv'
 M1.5a:
   audit_status: SUPPORTED
+  note: 'manual: derived/slope_per_pass_uncertainty.csv'
 M1.6:
   audit_status: SUPPORTED
   findings:
@@ -543,6 +545,7 @@ M1.6:
     40 km only three passes per period remain and the difference falls to +2.988 cm/km.
 
     '
+  note: 'manual: derived/slope_span_sensitivity.csv'
 M2.1:
   audit_status: SUPPORTED
   findings:
@@ -686,6 +689,21 @@ V1.3:
   - Using the reservoir zero at Kherson would introduce a 17 m blunder; the two domains
     must never share a zero.
   note: 'matrix: outputs/tables/manuscript_evidence_matrix.csv'
+V1.4:
+  audit_status: SUPPORTED_WITH_LIMITATION
+  findings:
+  - 'Six stations cannot refute a spatial pattern any more than they can confirm one:
+    with n = 6 the correlation test is badly underpowered, so this is an absence of
+    confirmation rather than a contradiction of the official grid. What it does establish
+    is that the satellite branch is tied to the gauges by a constant of about 0.17
+    m which the transformation does not explain, and that constant must not be read
+    as a validation of the grid''s spatial structure.
+
+    '
+  note: 'manual: derived/gauge_icesat_agreement.csv'
+V1.5:
+  audit_status: SUPPORTED
+  note: 'manual: derived/gauge_icesat_agreement.csv'
 V2.1:
   audit_status: SUPPORTED
   findings:

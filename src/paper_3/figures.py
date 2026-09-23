@@ -21,6 +21,15 @@ logger = logging.getLogger(__name__)
 
 FIGURE_DIR = OUT_DIR / "figures"
 TABLES = SNAPSHOT_DIR / "swot" / "outputs" / "tables"
+ICESAT = SNAPSHOT_DIR / "icesat" / "outputs" / "tables"
+
+
+def _read_at(base, name):
+    p = base / name
+    if not p.exists():
+        logger.warning("figure input missing, skipping: %s", name)
+        return None
+    return pd.read_csv(p)
 
 #: Muted, print-safe and distinguishable in greyscale.
 INK = "#1b1b1b"
@@ -344,7 +353,62 @@ def fig_heterogeneity(plt) -> Path | None:
     return out
 
 
+
+def fig_gauge_icesat(plt) -> Path | None:
+    """The tie between the satellite branch and the gauges, station by station.
+
+    Only pre-breach data can appear here: the reservoir gauge series end on
+    31 December 2021, so every matchup precedes the breach by construction.
+    """
+    import numpy as np
+    a = _read_at(ICESAT, "egg2015_to_evrf2019_by_station.csv")
+    b = _read_at(ICESAT, "kakhovka_datum_comparison.csv")
+    if a is None or b is None:
+        return None
+    m = a.merge(b[["station_id", "delta_empirical_m", "delta_official_m",
+                   "delta_unexplained_m"]], on="station_id").sort_values("delta_official_m")
+    from scipy import stats
+    x, y = m["delta_official_m"].values, m["delta_empirical_m"].values
+    r, p_r = stats.pearsonr(x, y)
+
+    fig, (ax, bx) = plt.subplots(1, 2, figsize=(7.4, 3.2),
+                                 gridspec_kw={"width_ratios": [1, 1.25]})
+    ax.scatter(x * 100, y * 100, s=46, color=ACCENT, zorder=3)
+    for xi, yi, nm, nn in zip(x, y, m["name_en"], m["n_matchups"]):
+        ax.annotate(f"{nm} (n={nn})", (xi * 100, yi * 100), textcoords="offset points",
+                    xytext=(7, 4), fontsize=6.2, color=INK)
+    lim = [min(x.min(), y.min()) * 100 - 3, max(x.max(), y.max()) * 100 + 3]
+    ax.plot(lim, lim, color=MUTED, lw=1.0, ls="--", label="1:1")
+    ax.set_xlim(lim); ax.set_ylim(lim)
+    ax.set_xlabel("official transformation (cm)")
+    ax.set_ylabel("empirical offset from ICESat-2 (cm)")
+    ax.set_title(f"a · the two do not track each other\n"
+                 f"Pearson r = {r:+.2f} (p = {p_r:.2f}, n = {len(m)})", loc="left")
+    ax.legend(fontsize=7, loc="upper left")
+    ax.grid(alpha=0.2)
+
+    yy = np.arange(len(m))
+    lo = (m["c_station_m"] - m["bootstrap_ci95_low_m"]).abs().values * 100
+    hi = (m["bootstrap_ci95_high_m"] - m["c_station_m"]).abs().values * 100
+    bx.errorbar(m["c_station_m"].values * 100, yy, xerr=[lo, hi], fmt="o",
+                ms=5, color=ACCENT, ecolor=ACCENT, elinewidth=1.1, capsize=2.5)
+    bx.axvline(float(m["c_station_m"].mean()) * 100, color=WARM, lw=1.2,
+               label=f"mean {m['c_station_m'].mean()*100:+.1f} cm")
+    bx.set_yticks(yy)
+    bx.set_yticklabels([f"{n}  (n={k})" for n, k in zip(m["name_en"], m["n_matchups"])],
+                       fontsize=7.2)
+    bx.set_xlabel("alignment constant (cm), 95 % bootstrap interval")
+    bx.set_title("b · well determined at each station,\nand of one sign throughout", loc="left")
+    bx.legend(fontsize=7.5, loc="lower right")
+    bx.grid(axis="x", alpha=0.25)
+
+    out = FIGURE_DIR / "F01_gauge_icesat_tie.png"
+    fig.savefig(out); plt.close(fig)
+    return out
+
+
 FIGURES = {
+    "F01": fig_gauge_icesat,
     "F02": fig_slope_per_date,
     "F04": fig_heterogeneity,
     "P2-F7": fig_canopy_by_class,

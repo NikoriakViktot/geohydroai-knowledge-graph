@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 DERIVED_DIR = OUT_DIR / "derived"
 MANIFEST = DERIVED_DIR / "DERIVED_MANIFEST.json"
 PERDATE = SNAPSHOT_DIR / "swot" / "outputs" / "tables" / "kakhovka_perdate_slopes_robust.csv"
+ICESAT_TABLES = SNAPSHOT_DIR / "icesat" / "outputs" / "tables"
 
 #: Minimum chainage spans the Methods section promises to test.
 SPANS_KM = (10, 20, 30, 40)
@@ -96,9 +97,50 @@ def span_sensitivity(frame: pd.DataFrame, spans: tuple[int, ...] = SPANS_KM) -> 
     return pd.DataFrame(rows)
 
 
+def gauge_icesat_agreement(_frame: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Does the satellite confirm the official transformation, station by station?
+
+    The manuscript states that the BS-77 to EVRF2019 offset varies along the
+    reach. That is a property of the official grid. Whether ICESat-2 reproduces
+    the same spatial pattern is a separate question, and the answer decides how
+    much the satellite branch can be said to validate the frame rather than
+    merely be tied to it.
+    """
+    from scipy import stats
+    a = pd.read_csv(ICESAT_TABLES / "egg2015_to_evrf2019_by_station.csv")
+    b = pd.read_csv(ICESAT_TABLES / "kakhovka_datum_comparison.csv")
+    m = a.merge(b[["station_id", "delta_empirical_m", "delta_official_m",
+                   "delta_unexplained_m"]], on="station_id")
+    x, y, u = (m["delta_official_m"].values, m["delta_empirical_m"].values,
+               m["delta_unexplained_m"].values)
+    r, p_r = stats.pearsonr(x, y)
+    rho, p_rho = stats.spearmanr(x, y)
+    fit = stats.linregress(x, y)
+    return pd.DataFrame([{
+        "n_stations": len(m), "n_matchups": int(m["n_matchups"].sum()),
+        "official_min_m": round(float(x.min()), 4), "official_max_m": round(float(x.max()), 4),
+        "empirical_min_m": round(float(y.min()), 4), "empirical_max_m": round(float(y.max()), 4),
+        "pearson_r": round(float(r), 3), "pearson_p": round(float(p_r), 3),
+        "spearman_rho": round(float(rho), 3), "spearman_p": round(float(p_rho), 3),
+        "slope": round(float(fit.slope), 3), "slope_stderr": round(float(fit.stderr), 3),
+        "residual_mean_m": round(float(u.mean()), 4),
+        "residual_sd_m": round(float(u.std(ddof=1)), 4),
+        "residual_min_m": round(float(u.min()), 4), "residual_max_m": round(float(u.max()), 4),
+        "residual_one_sign": bool((u > 0).all() or (u < 0).all()),
+        "per_station_nmad_min_m": round(float(a["empirical_nmad_m"].min()), 3),
+        "per_station_nmad_max_m": round(float(a["empirical_nmad_m"].max()), 3),
+    }])
+
+
+#: table name -> (builder, the snapshot files it actually reads). The manifest
+#: records these per table; attributing all of them to one input would make the
+#: provenance trail wrong in exactly the way it exists to prevent.
 TABLES = {
-    "slope_per_pass_uncertainty": per_pass_uncertainty,
-    "slope_span_sensitivity": span_sensitivity,
+    "slope_per_pass_uncertainty": (per_pass_uncertainty, (PERDATE,)),
+    "slope_span_sensitivity": (span_sensitivity, (PERDATE,)),
+    "gauge_icesat_agreement": (gauge_icesat_agreement,
+                               (ICESAT_TABLES / "egg2015_to_evrf2019_by_station.csv",
+                                ICESAT_TABLES / "kakhovka_datum_comparison.csv")),
 }
 
 
@@ -107,16 +149,20 @@ def build() -> dict[str, Path]:
         raise FileNotFoundError(f"snapshot input missing: {PERDATE} — run --step snapshot")
     frame = pd.read_csv(PERDATE)
     DERIVED_DIR.mkdir(parents=True, exist_ok=True)
-    src_sha = _sha256(PERDATE)
     written: dict[str, Path] = {}
     entries = []
-    for name, fn in TABLES.items():
+    for name, (fn, inputs) in TABLES.items():
+        missing = [i for i in inputs if not i.exists()]
+        if missing:
+            logger.warning("%s skipped — missing %s", name, ", ".join(m.name for m in missing))
+            continue
         out = DERIVED_DIR / f"{name}.csv"
         table = fn(frame)
         table.to_csv(out, index=False)
         written[name] = out
         entries.append({"table": f"{name}.csv", "rows": len(table),
-                        "source": str(PERDATE.relative_to(SNAPSHOT_DIR)), "source_sha256": src_sha,
+                        "sources": [{"path": str(i.relative_to(SNAPSHOT_DIR)),
+                                     "sha256": _sha256(i)} for i in inputs],
                         "sha256": _sha256(out)})
         logger.info("derived %s (%d rows)", out.name, len(table))
     MANIFEST.write_text(json.dumps(
