@@ -749,3 +749,33 @@ class LocateResponse(_Contract):
     doi_url: str | None = None
     notes: list[str] = []
     provenance: Provenance
+
+
+# ── manuscripts (docs/api/endpoints/bibliography.md) ───────────────────────────
+
+class ManuscriptCitationsRequest(_Contract):
+    manuscript: str = Field(min_length=1, max_length=2_000_000, description="markdown")
+    bibtex: str = Field(max_length=5_000_000)
+    project_id: ProjectId | None = None
+
+
+class ManuscriptCitation(_Contract):
+    cite_text: str = Field(description="as written, e.g. 'Johnson et al. (2019)' or '(Bates 2022)'")
+    authors: str
+    year: str = Field(description="with its suffix, e.g. 2024a")
+    status: Literal["resolved", "ambiguous", "missing"]
+    cite_key: str | None = None
+    candidates: list[str] = []
+    doi: str | None = None
+    section: str | None = None
+    sentence: str
+    line: int
+    quoted: list[str] = Field(default=[], description="words in quotation marks in the sentence")
+
+
+class ManuscriptCitationsResponse(_Contract):
+    occurrences: list[ManuscriptCitation]
+    missing_keys: list[dict]
+    uncited_entries: list[str]
+    summary: dict[str, int]
+    provenance: Provenance

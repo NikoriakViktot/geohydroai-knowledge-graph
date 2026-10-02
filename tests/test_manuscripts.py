@@ -31,3 +31,17 @@ def test_citations_resolve_to_keys():
     assert r["occurrences"][0]["quoted"] == ["do not accurately capture inundated cells"]
     assert r["occurrences"][0]["section"] == "Introduction" and r["occurrences"][0]["doi"] == "10.5194/nhess-19-2405-2019"
     assert r["uncited_entries"] == ["Unused_2020"] and r["missing_keys"][0]["cite_text"] == "(Ghost et al., 2021)"
+
+
+def test_endpoint():
+    from fastapi.testclient import TestClient
+
+    from src.api.app import create_app
+    from tests.test_api import READ_KEY, StubKeys, StubManifest
+    client = TestClient(create_app(key_store=StubKeys(), manifest=StubManifest()))
+    body = client.post("/v1/manuscripts/citations", headers={"X-API-Key": READ_KEY},
+                       json={"manuscript": MS, "bibtex": BIB}).json()
+    assert body["summary"]["resolved"] == 4 and body["summary"]["missing"] == 1
+    assert body["occurrences"][0]["cite_key"] == "Johnson_2019" and body["uncited_entries"] == ["Unused_2020"]
+    r = client.post("/v1/manuscripts/citations", headers={"X-API-Key": READ_KEY}, json={"manuscript": MS, "bibtex": "no"})
+    assert r.status_code == 422

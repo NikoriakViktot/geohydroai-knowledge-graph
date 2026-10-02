@@ -126,12 +126,22 @@ Regression fixtures:
 ---
 
 ## `POST /manuscripts/citations`
-- **Status**: planned (phase 1) · **Scope** `read` · S
+- **Status**: implemented (2026-10-02) · **Scope** `read` · S · **no LLM**
 - **Purpose**: find every citation in a manuscript and map it to bibliography keys. Replaces `p100b.citing_sentences`.
 - **Request**: `{"manuscript": string (markdown), "bibtex": string, "project_id": string?}`.
 - **Behaviour**:
-  - Recognises "(Surname et al. YYYY)", "(Surname et al., YYYY)", "Surname and Other (YYYY)", several citations in one bracket, and suffixed years.
-  - Quoted words inside the sentence are returned as `quoted`.
-  - Table placeholders (`{{T…}}`) are left untouched.
-- **Response 200**: `{"occurrences": [CitationOccurrence], "missing_keys": [{"cite_text", "section", "sentence"}], "uncited_entries": string[], "provenance"}`.
-- **Agent notes**: feed `occurrences` with `quoted` words straight into `POST /quotes/verify`.
+  - Recognises "(Surname et al. YYYY)", "(Surname et al., YYYY)", "Surname and Other (YYYY)", "A & B 2019", several citations in one bracket separated by ";", "Surname (2019, 2020)" and suffixed years ("2024a", "2024a, b").
+  - "e.g.", "see" and "cf." prefixes are ignored.
+  - Sentences are not split after "et al.", "e.g.", "Fig." or initials.
+  - Markdown headings give `section`; fenced code is skipped; table placeholders (`{{T…}}`) are left untouched.
+  - Quoted words inside the sentence ("…" or “…”) are returned as `quoted`.
+- **Matching**:
+  - A citation resolves when exactly one entry has the same year and first-author family name (accents and case ignored) and the right author count: one author, two (A and B), or three or more for "et al.". Two authors are accepted when no three-author entry exists.
+  - A suffix picks between keys that end with it.
+  - Corporate authors cited by acronym resolve through the house key: "(CEOBS 2023)" → `CEOBS_2023`.
+- **Response 200**: `{"occurrences": [{"cite_text", "authors", "year", "status": "resolved"|"ambiguous"|"missing", "cite_key", "candidates", "doi", "section", "sentence", "line", "quoted"}], "missing_keys": [{"cite_text", "section", "sentence", "line"}], "uncited_entries": string[], "summary": {"resolved", "missing", "ambiguous", "entries", "cited_entries"}, "provenance"}`.
+- **Errors**: `422` when the BibTeX text has no entries.
+- **Agent notes**:
+  - Feed `occurrences` with `quoted` words straight into `POST /quotes/verify` (`source = cite_key` with `project_id`, or `doi`).
+  - A quotation in a sentence that cites several works is returned for each of them. Verify them together; `found_in` tells you which work holds the words.
+  - `missing` usually means the bib lacks the entry, or its year or first author differs from the text. Check both before adding a duplicate.

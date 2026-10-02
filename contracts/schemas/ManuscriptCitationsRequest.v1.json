@@ -1,0 +1,43 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "manuscript": {
+      "description": "markdown",
+      "maxLength": 2000000,
+      "minLength": 1,
+      "title": "Manuscript",
+      "type": "string"
+    },
+    "bibtex": {
+      "maxLength": 5000000,
+      "title": "Bibtex",
+      "type": "string"
+    },
+    "project_id": {
+      "anyOf": [
+        {
+          "enum": [
+            "floodstate-eo:paper3",
+            "kakhovka-terrain:paper2",
+            "swot-dnipro:paper1",
+            "kakhovka-report:v1",
+            "article1"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Project Id"
+    }
+  },
+  "required": [
+    "manuscript",
+    "bibtex"
+  ],
+  "title": "ManuscriptCitationsRequest",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/ManuscriptCitationsRequest.v1.json"
+}

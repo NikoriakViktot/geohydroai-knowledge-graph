@@ -58,6 +58,8 @@ CONTRACTS = (
     (api.PaperSearchResponse, 1),
     (api.SimilarRequest, 1),
     (api.LocateResponse, 1),
+    (api.ManuscriptCitationsRequest, 1),
+    (api.ManuscriptCitationsResponse, 1),
     (api.ThesesValidateRequest, 1),
     (api.ThesesValidateResponse, 1),
     (research.Labeler, 1),

@@ -10,7 +10,10 @@ from starlette.concurrency import run_in_threadpool
 from src.api.deps import provenance, require_scope
 from src.api.documentation import route_doc
 from src.api.problems import Problem
-from src.contracts.api import DoiResponse, DoiVerifyRequest, DoiVerifyResponse, LocateResponse
+from src.contracts.api import (
+    DoiResponse, DoiVerifyRequest, DoiVerifyResponse, LocateResponse, ManuscriptCitationsRequest,
+    ManuscriptCitationsResponse,
+)
 from src.services.identity import normalize_doi
 
 router = APIRouter()
@@ -67,3 +70,15 @@ async def locate(request: Request,
     if not body["doi"] and not body["in_corpus"]:
         raise Problem("NOT_FOUND", "; ".join(body["notes"]) or f"cannot resolve {q!r}")
     return LocateResponse(**body, provenance=provenance(request))
+
+
+@router.post("/manuscripts/citations", response_model=ManuscriptCitationsResponse,
+             **route_doc("POST", "/manuscripts/citations"))
+async def manuscript_citations(request: Request, body: ManuscriptCitationsRequest,
+                               _=Depends(require_scope("read"))) -> ManuscriptCitationsResponse:
+    from src.services import manuscripts
+    result = await run_in_threadpool(manuscripts.find, body.manuscript, body.bibtex)
+    if result["summary"].get("entries", 0) == 0:
+        raise Problem("VALIDATION_FAILED", "the BibTeX text has no entries",
+                      errors=[{"loc": ["body", "bibtex"], "msg": "no @type{key, …} entries", "type": "value_error"}])
+    return ManuscriptCitationsResponse(**result, provenance=provenance(request))
