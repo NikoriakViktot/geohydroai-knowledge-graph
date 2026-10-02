@@ -154,8 +154,10 @@ _ENTITY = """{match}
 MATCH (p)-[r:{rel}]->(e:{label})
 RETURN e.canonical_id AS canonical_id, e.display_name AS display_name, e.family AS family,
        r.confidence AS confidence, r.role AS role, r.surface_form AS surface_form, r.evidence AS evidence,
-       r.page AS page, r.section AS section
-ORDER BY CASE r.role WHEN 'used' THEN 0 ELSE 1 END, r.confidence DESC, canonical_id"""
+       r.page AS page, r.section AS section, r.grounded AS grounded, r.tei_mentions AS tei_mentions,
+       r.tei_evidence AS tei_evidence, r.tei_page AS tei_page, r.tei_section AS tei_section
+ORDER BY CASE r.grounded WHEN true THEN 0 WHEN false THEN 2 ELSE 1 END,
+         CASE r.role WHEN 'used' THEN 0 ELSE 1 END, r.confidence DESC, canonical_id"""
 Q_METHODS = "// methods\n" + _ENTITY.format(match=_MATCH_ONE, rel="USES_METHOD", label="Method")
 Q_SENSORS = "// sensors\n" + _ENTITY.format(match=_MATCH_ONE, rel="USES_SENSOR", label="Sensor")
 Q_METRICS = "// metrics\n" + _ENTITY.format(match=_MATCH_ONE, rel="REPORTS_METRIC", label="Metric")
@@ -268,12 +270,15 @@ def citations(doi_or_paper_id: str, direction: str, in_corpus_only: bool, limit:
 
 # ── entity → papers ────────────────────────────────────────────────────────────
 
+#: grounded = 'true' | 'false' | 'any' (src/graph/entity_grounding.py)
+GROUNDED_FILTER = "($grounded = 'any' OR r.grounded = ($grounded = 'true'))"
+
 _ENTITY_PAPERS = """// entity_papers:{label}
 MATCH (p:Paper)-[r:{rel}]->(e:{label} {{{key}: $id}})
 WHERE p.is_reference_stub IS NULL
   AND ($year_from IS NULL OR p.year >= $year_from) AND ($year_to IS NULL OR p.year <= $year_to)
   AND (r.confidence IS NULL OR r.confidence >= $min_confidence)
-  AND ($role IS NULL OR r.role = $role)
+  AND ($role IS NULL OR r.role = $role){grounded}
 WITH p, r ORDER BY coalesce(p.year, 0) DESC, p.paper_id
 WITH collect({{p: p, r: r}}) AS hits
 RETURN size(hits) AS total,
@@ -282,7 +287,8 @@ RETURN size(hits) AS total,
           identity_status: h.p.identity_status, is_reference_stub: false, cited_by_count: h.p.cited_by_count,
           openalex_id: h.p.openalex_id,
           confidence: h.r.confidence, role: h.r.role, surface_form: h.r.surface_form, evidence: h.r.evidence,
-          page: h.r.page, score: h.r.score}}] AS items"""
+          page: h.r.page, score: h.r.score, grounded: h.r.grounded, tei_mentions: h.r.tei_mentions,
+          tei_evidence: h.r.tei_evidence, tei_page: h.r.tei_page}}] AS items"""
 
 ENTITY_LABELS = {
     "Method": ("USES_METHOD", "canonical_id"),
@@ -292,15 +298,17 @@ ENTITY_LABELS = {
     "Country": ("FROM_COUNTRY", "name"),
     "FloodEvent": ("INVESTIGATES", "name"),
 }
-Q_ENTITY_PAPERS = {label: _ENTITY_PAPERS.format(label=label, rel=rel, key=key)
+GROUNDED_LABELS = ("Method", "Sensor", "Metric")
+Q_ENTITY_PAPERS = {label: _ENTITY_PAPERS.format(label=label, rel=rel, key=key,
+                                                grounded=f"\n  AND {GROUNDED_FILTER}" if label in GROUNDED_LABELS else "")
                    for label, (rel, key) in ENTITY_LABELS.items()}
 Q_CORPUS_SIZE = "// corpus_size\nMATCH (p:Paper) WHERE p.is_reference_stub IS NULL RETURN count(p) AS n"
 
 
 def entity_papers(label: str, entity_id: str, *, year_from: int | None, year_to: int | None,
-                  min_confidence: float, role: str | None, limit: int, offset: int) -> dict:
+                  min_confidence: float, role: str | None, limit: int, offset: int, grounded: str = "true") -> dict:
     rows = records(Q_ENTITY_PAPERS[label], {"id": entity_id, "year_from": year_from, "year_to": year_to,
-                                            "min_confidence": min_confidence, "role": role,
+                                            "min_confidence": min_confidence, "role": role, "grounded": grounded,
                                             "skip": offset, "limit": limit}, 1)
     total = rows[0]["total"] if rows else 0
     items = [_plain(dict(i, mention_in_evidence=mention_in_evidence(i.get("surface_form"), i.get("evidence"))))
@@ -338,7 +346,9 @@ class NamedQuery:
 _YEARS = {"year_from": Param(int, description="first publication year, inclusive"),
           "year_to": Param(int, description="last publication year, inclusive")}
 _YEAR_FILTER = "($year_from IS NULL OR p.year >= $year_from) AND ($year_to IS NULL OR p.year <= $year_to)"
-_ROLE = {"role": Param(str, choices=("used", "mentioned"), description="only edges with this role")}
+_ROLE = {"role": Param(str, choices=("used", "mentioned"), description="only edges with this role"),
+         "grounded": Param(str, "true", choices=("true", "false", "any"),
+                           description="'true' (default): only edges whose term occurs as a word in the paper's TEI text")}
 
 
 def _lineage(hops: int, direction: str) -> str:
@@ -347,6 +357,7 @@ def _lineage(hops: int, direction: str) -> str:
     return f"""// citation_lineage
 MATCH (seed:Paper)-[r:USES_METHOD]->(:Method {{canonical_id: $canonical_id}})
 WHERE seed.is_reference_stub IS NULL AND ($role IS NULL OR r.role = $role)
+  AND ($grounded = 'any' OR r.grounded = ($grounded = 'true'))
 MATCH path = {pattern}
 WHERE other <> seed
 RETURN seed.paper_id AS seed, other.paper_id AS paper_id, other.doi AS doi, other.title AS title,
@@ -359,14 +370,14 @@ CATALOGUE: dict[str, NamedQuery] = {q.name: q for q in (
                {**_YEARS, **_ROLE}, ("canonical_id", "display_name", "family", "papers"),
                f"""// top_methods
 MATCH (p:Paper)-[r:USES_METHOD]->(m:Method)
-WHERE p.is_reference_stub IS NULL AND {_YEAR_FILTER} AND ($role IS NULL OR r.role = $role)
+WHERE p.is_reference_stub IS NULL AND {_YEAR_FILTER} AND ($role IS NULL OR r.role = $role) AND {GROUNDED_FILTER}
 RETURN m.canonical_id AS canonical_id, m.display_name AS display_name, m.family AS family, count(DISTINCT p) AS papers
 ORDER BY papers DESC, canonical_id"""),
     NamedQuery("top_sensors", "Sensors by number of corpus papers in which the extractor found them.",
                {**_YEARS, **_ROLE}, ("canonical_id", "display_name", "family", "papers"),
                f"""// top_sensors
 MATCH (p:Paper)-[r:USES_SENSOR]->(s:Sensor)
-WHERE p.is_reference_stub IS NULL AND {_YEAR_FILTER} AND ($role IS NULL OR r.role = $role)
+WHERE p.is_reference_stub IS NULL AND {_YEAR_FILTER} AND ($role IS NULL OR r.role = $role) AND {GROUNDED_FILTER}
 RETURN s.canonical_id AS canonical_id, s.display_name AS display_name, s.family AS family, count(DISTINCT p) AS papers
 ORDER BY papers DESC, canonical_id"""),
     NamedQuery("method_sensor_pairs", "Method–sensor pairs found together in at least `min_papers` corpus papers.",
@@ -376,6 +387,7 @@ ORDER BY papers DESC, canonical_id"""),
 MATCH (p:Paper)-[rm:USES_METHOD]->(m:Method), (p)-[rs:USES_SENSOR]->(s:Sensor)
 WHERE p.is_reference_stub IS NULL AND {_YEAR_FILTER}
   AND ($role IS NULL OR (rm.role = $role AND rs.role = $role))
+  AND ($grounded = 'any' OR (rm.grounded = ($grounded = 'true') AND rs.grounded = ($grounded = 'true')))
 WITH m, s, count(DISTINCT p) AS papers WHERE papers >= $min_papers
 RETURN m.canonical_id AS method, s.canonical_id AS sensor, papers ORDER BY papers DESC, method, sensor"""),
     NamedQuery("papers_by_country", "Corpus papers whose study area is in a country (OpenAlex/extracted country name).",
@@ -406,6 +418,7 @@ ORDER BY shared_papers DESC, coauthor"""),
                """// metric_ranges_by_method
 MATCH (p:Paper)-[r:USES_METHOD]->(m:Method), (p)-[:HAS_NUMERIC_FACT]->(f:NumericFact {canonical_id: $metric})
 WHERE p.is_reference_stub IS NULL AND ($role IS NULL OR r.role = $role) AND f.value IS NOT NULL
+  AND ($grounded = 'any' OR r.grounded = ($grounded = 'true'))
 WITH m, count(DISTINCT p) AS papers, collect(f.value) AS values WHERE size(values) >= $min_facts
 UNWIND values AS v
 WITH m, papers, size(values) AS facts, min(v) AS lo, percentileCont(v, 0.5) AS median, max(v) AS hi

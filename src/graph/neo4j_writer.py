@@ -195,6 +195,11 @@ class GraphWriter:
             e.page              = r.page,
             e.section           = r.section,
             e.coord_match       = r.coord_match,
+            e.grounded          = r.grounded,
+            e.tei_mentions      = r.tei_mentions,
+            e.tei_evidence      = r.tei_evidence,
+            e.tei_page          = r.tei_page,
+            e.tei_section       = r.tei_section,
             e.resolver_version  = r.resolver_version,
             e.ontology_version  = r.ontology_version
         """
@@ -216,6 +221,11 @@ class GraphWriter:
             e.page              = r.page,
             e.section           = r.section,
             e.coord_match       = r.coord_match,
+            e.grounded          = r.grounded,
+            e.tei_mentions      = r.tei_mentions,
+            e.tei_evidence      = r.tei_evidence,
+            e.tei_page          = r.tei_page,
+            e.tei_section       = r.tei_section,
             e.resolver_version  = r.resolver_version,
             e.ontology_version  = r.ontology_version
         """
@@ -237,6 +247,11 @@ class GraphWriter:
             e.page              = r.page,
             e.section           = r.section,
             e.coord_match       = r.coord_match,
+            e.grounded          = r.grounded,
+            e.tei_mentions      = r.tei_mentions,
+            e.tei_evidence      = r.tei_evidence,
+            e.tei_page          = r.tei_page,
+            e.tei_section       = r.tei_section,
             e.resolver_version  = r.resolver_version,
             e.ontology_version  = r.ontology_version
         """

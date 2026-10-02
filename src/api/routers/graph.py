@@ -74,6 +74,9 @@ async def entity_papers(request: Request, label: str, canonical_id: str,
                         year_from: int | None = None, year_to: int | None = None,
                         min_confidence: float = Query(0.6, ge=0, le=1),
                         role: str | None = Query(None, pattern="^(used|mentioned)$"),
+                        grounded: str = Query("true", pattern="^(true|false|any)$",
+                                              description="Method/Sensor/Metric: 'true' keeps edges whose term occurs "
+                                                          "as a word in the paper's TEI text"),
                         limit: int = Query(100, ge=1, le=1000), cursor: str | None = None,
                         _=Depends(require_scope("read"))) -> EntityPapersResponse:
     from src.services import graph_read as g
@@ -82,7 +85,7 @@ async def entity_papers(request: Request, label: str, canonical_id: str,
                       errors=[{"loc": ["path", "label"], "msg": f"one of {list(g.ENTITY_LABELS)}", "type": "literal_error"}])
     offset = await _call(g.decode_cursor, cursor)
     body = await _call(g.entity_papers, label, canonical_id, year_from=year_from, year_to=year_to,
-                       min_confidence=min_confidence, role=role, limit=limit, offset=offset)
+                       min_confidence=min_confidence, role=role, limit=limit, offset=offset, grounded=grounded)
     return EntityPapersResponse(**body, provenance=provenance(request))
 
 

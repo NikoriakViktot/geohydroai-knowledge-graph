@@ -398,6 +398,12 @@ class GraphEntityEdge(_Contract):
                                                                        "false means the snippet cannot support the edge")
     page: int | None = None
     section: str | None = None
+    grounded: bool | None = Field(default=None, description="the surface form or display name occurs as a word in the "
+                                                            "paper's TEI text; null = not checked")
+    tei_mentions: int | None = None
+    tei_evidence: list[str] | None = Field(default=None, description="up to 3 TEI sentences that mention it, verbatim")
+    tei_page: int | None = None
+    tei_section: str | None = None
 
 
 class GraphAuthor(_Contract):
@@ -460,6 +466,10 @@ class EntityPaperItem(GraphPaper):
     mention_in_evidence: bool | None = None
     page: int | None = None
     score: float | None = Field(default=None, description="topic score (HAS_TOPIC only)")
+    grounded: bool | None = None
+    tei_mentions: int | None = None
+    tei_evidence: list[str] | None = None
+    tei_page: int | None = None
 
 
 class EntityPapersResponse(_Contract):

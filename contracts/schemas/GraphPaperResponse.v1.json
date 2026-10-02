@@ -195,6 +195,71 @@
           ],
           "default": null,
           "title": "Section"
+        },
+        "grounded": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the surface form or display name occurs as a word in the paper's TEI text; null = not checked",
+          "title": "Grounded"
+        },
+        "tei_mentions": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tei Mentions"
+        },
+        "tei_evidence": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "up to 3 TEI sentences that mention it, verbatim",
+          "title": "Tei Evidence"
+        },
+        "tei_page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tei Page"
+        },
+        "tei_section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tei Section"
         }
       },
       "title": "GraphEntityEdge",

@@ -334,6 +334,33 @@ def load_metric_nodes() -> list[dict]:
     ]
 
 
+def entity_display_names() -> dict[str, str]:
+    """canonical_id → display name of every Method, Sensor and Metric (analytics parquet)."""
+    names: dict[str, str] = {}
+    for rows in (load_method_nodes(), load_sensor_nodes(), load_metric_nodes()):
+        for r in rows:
+            if r.get("canonical_id") and r.get("display_name"):
+                names[r["canonical_id"]] = r["display_name"]
+    return names
+
+
+GROUNDING_FILE = _PROJECT_ROOT / "data" / "graph_inputs" / "entity_grounding.parquet"
+_GROUNDING_FIELDS = ("grounded", "tei_mentions", "tei_evidence", "tei_page", "tei_section")
+
+
+def load_entity_grounding(path: Path = GROUNDING_FILE) -> dict[tuple[str, str, str], dict]:
+    """(rel, paper_id, canonical_id) → grounding fields (src/graph/entity_grounding.py); {} if absent."""
+    if not path.exists():
+        log.warning("  no entity grounding file (%s): edges get grounded = null", path)
+        return {}
+    import pyarrow.parquet as pq
+    out = {}
+    for r in pq.read_table(path).to_pylist():
+        out[(r["rel"], r["paper_id"], r["canonical_id"])] = {k: r.get(k) for k in _GROUNDING_FIELDS}
+    log.info("  entity grounding: %d edges from %s", len(out), path.name)
+    return out
+
+
 def load_country_nodes(paper_rows: list[dict], institution_rows: list[dict]) -> list[dict]:
     """Build Country nodes from all country names that appear across papers and institutions."""
     names: set[str] = set()
@@ -531,7 +558,7 @@ def _edge_row(paper_id: str, ent: dict, raws: list[dict] | None = None) -> dict:
 
 
 def load_entity_edges_from_enriched(
-    limit: int | None = None,
+    limit: int | None = None, grounding: bool = True,
 ) -> tuple[list[dict], list[dict], list[dict], list[dict]]:
     """
     Single pass over all enriched JSONs.
@@ -598,6 +625,12 @@ def load_entity_edges_from_enriched(
 
     log.info("  Paper→Method: %d  Paper→Sensor: %d  Paper→Metric: %d  Author→Inst: %d",
              len(pm_edges), len(ps_edges), len(pmet_edges), len(ai_edges))
+    if grounding:
+        g = load_entity_grounding()
+        empty = dict.fromkeys(_GROUNDING_FIELDS)
+        for rel, rows in (("USES_METHOD", pm_edges), ("USES_SENSOR", ps_edges), ("REPORTS_METRIC", pmet_edges)):
+            for r in rows:
+                r.update(g.get((rel, r["paper_id"], r["canonical_id"]), empty))
     return pm_edges, ps_edges, pmet_edges, ai_edges
 
 
