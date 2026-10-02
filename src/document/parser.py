@@ -78,11 +78,42 @@ def _tag(local: str) -> str:
     return f"{_T}{local}"
 
 
+#: Elements whose boundaries are word boundaries. GROBID writes its <s> sentences (and
+#: <p>, <head>, <div>) with no whitespace between them, so a plain itertext() join glued
+#: "planning.The Height" in ~92 % of abstracts and in most figure captions.
+_BLOCK = frozenset(_tag(x) for x in ("s", "p", "div", "head", "note", "figDesc", "label", "item", "row", "cell", "lb"))
+
+
 def _text(el) -> str:
-    """Safe itertext join — returns '' when el is None."""
+    """Text of an element; '' when el is None.
+
+    Inline markup (<ref>, <hi>, <formula>) is joined as written; a sentence or block
+    boundary becomes one space unless whitespace is already there. Comment text is skipped.
+    """
     if el is None:
         return ""
-    return "".join(el.itertext()).strip()
+    out: list[str] = []
+
+    def gap() -> None:
+        if out and not out[-1][-1:].isspace():
+            out.append(" ")
+
+    def walk(e) -> None:
+        block = e.tag in _BLOCK
+        if block:
+            gap()
+        if e.text:
+            out.append(e.text)
+        for child in e:
+            if isinstance(child.tag, str):
+                walk(child)
+            if child.tail:
+                out.append(child.tail)
+        if block:
+            gap()
+
+    walk(el)
+    return "".join(out).strip()
 
 
 def _attr(el, name: str, default: str = "") -> str:

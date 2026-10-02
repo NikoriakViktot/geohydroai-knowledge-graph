@@ -22,6 +22,13 @@ TEI XML builder mirrors the XPath queries used by pipeline.py:
 
 from __future__ import annotations
 
+import os
+
+# Never let a test boot a local Ray cluster: ray.get() on a mocked future would
+# auto-init one (32 pre-started workers), which hangs when memory is short and
+# made the full suite stall on 2026-10-02. Must run before anything imports ray.
+os.environ.setdefault("RAY_ENABLE_AUTO_CONNECT", "0")
+
 import json
 import textwrap
 from pathlib import Path

@@ -12,6 +12,10 @@ Workflow per paper:
   5. Upsert DocumentChunks to VectorStore (idempotent on chunk_id)
 
 Safe to re-run: upserts are idempotent. Never modifies paper.json files.
+
+--chunk-types abstract,figure,table re-embeds only those chunks, in place (their
+chunk_ids do not depend on the text): used after the 2026-10-02 parser fix that stopped
+GROBID sentences being glued together in abstracts and captions.
 """
 from __future__ import annotations
 
@@ -66,8 +70,15 @@ def main() -> None:
         type=int,
         help="Stop after N papers (smoke test mode)",
     )
+    ap.add_argument(
+        "--chunk-types",
+        default=None,
+        help="comma list, e.g. abstract,figure,table: upsert only these chunk types "
+             "(refresh text that changed without re-embedding everything)",
+    )
     ap.add_argument("--log-level", default="INFO")
     args = ap.parse_args()
+    wanted = {t.strip() for t in args.chunk_types.split(",") if t.strip()} if args.chunk_types else None
 
     logging.basicConfig(
         level=args.log_level,
@@ -113,6 +124,8 @@ def main() -> None:
         try:
             doc    = parser.parse_file(xml, pid)
             chunks = chunker.chunk(doc)
+            if wanted is not None:
+                chunks = [c for c in chunks if c.chunk_type in wanted]
 
             if not chunks:
                 log.warning("[skip-no-chunks] %s", pid)
