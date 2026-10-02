@@ -57,6 +57,10 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                    help="Scan only the first N enriched JSON files (dev mode).")
     p.add_argument("--skip-stats", action="store_true",
                    help="Skip graph_statistics generation.")
+    p.add_argument("--identity", choices=["postgres", "none"], default="postgres",
+                   help="Take Paper identity (canonical DOI, duplicates, non-papers) from the "
+                        "PostgreSQL layer of truth (default). 'none' builds from parquet alone "
+                        "and must be asked for explicitly: there is no silent fallback.")
     p.add_argument("--log-level", default="INFO",
                    choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     return p.parse_args(argv)
@@ -106,6 +110,12 @@ def build(args: argparse.Namespace) -> None:
         t = time.perf_counter()
         log.info("Loading Paper nodes …")
         paper_rows = loader.load_paper_nodes()
+        excluded: set[str] = set()
+        if args.identity == "postgres":
+            identity = loader.load_identity_from_postgres()   # raises if Postgres is unreachable
+            paper_rows, excluded = loader.apply_identity(paper_rows, identity)
+            log.info("  identity from Postgres: %d papers known, %d excluded (duplicate / not a paper)",
+                     len(identity), len(excluded))
         log.info("  %d papers  (%s)", len(paper_rows), _elapsed(t))
 
         t = time.perf_counter()
@@ -189,6 +199,9 @@ def build(args: argparse.Namespace) -> None:
         pm_edges, ps_edges, pmet_edges, ai_edges = loader.load_entity_edges_from_enriched(
             limit=args.limit
         )
+        pm_edges   = loader.drop_excluded(pm_edges, excluded)
+        ps_edges   = loader.drop_excluded(ps_edges, excluded)
+        pmet_edges = loader.drop_excluded(pmet_edges, excluded)
         log.info(
             "  paper→method=%d  paper→sensor=%d  paper→metric=%d  "
             "author→institution=%d  (%s)",
@@ -238,7 +251,8 @@ def build(args: argparse.Namespace) -> None:
         _phase("CITES EDGES")
 
         t = time.perf_counter()
-        cites_rows = loader.load_cites_edges(limit=args.limit)
+        cites_rows = loader.drop_excluded(loader.load_cites_edges(limit=args.limit), excluded,
+                                          key="source_paper_id")
         log.info("  %d CITES edge candidates  (%s)", len(cites_rows), _elapsed(t))
         gw.write_cites_edges(cites_rows)
 

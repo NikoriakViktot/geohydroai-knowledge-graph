@@ -63,6 +63,37 @@ def test_entity_edges_come_from_nested_layout(enriched_dir):
     assert [r["canonical_id"] for r in pmet] == ["metric.nse"]
 
 
+def test_apply_identity_uses_canonical_doi_and_drops_copies():
+    rows = [
+        {"paper_id": "10.1029_2025gl120832", "doi": "10.1029/2025GL120832", "title": "T", "year": 2026},
+        {"paper_id": "copy_of_it", "doi": "10.1029/2025GL120832", "title": "T", "year": 2026},
+        {"paper_id": "VKNU", "doi": "10.1126/science.aan2506", "title": "Ukrainian floods", "year": None},
+        {"paper_id": "EXHIBIT", "doi": None, "title": "Exhibit A", "year": None},
+        {"paper_id": "not_in_postgres", "doi": None, "title": "x", "year": 2020},
+    ]
+    identity = {
+        "10.1029_2025gl120832": {"doi": "10.1029/2025gl120832", "title": "T", "year": 2026,
+                                 "identity_status": "ok", "duplicate_of": None},
+        "copy_of_it": {"doi": "10.1029/2025gl120832", "title": "T", "year": 2026,
+                       "identity_status": "duplicate", "duplicate_of": "10.1029_2025gl120832"},
+        "VKNU": {"doi": None, "title": "Ukrainian floods", "year": 2018,
+                 "identity_status": "title_doi_mismatch", "duplicate_of": None},
+        "EXHIBIT": {"doi": None, "title": "Exhibit A", "year": None,
+                    "identity_status": "not_a_paper", "duplicate_of": None},
+    }
+    out, excluded = gl.apply_identity(rows, identity)
+    by_id = {r["paper_id"]: r for r in out}
+    assert excluded == {"copy_of_it", "EXHIBIT"}
+    assert set(by_id) == {"10.1029_2025gl120832", "VKNU", "not_in_postgres"}
+    assert by_id["10.1029_2025gl120832"]["doi"] == "10.1029/2025gl120832"
+    assert by_id["VKNU"]["doi"] is None            # header DOI names another work
+    assert by_id["VKNU"]["year"] == 2018           # filled from the layer of truth
+    assert by_id["not_in_postgres"]["identity_status"] == "unknown"
+
+    edges = [{"paper_id": "copy_of_it"}, {"paper_id": "VKNU"}]
+    assert gl.drop_excluded(edges, excluded) == [{"paper_id": "VKNU"}]
+
+
 def test_cites_rows_come_from_nested_layout(enriched_dir):
     rows = gl.load_cites_edges()
     assert len(rows) == 2  # the reference with neither DOI nor title is skipped

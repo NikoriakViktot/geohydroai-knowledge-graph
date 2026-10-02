@@ -88,7 +88,8 @@ class GraphWriter:
             p.openalex_id     = r.openalex_id,
             p.journal         = r.journal,
             p.study_type      = r.study_type,
-            p.primary_country = r.primary_country
+            p.primary_country = r.primary_country,
+            p.identity_status = r.identity_status
         """
         self._batch_write("Papers", cypher, rows)
 

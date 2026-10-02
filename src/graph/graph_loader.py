@@ -197,6 +197,59 @@ def load_paper_nodes() -> list[dict]:
     return rows
 
 
+# ── Identity from the layer of truth (API_PLAN_v1/11) ─────────────────────────
+
+#: Papers that must not become graph nodes: copies of another paper, and documents
+#: that are not scholarly works.
+EXCLUDED_IDENTITY_STATUSES = frozenset({"duplicate", "not_a_paper"})
+
+
+def load_identity_from_postgres() -> dict[str, dict]:
+    """paper_id → canonical identity (core.paper in the PostgreSQL layer of truth)."""
+    from sqlalchemy import select
+
+    from src.db.engine import session_scope
+    from src.db.models import Paper
+
+    with session_scope() as s:
+        rows = s.execute(select(Paper.paper_id, Paper.doi, Paper.title, Paper.year,
+                                Paper.identity_status, Paper.duplicate_of)).all()
+    return {r.paper_id: {"doi": r.doi, "title": r.title, "year": r.year,
+                         "identity_status": r.identity_status, "duplicate_of": r.duplicate_of}
+            for r in rows}
+
+
+def apply_identity(paper_rows: list[dict], identity: dict[str, dict]) -> tuple[list[dict], set[str]]:
+    """Overlay canonical identity on Paper rows.
+
+    The DOI always comes from the layer of truth (normalised, None when the header DOI
+    names another work), so CITES stubs merged on DOI meet the corpus paper instead of
+    creating a second node. Duplicates and non-papers are dropped; their ids are
+    returned so that edges keyed on them can be dropped too.
+    """
+    excluded = {pid for pid, r in identity.items() if r["identity_status"] in EXCLUDED_IDENTITY_STATUSES}
+    out: list[dict] = []
+    for row in paper_rows:
+        pid = row["paper_id"]
+        if pid in excluded:
+            continue
+        ident = identity.get(pid)
+        if ident is None:
+            out.append(dict(row, identity_status="unknown"))
+            continue
+        merged = dict(row, doi=ident["doi"], identity_status=ident["identity_status"])
+        if not merged.get("title"):
+            merged["title"] = ident["title"]
+        if merged.get("year") is None:
+            merged["year"] = ident["year"]
+        out.append(merged)
+    return out, excluded
+
+
+def drop_excluded(rows: list[dict], excluded: set[str], key: str = "paper_id") -> list[dict]:
+    return [r for r in rows if r.get(key) not in excluded]
+
+
 def load_author_nodes() -> list[dict]:
     df = _duckdb_query("SELECT author_id, display_name, orcid, paper_count FROM authors")
     return [
