@@ -14,7 +14,7 @@ from sqlalchemy import (
     BigInteger, Boolean, CheckConstraint, DateTime, ForeignKey, Index, MetaData,
     SmallInteger, Text, func, text,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from src.contracts.identity import (
@@ -74,6 +74,24 @@ class SourceFile(Base):
     run_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("ops.run.run_id"))
     size_bytes: Mapped[int | None] = mapped_column(BigInteger)
     imported_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ApiKey(Base):
+    """An API consumer key: only the sha256 of the key is stored."""
+
+    __tablename__ = "api_key"
+    __table_args__ = (
+        CheckConstraint("scopes <@ ARRAY['read','llm','write','admin']::text[]", name="scopes"),
+        {"schema": "ops"},
+    )
+
+    key_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    consumer: Mapped[str] = mapped_column(Text)
+    scopes: Mapped[list[str]] = mapped_column(ARRAY(Text))
+    key_hash: Mapped[str] = mapped_column(Text, unique=True)
+    note: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 # ── core: papers ────────────────────────────────────────────────────────────────

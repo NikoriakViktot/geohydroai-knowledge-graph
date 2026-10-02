@@ -30,3 +30,8 @@ pydantic
 sqlalchemy>=2.0,<2.1
 psycopg[binary]>=3.2,<3.3
 alembic>=1.13,<1.17
+
+# ── Knowledge API (API_PLAN_v1/03, docs/api) ──────────────────────────────────
+fastapi==0.141.0          # 0.142+ requires opentelemetry-api>=1.44, which breaks chromadb (otel sdk 1.41)
+python-multipart>=0.0.9
+uvicorn>=0.30

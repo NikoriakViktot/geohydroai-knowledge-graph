@@ -1,0 +1,92 @@
+{
+  "$defs": {
+    "ValidationErrorItem": {
+      "additionalProperties": false,
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Loc",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Msg",
+          "type": "string"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationErrorItem",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "application/problem+json body of every error.",
+  "properties": {
+    "type": {
+      "title": "Type",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "status": {
+      "title": "Status",
+      "type": "integer"
+    },
+    "code": {
+      "title": "Code",
+      "type": "string"
+    },
+    "detail": {
+      "title": "Detail",
+      "type": "string"
+    },
+    "instance": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Instance"
+    },
+    "errors": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ValidationErrorItem"
+      },
+      "title": "Errors",
+      "type": "array"
+    }
+  },
+  "required": [
+    "type",
+    "title",
+    "status",
+    "code",
+    "detail"
+  ],
+  "title": "Problem",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/Problem.v1.json"
+}

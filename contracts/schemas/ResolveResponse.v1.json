@@ -1,0 +1,514 @@
+{
+  "$defs": {
+    "LLMUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "prompt_sha256": {
+          "title": "Prompt Sha256",
+          "type": "string"
+        },
+        "tokens_in": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokens In"
+        },
+        "tokens_out": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokens Out"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "repair_count": {
+          "default": 0,
+          "title": "Repair Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "prompt_sha256"
+      ],
+      "title": "LLMUsage",
+      "type": "object"
+    },
+    "PaperAlias": {
+      "additionalProperties": false,
+      "properties": {
+        "alias_type": {
+          "enum": [
+            "doi",
+            "doi_slug",
+            "doi_slug_colon",
+            "file_stem",
+            "openalex_id",
+            "pdf_sha256"
+          ],
+          "title": "Alias Type",
+          "type": "string"
+        },
+        "alias": {
+          "minLength": 1,
+          "title": "Alias",
+          "type": "string"
+        },
+        "source": {
+          "description": "where the alias was observed, e.g. 'paper_json.metadata.doi'",
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "alias_type",
+        "alias",
+        "source"
+      ],
+      "title": "PaperAlias",
+      "type": "object"
+    },
+    "PaperFile": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "pdf",
+            "tei",
+            "paper_json",
+            "normalized",
+            "enriched",
+            "sodb",
+            "nougat_regions"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "description": "path relative to the repository root",
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "size_bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size Bytes"
+        },
+        "status": {
+          "default": "ok",
+          "enum": [
+            "ok",
+            "truncated",
+            "duplicate_copy"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ],
+      "title": "PaperFile",
+      "type": "object"
+    },
+    "PaperIdentity": {
+      "additionalProperties": false,
+      "description": "One paper as the layer of truth knows it.",
+      "properties": {
+        "paper_id": {
+          "description": "v1: the file stem used across data/",
+          "minLength": 1,
+          "title": "Paper Id",
+          "type": "string"
+        },
+        "doi": {
+          "anyOf": [
+            {
+              "pattern": "^10\\.\\d{4,9}/\\S+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Doi"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "maximum": 2100,
+              "minimum": 1500,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "venue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Venue"
+        },
+        "openalex_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Openalex Id"
+        },
+        "identity_status": {
+          "enum": [
+            "ok",
+            "no_doi",
+            "title_doi_mismatch",
+            "duplicate",
+            "not_a_paper",
+            "truncated_json"
+          ],
+          "title": "Identity Status",
+          "type": "string"
+        },
+        "duplicate_of": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duplicate Of"
+        },
+        "aliases": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PaperAlias"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "files": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PaperFile"
+          },
+          "title": "Files",
+          "type": "array"
+        },
+        "cohorts": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Cohorts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "paper_id",
+        "identity_status"
+      ],
+      "title": "PaperIdentity",
+      "type": "object"
+    },
+    "PaperRef": {
+      "additionalProperties": false,
+      "properties": {
+        "paper_id": {
+          "title": "Paper Id",
+          "type": "string"
+        },
+        "doi": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Doi"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "venue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Venue"
+        },
+        "identity_status": {
+          "enum": [
+            "ok",
+            "no_doi",
+            "title_doi_mismatch",
+            "duplicate",
+            "not_a_paper",
+            "truncated_json"
+          ],
+          "title": "Identity Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "paper_id",
+        "identity_status"
+      ],
+      "title": "PaperRef",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Present in every successful response; record it with any result you use.",
+      "properties": {
+        "api_version": {
+          "title": "Api Version",
+          "type": "string"
+        },
+        "git_commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Git Commit"
+        },
+        "corpus_manifest_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corpus Manifest Id"
+        },
+        "collection": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Collection"
+        },
+        "embedding_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Embedding Model"
+        },
+        "kb_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kb Version"
+        },
+        "identity_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Identity Run Id"
+        },
+        "llm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LLMUsage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "api_version",
+        "git_commit",
+        "corpus_manifest_id",
+        "generated_at"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "match": {
+      "enum": [
+        "exact",
+        "alias",
+        "title_fuzzy"
+      ],
+      "title": "Match",
+      "type": "string"
+    },
+    "score": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Score",
+      "type": "number"
+    },
+    "paper": {
+      "$ref": "#/$defs/PaperIdentity"
+    },
+    "canonical": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PaperRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "the paper to use when `paper` is a duplicate"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "match",
+    "score",
+    "paper",
+    "provenance"
+  ],
+  "title": "ResolveResponse",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/ResolveResponse.v1.json"
+}

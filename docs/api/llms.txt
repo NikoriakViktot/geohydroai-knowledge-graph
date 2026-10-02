@@ -1,0 +1,37 @@
+# GeoHydroAI Knowledge API
+
+> Evidence-grounded access to a corpus of ~4.8k flood, hydrology and remote-sensing papers. It covers full-text passages, semantic search, a citation and entity graph, metric facts, DOI and bibliography verification, quote and claim checks, thesis evidence, discovery of new papers and legal open-access ingestion.
+> Base URL `http://127.0.0.1:8090/v1`. Header `X-API-Key`. Errors are `application/problem+json`. Every answer carries `provenance` (`corpus_manifest_id`, collection, model).
+> PostgreSQL is the layer of truth; Neo4j, Chroma and Parquet are projections.
+
+Agents MUST read the rules first. The non-negotiable ones:
+- quote, don't recall;
+- every number comes with its source sentence;
+- "not found" is not "does not exist", and gap or novelty claims need the gate (CANDIDATE_GAP);
+- model verdicts are labelled model-assessed (there are no human labels yet);
+- record provenance;
+- acquire papers only from open-access sources.
+
+## Rules and conventions
+- [AGENT_RULES.md](AGENT_RULES.md): mandatory rules for AI agents, task → endpoint table, workflows, error handling, checklist
+- [README.md](README.md): base URL, auth and scopes, conventions, error codes, provenance and retrieval validity, jobs and quota
+- [SCHEMAS.md](SCHEMAS.md): Provenance, Problem, Coverage, RetrievalValidity, PaperIdentity (implemented), EvidenceSpan, ChunkHit, Job, QuoteResult, DoiVerifyResult, Thesis, AtomicClaim, ClaimCheckResult, ScreeningLabel, Candidate, Acquisition, MetricFact, GraphBundle
+- [MCP_TOOLS.md](MCP_TOOLS.md): MCP tools for Claude Code (`http://127.0.0.1:8090/mcp`)
+
+## Endpoints
+- [system](endpoints/system.md): GET /health, /capabilities, /stats, /manifest, /schemas/{name}, /client.py, /llms.txt; documentation served by the API: GET /v1/agent-rules (rules as JSON or ?format=markdown), /v1/docs/index, /v1/docs/pages/{name}, /v1/docs/endpoint?method=&path= (one endpoint with the full text of its rules); Swagger UI at /docs, OpenAPI at /v1/openapi.json (every operation carries x-agent-rules and x-status)
+- [papers](endpoints/papers.md): GET /papers/resolve; POST /papers/resolve-batch; GET /papers/{id}, /sections, /text, /references, /entities, /tables
+- [search](endpoints/search.md): POST /search/chunks, /search/papers, /search/similar, /search/hybrid
+- [graph](endpoints/graph.md): GET /graph/papers/{id}, /graph/papers/{id}/citations, /graph/entities/{label}/{canonical_id}/papers, /graph/queries; POST /graph/queries/{name}, /graph/cypher (admin)
+- [metrics](endpoints/metrics.md): GET /metrics/facts, /metrics/ontology, /ontology/entities; POST /metrics/extract, /ontology/normalize
+- [bibliography](endpoints/bibliography.md): GET /doi/{doi}; POST /doi/verify, /bib/format, /bib/audit, /bib/render, /manuscripts/citations
+- [evidence](endpoints/evidence.md): POST /quotes/verify, /claims/check, /theses/validate, /theses/extract, /theses/evidence, /theses/evidence-run, /theses/novelty; GET /theses/sets/{project_id}
+- [generate](endpoints/generate.md): POST /generate/synthesis, /generate/related-work, /generate/rewrite-check
+- [acquisition](endpoints/acquisition.md): POST /discovery/search, /discovery/snowball, /discovery/screen, /acquire, /ingest, /ingest/upload, /pipelines/discover-and-ingest; GET/PATCH /discovery/candidates
+- [jobs](endpoints/jobs.md): GET /jobs, /jobs/{id}, /jobs/{id}/events (SSE); DELETE /jobs/{id}; POST /jobs/{id}/retry
+- [bundles](endpoints/bundles.md): POST /bundles/import
+- [admin](endpoints/admin.md): POST /admin/manifest/freeze, /admin/rebuild/{graph|vectors|analytics}, /admin/integrity/check
+
+## Optional
+- [Design and rationale (Ukrainian)](../../API_PLAN_v1/INDEX.md)
+- [Contracts as JSON Schema](../../contracts/schemas/)
