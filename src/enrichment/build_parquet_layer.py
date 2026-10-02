@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Optional
 
 from src.config.settings import ENRICHED_DIR, PARQUET_DIR, REFERENCE_ENRICHED_DIR
+from src.services.identity import normalize_doi
 
 log = logging.getLogger(__name__)
 
@@ -149,9 +150,9 @@ def _build_references(docs: list[dict]) -> list[dict]:
         openalex = doc.get("openalex") or {}
         paper_id = meta.get("paper_id")
 
-        # GROBID-parsed references with DOI
+        # GROBID-parsed references with DOI (canonical lower-case form, as in the graph)
         for ref in (doc.get("paper") or {}).get("references", []):
-            doi = ref.get("doi")
+            doi = normalize_doi(ref.get("doi"))
             if doi:
                 rows.append({
                     "source_paper_id":      paper_id,
@@ -211,20 +212,30 @@ def _write(
 
     new_df = pd.DataFrame(rows)
 
-    if incremental and out_path.exists() and dedup_key in new_df.columns:
-        try:
-            existing = pd.read_parquet(out_path)
-            # Remove stale rows for paper_ids being updated, then append
-            new_ids = set(new_df[dedup_key].dropna())
-            existing = existing[~existing[dedup_key].isin(new_ids)]
-            combined = pd.concat([existing, new_df], ignore_index=True)
-            combined.to_parquet(out_path, engine="pyarrow", compression="zstd", index=False)
-            log.info("%-30s +%d rows (total %d)  [%s]", label, len(new_df), len(combined), out_path.name)
-            return
-        except Exception as exc:
-            log.warning("Incremental merge failed for %s (%s) — falling back to full write", label, exc)
+    if incremental and out_path.exists():
+        # An incremental run only holds the changed papers. Writing them over the
+        # existing table is how references.parquet went from 320,633 rows to 883
+        # (its rows have no "paper_id" column, so the merge was skipped). Never
+        # replace an existing table with a partial one: merge or fail loudly.
+        if dedup_key not in new_df.columns:
+            raise ValueError(
+                f"{label}: dedup key {dedup_key!r} not in columns {list(new_df.columns)}; "
+                f"refusing to overwrite {out_path} with {len(new_df)} incremental rows"
+            )
+        existing = pd.read_parquet(out_path)
+        # Remove stale rows for the papers being updated, then append
+        new_ids = set(new_df[dedup_key].dropna())
+        existing = existing[~existing[dedup_key].isin(new_ids)]
+        combined = pd.concat([existing, new_df], ignore_index=True)
+        tmp = out_path.with_suffix(".parquet.tmp")
+        combined.to_parquet(tmp, engine="pyarrow", compression="zstd", index=False)
+        tmp.replace(out_path)
+        log.info("%-30s +%d rows (total %d)  [%s]", label, len(new_df), len(combined), out_path.name)
+        return
 
-    new_df.to_parquet(out_path, engine="pyarrow", compression="zstd", index=False)
+    tmp = out_path.with_suffix(".parquet.tmp")
+    new_df.to_parquet(tmp, engine="pyarrow", compression="zstd", index=False)
+    tmp.replace(out_path)
     log.info("%-30s → %d rows  [%s]", label, len(rows), out_path.name)
 
 
@@ -282,7 +293,7 @@ def build_parquet_layer(
 
     _write(_build_references(docs),
            parquet_dir / "references.parquet",
-           "references", incremental=incremental)
+           "references", dedup_key="source_paper_id", incremental=incremental)
 
     _write(_build_topics(docs),
            parquet_dir / "topics.parquet",
