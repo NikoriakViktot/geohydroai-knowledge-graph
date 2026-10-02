@@ -1,0 +1,16 @@
+# claims.md C01–C14 of floodstate-eo Paper 3 -> the theses that carry their literature (hand map, 2026-09-28).
+# Lives in that repository as case_studies/kakhovka_2023/literature_audit/claims_theses.yaml.
+C01: [TH-RES-01, TH-DIS-01, TH-INT-03]
+C02: [TH-RES-02, TH-MET-03, TH-MET-01]
+C03: [TH-RES-03]
+C04: [TH-RES-04, TH-MET-08]
+C05: [TH-RES-05, TH-INT-06, TH-MET-09]
+C06: [TH-RES-06, TH-RES-07, TH-MET-10, TH-DAT-05, TH-DAT-03]
+C07: [TH-MET-06, TH-INT-10, TH-MET-07]
+C08: [TH-RES-08, TH-INT-02, TH-INT-05, TH-MET-05, TH-DIS-02]
+C09: [TH-RES-10, TH-MET-12, TH-INT-07]
+C10: [TH-RES-11]
+C11: [TH-RES-12, TH-INT-08]
+C12: [TH-RES-09, TH-MET-11, TH-DAT-07]
+C13: [TH-RES-13, TH-MET-14]
+C14: [TH-RES-14, TH-RES-15, TH-INT-04, TH-DIS-04, TH-RES-16, TH-RES-17, TH-RES-18]

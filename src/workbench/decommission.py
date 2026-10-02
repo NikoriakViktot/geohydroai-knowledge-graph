@@ -234,6 +234,10 @@ RULES: tuple[Rule, ...] = (
 
     # Per-paper code in src/paper_3 (tracked): generic parts move into the workbench, the rest is archived.
     R("src/paper_3/evidence.py", "here", None, "src/services/evidence_text.py"),
+    R("src/paper_3/retrieve.py", "here", None, "src/workbench/literature/cascade.py"),
+    R("src/paper_3/classify_relation.py", "here", None, "src/workbench/literature/relations.py"),
+    R("src/paper_3/theses.py", "here", None, "src/workbench/literature/theses.py"),
+    R("src/paper_3/_utils.py", "here", None, "src/workbench/literature/corpus_utils.py"),
     R("src/paper_3/snapshot.py", "here", None, "src/workbench/remote.py"),
     R("src/paper_3/v2/assemble.py", "here", None, "src/workbench/assemble/render.py",
       note="TABLE_SPECS become table_specs.yaml in SWOT-DNIPRO (T1-T4, T9) and kakhovka-terrain (T5-T8, P2-T*)"),
@@ -260,8 +264,14 @@ RULES: tuple[Rule, ...] = (
     R("tools/paper3_audit/checks.py", "here", None, "src/workbench/review/engine.py",
       note="checks A–H: the engine here, the rules as data in floodstate-eo review_rules.yaml"),
     R("tools/paper3_audit/revise.py", "here", None, "src/workbench/review/revise.py"),
-    R("tools/paper3_audit/**", "here", None, "src/workbench/literature/"),
-    R("tools/paper3_literature_audit.py", "here", None, "src/workbench/__main__.py"),
+    R("tools/paper3_audit/article.py", "retire", FS3, note="Paper 3 article package; superseded by the assemble step"),
+    R("tools/paper3_audit/final_article.py", "retire", FS3, note="Paper 3 article package; superseded by assemble"),
+    R("tools/paper3_audit/docx_build.py", "retire", FS3, note="superseded by src/services/markdown_docx.py in assemble"),
+    R("tools/paper3_audit/rebase.py", "retire", FS3, note="re-anchoring for one template; superseded by review/revise"),
+    R("tools/paper3_audit/__init__.py", "retire", FS3),
+    R("tools/paper3_audit/*.py", "here", None, "src/workbench/literature/"),
+    R("tools/paper3_audit/**", "archive", FS3),
+    R("tools/paper3_literature_audit.py", "here", None, "src/workbench/steps/literature.py"),
 )
 
 

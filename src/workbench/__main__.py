@@ -11,6 +11,7 @@
     python -m src.workbench <project_id> tables | figures     # inventories with sha256 and caption checks
     python -m src.workbench <project_id> assemble [--final]   # manuscript + OPEN_ITEMS + docx; --final = gate
     python -m src.workbench <project_id> translate            # other languages, numbers locked
+    python -m src.workbench <project_id> literature <command> # the evidence run: prepare … export, report
     python -m src.workbench <project_id> deliver  [--from-inventory] [--dry-run] [--force]
 
 Checking steps stage their reports in data/workbench/<project>/out/<reviews>/workbench/; deliver sends them.
@@ -18,8 +19,7 @@ Checking steps stage their reports in data/workbench/<project>/out/<reviews>/wor
 Every step that writes into a paper repository plans first, refuses to overwrite work that is not
 committed (unless --force) and verifies what it wrote; the human commits there. ``--to DIR`` runs a
 step against a scratch directory instead of the repository (nothing is recorded).
-The remaining steps (passport, literature, analysis) follow; the whole sequence is
-docs/api/PAPER_WORKFLOW.md.
+The remaining steps (passport, analysis) follow; the whole sequence is docs/api/PAPER_WORKFLOW.md.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ import argparse
 import sys
 
 STEPS = ("status", "init", "pull", "theses", "citations", "bibliography", "review", "tables", "figures",
-         "assemble", "translate", "deliver")
+         "assemble", "translate", "literature", "deliver")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -50,7 +50,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--to", metavar="DIR", help="a scratch directory standing in for the paper repository")
     ap.add_argument("--from-inventory", action="store_true", help="deliver: the P6 freeze rows of this project")
     ap.add_argument("--final", action="store_true", help="assemble: refuse a manuscript with open markers")
-    args = ap.parse_args(argv)
+    ap.add_argument("--refresh", action="store_true", help="literature: pull the audit directory again")
+    ap.add_argument("--seed-work", metavar="DIR", help="literature: copy an earlier run's _work once")
+    args, rest = ap.parse_known_args(argv)
+    if rest and args.step != "literature":
+        ap.error(f"unrecognized arguments: {' '.join(rest)}")
 
     from src.workbench.steps import context
     ctx = context(args.project_id, to=args.to)
@@ -72,6 +76,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.step == "assemble":
         from src.workbench.steps import assemble
         return assemble.run(ctx, final=args.final)
+    if args.step == "literature":          # --force / --dry-run belong to the literature command here
+        from src.workbench.steps import literature
+        rest = [x for x in rest if x != "--"] + ["--force"] * args.force + ["--dry-run"] * args.dry_run
+        return literature.run(ctx, rest, refresh=args.refresh, seed_work=args.seed_work)
     from src.workbench.steps import deliver
     return deliver.run(ctx, from_inventory=args.from_inventory, dry_run=args.dry_run, force=args.force)
 
