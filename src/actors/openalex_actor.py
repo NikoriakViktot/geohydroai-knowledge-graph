@@ -14,7 +14,7 @@ from src.config.settings import (
     OPEN_ALEX_EMAIL,
 )
 
-_DEFAULT_CACHE_PATH = Path(__file__).resolve().parents[2] / "paper_my" / "cache" / "openalex_verification_cache.json"
+_DEFAULT_CACHE_PATH = Path(__file__).resolve().parents[2] / "data" / "cache" / "openalex_verification_cache.json"
 
 
 def _sim_to_confidence(sim: float) -> str:

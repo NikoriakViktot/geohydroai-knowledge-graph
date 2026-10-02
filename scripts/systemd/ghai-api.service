@@ -1,0 +1,18 @@
+[Unit]
+Description=GeoHydroAI Knowledge API (REST /v1 + MCP /mcp) on 127.0.0.1:8090
+Documentation=file:///home/niko/projects/knoweledg_graf/docs/api/README.md
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/niko/projects/knoweledg_graf
+# Postgres is started by ghai_api.sh; Neo4j is the existing container course-neo4j (restart unless-stopped)
+ExecStartPre=-/usr/bin/docker start course-neo4j
+ExecStart=/home/niko/projects/knoweledg_graf/scripts/ghai_api.sh
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=300
+Environment=TOKENIZERS_PARALLELISM=false OMP_NUM_THREADS=2 RAYON_NUM_THREADS=1
+
+[Install]
+WantedBy=default.target
