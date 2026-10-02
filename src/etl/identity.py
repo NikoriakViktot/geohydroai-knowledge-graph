@@ -96,6 +96,31 @@ def stem_doi(paper_id: str) -> str | None:
     return normalize_doi(paper_id.replace("_", "/", 1))
 
 
+def repair_header_doi(doi: str | None, paper_id: str) -> tuple[str | None, str | None]:
+    """Repair the two header-DOI defects GROBID produces, or drop the DOI.
+
+    * cut at a line-break hyphen: "10.1146/annurev-fluid-030121-" — when the file stem
+      continues the suffix ("annurev-fluid-030121-113138") the DOI is rebuilt from it;
+    * text glued after it: "10.30501/jree.2021.257941.1162).2423-7469/" — cut at the
+      first unbalanced ")".
+    Returns (doi, note); note is None when nothing was changed.
+    """
+    if not doi:
+        return doi, None
+    prefix, _, suffix = doi.partition("/")
+    close = suffix.find(")")
+    if close != -1 and "(" not in suffix[:close]:
+        repaired = normalize_doi(f"{prefix}/{suffix[:close]}")
+        return repaired, f"header DOI {doi} carried trailing text; cut to {repaired}"
+    if doi.endswith(("-", ".", "_", "/")):
+        stem = paper_id.lower()
+        if suffix and stem.startswith(suffix) and len(stem) > len(suffix):
+            repaired = normalize_doi(f"{prefix}/{stem}")
+            return repaired, f"header DOI {doi} was cut at a line break; rebuilt from the file name as {repaired}"
+        return None, f"header DOI {doi} looks truncated; dropped"
+    return doi, None
+
+
 def openalex_short(value: str | None) -> str | None:
     if not value:
         return None
@@ -236,7 +261,9 @@ def classify(
     duplicate_of: dict[str, str] = {}
 
     for pid, sp in scanned.items():
-        d = normalize_doi(sp.doi_raw)
+        d, repair_note = repair_header_doi(normalize_doi(sp.doi_raw), pid)
+        if repair_note:
+            notes[pid] = repair_note
         d_stem = stem_doi(pid)
         if d_stem:
             if d and d != d_stem:

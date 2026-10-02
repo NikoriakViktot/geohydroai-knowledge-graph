@@ -130,6 +130,18 @@ def test_cyrillic_title_is_not_compared_with_the_english_openalex_title(tmp_path
     assert paper.doi == "10.31481/uhmj.32.2023.05"
 
 
+@pytest.mark.parametrize("doi, pid, expected", [
+    ("10.1146/annurev-fluid-030121-", "annurev-fluid-030121-113138", "10.1146/annurev-fluid-030121-113138"),
+    ("10.30501/jree.2021.257941.1162).2423-7469/", "JREE_Volume 8_Issue 3_Pages 75-85", "10.30501/jree.2021.257941.1162"),
+    ("10.1000/abc-", "unrelated_stem", None),
+    ("10.1029/2024wr038314", "anything", "10.1029/2024wr038314"),
+])
+def test_repair_header_doi(doi, pid, expected):
+    repaired, note = idn.repair_header_doi(doi, pid)
+    assert repaired == expected
+    assert (note is None) == (doi == expected)
+
+
 def test_stem_doi_only_for_doi_named_files():
     assert idn.stem_doi("10.1029_2025gl120832") == "10.1029/2025gl120832"
     assert idn.stem_doi("giustarini2013") is None
