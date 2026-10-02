@@ -134,9 +134,9 @@
 | Крок | Що | Готово, коли |
 |---|---|---|
 | P0 ✅ | контейнер `ghai-postgres` (PG 17 + pgvector), `GHAI_PG_*` у `.env`, compose з виправленим томом Neo4j | `pg_isready`; `docker compose config` OK |
-| P1 | міграція `0001` (`core`, `ops`) + контракти ідентичності + ETL ідентичності з файлів | кожна з ~5 038 статей має рядок; статуси дублікатів, `not_a_paper`, обрізаних JSON; звіт |
-| P2 | `0002` `biblio` + імпорт кешів Crossref/OpenAlex, `07_*`, `REFERENCES.csv`, `citation_keys.yaml`, `technical_sources.yaml`, результатів `citation_verification.md` | перевірки DOI з'являються як рядки `biblio.verification` |
-| P3 | `0003` `project` + `evidence` + імпорт усіх тек статей за інвентарем (тези, атомарні твердження, контролі, мітки скринінгу з `labeler_kind`, `02_thesis_evidence`, вердикти, ворота) | кожен файл тек статей записаний в `ops.source_file` з sha256, а кожен рядок має провенанс |
+| P1 ✅ | міграція `0001` (`core`, `ops`) + контракти ідентичності + ETL ідентичності з файлів | кожна з ~5 038 статей має рядок; статуси дублікатів, `not_a_paper`, обрізаних JSON; звіт |
+| P2 ✅ (без HTTP-кешів) | `biblio` у міграції `0003` (`0002` — ключі API) + імпорт `references_verified.csv`, `REFERENCES.csv`, `citation_keys.yaml`, `technical_sources.yaml`, `method_references`, результатів `citation_verification.md` | перевірки DOI з'являються як рядки `biblio.verification` |
+| P3 ✅ (без воріт і журналу LLM) | `0003` `project` + `evidence` + імпорт тек статей (`src/etl/paper_folders.py`, 26 джерел): тези, атомарні твердження, контролі, мітки скринінгу з `labeler_kind`, `02_thesis_evidence`, вердикти новизни, overrides, числа, черга ручного завантаження | кожен файл тек статей записаний в `ops.source_file` з sha256, а кожен рядок має провенанс |
 | P4 | `0004` `ops.job` / `api_key` / `llm_call` — основа для API (фази 1–2 [06](06_ROADMAP.md)) | API пише задачі в Postgres |
 | P5 | проєкції з Postgres: граф (`build_graph` читає `core.paper` замість застарілого `data/analytics`), Chroma (ID статей з `core.paper`), Parquet-експорти | `core.projection_state` заповнений |
 | P6 | **вивести з репозиторію теки статей**: виходи статей → у репозиторії споживачів; дані правди вже в Postgres; решта → архів `data/frozen/` | нових тек `paper_*` немає; `src/paper_3/*.yaml` і `tools/paper3_audit` читають з API або з Postgres |
