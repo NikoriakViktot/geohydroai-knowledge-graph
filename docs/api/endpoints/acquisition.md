@@ -10,6 +10,27 @@ A paywalled work ends as `needs_manual`; a human may then upload a copy they are
 
 ---
 
+## `GET /locate`
+- **Status**: implemented (2026-10-02) · **Scope** `read` · S · command line: `scripts/pdf <query> [--open] [--json]`
+- **Purpose**: "where can I read this paper?" Returns the corpus files (PDF, TEI) and the legal open-access copies.
+- **Query**: `q` is one of:
+  - a DOI in any form;
+  - a publisher URL with the DOI in its path (Wiley, Springer, T&F, IOP, AGU …);
+  - a ScienceDirect PII URL (`/pii/S0924…`; the DOI comes from Crossref's alternative-id);
+  - an arXiv id or URL;
+  - a corpus `paper_id` or file stem.
+  - The API never fetches other pages: give the DOI. The command line may read a publisher page's `citation_doi` tag; MDPI and some others refuse automated readers.
+- **Response 200**: `{"query", "doi", "resolved_from", "title", "year", "venue", "in_corpus": PaperRef?, "files": [{"paper_id", "kind": "pdf"|"tei", "path", "windows_path", "exists", "status"}], "is_oa", "oa_status", "best_pdf_url", "open_access": [{"url", "kind": "pdf"|"landing", "version", "license", "host", "source"}], "doi_url", "notes", "provenance"}`.
+  - `windows_path` is the `\\wsl.localhost\<distro>\…` form, to open a corpus PDF from Windows.
+  - `open_access` lists PDFs first, then landing pages, by version: published, then accepted, then submitted.
+  - Sources: OpenAlex locations, Unpaywall (contact from `OPEN_ALEX_EMAIL`, never stored) and arXiv. Answers are cached in `biblio.http_cache`.
+- **Errors**: `404 NOT_FOUND` when the query resolves to nothing (`detail` says why); `503`.
+- **Agent notes**:
+  - `oa_status = bronze` means free to read on the publisher site without an open licence. Do not redistribute the file.
+  - When nothing is open, the copy must come from the user's own access (`POST /ingest/upload`). Shadow libraries are never an option.
+
+---
+
 ## `POST /discovery/search`
 - **Status**: planned (phase 3, WP 3.2) · **Scope** `read` · S for ≤ 200 results, **J** above
 - **Purpose**: search OpenAlex (and optionally Crossref and arXiv) for works matching queries and filters. Returns candidates marked by whether the corpus already has them.

@@ -711,3 +711,41 @@ class SimilarRequest(_Contract):
     doi: str | None = None
     k: int = Field(default=20, ge=1, le=200)
     filters: SearchFilters = SearchFilters()
+
+
+# ── locate: where can I read this paper? (docs/api/endpoints/acquisition.md) ───
+
+class FileLocation(_Contract):
+    paper_id: str
+    kind: Literal["pdf", "tei"]
+    path: str = Field(description="absolute path on the API host")
+    windows_path: str | None = Field(default=None, description="\\\\wsl.localhost\\<distro>\\… when the API runs in WSL")
+    exists: bool
+    status: str = Field(description="ok, or e.g. duplicate_copy")
+
+
+class OALocation(_Contract):
+    url: str
+    kind: Literal["pdf", "landing"]
+    version: str | None = Field(default=None, description="publishedVersion | acceptedVersion | submittedVersion")
+    license: str | None = None
+    host: str | None = Field(default=None, description="publisher | repository")
+    source: str = Field(description="openalex, unpaywall, arxiv, or several joined with '+'")
+
+
+class LocateResponse(_Contract):
+    query: str
+    doi: str | None = None
+    resolved_from: Literal["doi", "url", "pii", "arxiv", "paper_id", "landing_page"] | None = None
+    title: str | None = None
+    year: int | None = None
+    venue: str | None = None
+    in_corpus: PaperRef | None = None
+    files: list[FileLocation] = []
+    is_oa: bool | None = None
+    oa_status: str | None = None
+    best_pdf_url: str | None = None
+    open_access: list[OALocation] = []
+    doi_url: str | None = None
+    notes: list[str] = []
+    provenance: Provenance

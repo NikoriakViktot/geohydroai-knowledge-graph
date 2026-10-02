@@ -10,7 +10,7 @@ from starlette.concurrency import run_in_threadpool
 from src.api.deps import provenance, require_scope
 from src.api.documentation import route_doc
 from src.api.problems import Problem
-from src.contracts.api import DoiResponse, DoiVerifyRequest, DoiVerifyResponse
+from src.contracts.api import DoiResponse, DoiVerifyRequest, DoiVerifyResponse, LocateResponse
 from src.services.identity import normalize_doi
 
 router = APIRouter()
@@ -52,3 +52,18 @@ async def doi_verify(request: Request, body: DoiVerifyRequest,
         raise _store_error(exc) from exc
     return DoiVerifyResponse(results=results, summary=dict(Counter(r.verdict for r in results)),
                              provenance=provenance(request))
+
+
+@router.get("/locate", response_model=LocateResponse, **route_doc("GET", "/locate"))
+async def locate(request: Request,
+                 q: str = Query(..., min_length=3, max_length=2000,
+                                description="DOI, doi.org or publisher URL, ScienceDirect PII URL, arXiv id, paper_id"),
+                 _=Depends(require_scope("read"))) -> LocateResponse:
+    from src.services import locate as service
+    try:
+        body = await run_in_threadpool(service.locate, q, False)
+    except Exception as exc:
+        raise _store_error(exc) from exc
+    if not body["doi"] and not body["in_corpus"]:
+        raise Problem("NOT_FOUND", "; ".join(body["notes"]) or f"cannot resolve {q!r}")
+    return LocateResponse(**body, provenance=provenance(request))

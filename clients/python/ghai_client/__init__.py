@@ -141,6 +141,11 @@ class GHAI:
     def manifest(self) -> dict:
         return self.get("manifest")
 
+    def locate(self, query: str) -> dict:
+        """Where to read a paper: corpus PDF/TEI paths and legal open-access copies.
+        `query`: DOI, doi.org or publisher URL, ScienceDirect PII URL, arXiv id, or paper_id."""
+        return self.get("locate", q=query)
+
     def agent_rules(self, markdown: bool = False) -> Any:
         if markdown:
             return self.request("GET", "agent-rules", params={"format": "markdown"}, raw=True)
