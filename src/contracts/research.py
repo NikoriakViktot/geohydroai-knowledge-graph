@@ -8,12 +8,17 @@ kept verbatim in `*_raw` fields and normalised here, never silently dropped.
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Literal, get_args
+from typing import Annotated, Literal, get_args
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
-ProjectId = Literal["floodstate-eo:paper3", "kakhovka-terrain:paper2", "swot-dnipro:paper1",
-                    "kakhovka-report:v1", "article1"]
+#: "<repository>:<paper>" or a bare name, lower case. The registry (project.project) decides which
+#: ids exist; the foreign keys of every research table refuse rows of an unregistered project.
+PROJECT_ID_PATTERN = r"^[a-z0-9][a-z0-9-]*(:[a-z0-9][a-z0-9-]*)?$"
+ProjectId = Annotated[str, StringConstraints(pattern=PROJECT_ID_PATTERN, max_length=64)]
+#: The projects registered by migration 0003 and the paper-folder import (2026-10-02).
+SEED_PROJECT_IDS: tuple[str, ...] = ("floodstate-eo:paper3", "kakhovka-terrain:paper2", "swot-dnipro:paper1",
+                                     "kakhovka-report:v1", "article1")
 LabelerKind = Literal["human", "model", "model_assisted_external", "rule", "import", "unknown"]
 ThesisKind = Literal["literature", "report", "article", "novelty"]
 RefRelation = Literal["SUPPORTED_BY", "SUPPORTS", "COMPARATOR", "NEEDS_SOURCE", "METHOD_FROM", "METHOD",
@@ -27,7 +32,6 @@ QuoteStatus = Literal["FOUND_EXACT", "FOUND_NORMALIZED", "FOUND_FUZZY", "NOT_FOU
 CitationVerdict = Literal["VERIFIED", "FIX", "WORDING", "OPEN"]
 BibVerdict = Literal["verified", "verified_with_notes", "mismatch", "unresolved"]
 
-PROJECT_IDS: tuple[str, ...] = get_args(ProjectId)
 LABELER_KINDS: tuple[str, ...] = get_args(LabelerKind)
 THESIS_KINDS: tuple[str, ...] = get_args(ThesisKind)
 REF_RELATIONS: tuple[str, ...] = get_args(RefRelation)

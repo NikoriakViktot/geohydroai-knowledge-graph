@@ -31,7 +31,7 @@ def test_ref_status_vocabulary():
 
 
 def _bundle(tmp_path, monkeypatch, theses):
-    monkeypatch.setattr(pf, "ROOT", tmp_path)
+    monkeypatch.setattr(pf, "SOURCE_ROOT", tmp_path)
     (tmp_path / "t.json").write_text(json.dumps(theses), encoding="utf-8")
     return pf.bundle_theses(pf.KT2, "t.json", C.Labeler(labeler_kind="import", labeler="test"))
 

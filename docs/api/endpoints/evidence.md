@@ -150,6 +150,8 @@ This group turns "the paper says X" into a checked, stored and citable statement
 - duplicate ids;
 - unknown relations or roles.
 
+**Response 422** `UNKNOWN_PROJECT`: `project_id` has the right shape but is not in the registry (`project.project`). A paper is registered once, by the workbench `init` step; never invent a namespace.
+
 ---
 
 ## `POST /theses/extract`

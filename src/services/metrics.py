@@ -179,7 +179,7 @@ def extract_sentence(sentence: str, *, passage_id: str | None = None, page: int 
 
 
 def extract_text(text: str, wanted: set[str] | None = None) -> tuple[list[dict], list[dict]]:
-    from src.paper_3.evidence import split_sentences
+    from src.services.evidence_text import split_sentences
     facts, rejected = [], []
     for sentence in split_sentences(text):
         f, r = extract_sentence(sentence, wanted=wanted)

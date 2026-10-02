@@ -12,7 +12,7 @@ from src.contracts.api import (
     OpenCitationsQuote, QuoteItem, QuoteVerifyRequest, QuoteVerifyResponse, ThesesValidateRequest,
     ThesesValidateResponse,
 )
-from src.paper_3.evidence import MIN_QUOTE_CHARS
+from src.services.evidence_text import MIN_QUOTE_CHARS
 
 router = APIRouter()
 MAX_SYNC_QUOTES = 50
@@ -58,7 +58,13 @@ async def quotes_verify(request: Request, body: QuoteVerifyRequest,
 @router.post("/theses/validate", response_model=ThesesValidateResponse, **route_doc("POST", "/theses/validate"))
 async def theses_validate(request: Request, body: ThesesValidateRequest,
                           _=Depends(require_scope("read"))) -> ThesesValidateResponse:
+    from src.services import projects
     from src.services import thesis_validation as tv
+    known_project = await run_in_threadpool(projects.registered, body.project_id)
+    if known_project is False:
+        raise Problem("UNKNOWN_PROJECT", f"project {body.project_id!r} is not in the registry (project.project); "
+                      "a new paper is registered once, by the workbench `init` step",
+                      errors=[{"loc": ["project_id"], "msg": "not registered", "type": "unknown_project"}])
     try:
         doc = tv.parse(body.document)
     except ValueError as exc:
@@ -71,6 +77,8 @@ async def theses_validate(request: Request, body: ThesesValidateRequest,
         report = tv.validate_atomic_claims(doc, body.project_id, body.authored_by, known)
         if note:
             report.warnings.append(note)
+    if known_project is None:
+        report.warnings.append("project registration not checked: postgres unavailable")
     if not report.valid:
         raise Problem("VALIDATION_FAILED", f"{len(report.errors)} problem(s); the document violates contract v1 and "
                       "nothing was coerced", errors=report.errors,

@@ -1,4 +1,5 @@
-"""Anti-hallucination core: verify_quote must reject what the model did not copy.
+"""Anti-hallucination core: verify_quote must reject what the model did not copy
+(src/services/evidence_text.py).
 
 Every count in the gap matrix depends on these tests. If verify_quote accepts a
 paraphrase, a fabricated sentence enters the manuscript's related-work section
@@ -8,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.paper_3.evidence import (
+from src.services.evidence_text import (
     FUZZY_THRESHOLD,
     MIN_QUOTE_CHARS,
     EvidencePassage,

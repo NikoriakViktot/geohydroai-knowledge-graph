@@ -24,6 +24,7 @@ CODES: dict[str, tuple[int, str]] = {
     "UNSUPPORTED_MEDIA_TYPE": (415, "Unsupported media type"),
     "VALIDATION_FAILED": (422, "Request violates the contract"),
     "INVALID_DOI": (422, "Not a DOI"),
+    "UNKNOWN_PROJECT": (422, "Project not registered"),
     "SOURCE_UNAVAILABLE": (424, "Source full text unavailable"),
     "RATE_LIMITED": (429, "Rate limited"),
     "QUOTA_EXHAUSTED": (429, "LLM quota exhausted"),

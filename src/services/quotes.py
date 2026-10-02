@@ -1,6 +1,6 @@
 """Does a quotation (and its numbers) occur in the cited source? Deterministic, no LLM.
 
-Matching reuses src/paper_3/evidence.verify_quote (NFKC normalisation; exact, then a
+Matching reuses src/services/evidence_text.verify_quote (NFKC normalisation; exact, then a
 sliding window accepted at ≥ 0.92). On top of it this service:
   * resolves the source (DOI, paper_id, or a cite key of the project),
   * splits quotations at "…" and requires the fragments in order in one passage,
@@ -22,7 +22,7 @@ from src.contracts.api import (
     Attribution, EvidenceSpan, NotChecked, NumberCheck, PaperRef, QuoteItem, QuoteResult, Searched,
 )
 from src.contracts.identity import PaperIdentity
-from src.paper_3.evidence import MIN_QUOTE_CHARS, normalize_text, verify_quote
+from src.services.evidence_text import MIN_QUOTE_CHARS, normalize_text, verify_quote
 from src.services import fulltext
 from src.services.identity import normalize_doi
 

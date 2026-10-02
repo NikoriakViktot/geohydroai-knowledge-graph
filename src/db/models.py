@@ -21,7 +21,7 @@ from src.contracts.identity import (
     ALIAS_TYPES, FILE_KINDS, FILE_STATUSES, IDENTITY_STATUSES, RUN_KINDS, RUN_STATUSES,
 )
 from src.contracts.research import (
-    BIB_VERDICTS, CITATION_VERDICTS, EVIDENCE_ROLES, LABELER_KINDS, PROJECT_IDS, REF_RELATIONS,
+    BIB_VERDICTS, CITATION_VERDICTS, EVIDENCE_ROLES, LABELER_KINDS, PROJECT_ID_PATTERN, REF_RELATIONS,
     REF_STATUSES, RELEVANCES, THESIS_KINDS,
 )
 
@@ -203,13 +203,27 @@ def _labeler_check() -> CheckConstraint:
 
 
 class Project(Base):
+    """The registry of papers: where each one's repository is and what was last delivered (migration 0005)."""
+
     __tablename__ = "project"
-    __table_args__ = (CheckConstraint(_in("project_id", PROJECT_IDS), name="project_id"), {"schema": "project"})
+    __table_args__ = (CheckConstraint(f"project_id ~ '{PROJECT_ID_PATTERN}'", name="project_id"),
+                      {"schema": "project"})
 
     project_id: Mapped[str] = mapped_column(Text, primary_key=True)
     repo: Mapped[str | None] = mapped_column(Text)
     paper_label: Mapped[str | None] = mapped_column(Text)
     note: Mapped[str | None] = mapped_column(Text)
+    distro: Mapped[str | None] = mapped_column(Text)                # WSL distribution holding the repository
+    repo_path: Mapped[str | None] = mapped_column(Text)             # absolute path inside that distribution
+    publication_dir: Mapped[str | None] = mapped_column(Text)       # delivery target, relative to repo_path
+    public: Mapped[bool | None] = mapped_column(Boolean)            # public repository: text artefacts only
+    manifest_path: Mapped[str | None] = mapped_column(Text)         # ghai.project.yaml, relative to repo_path
+    manifest_sha256: Mapped[str | None] = mapped_column(Text)
+    last_delivery_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_delivery_commit: Mapped[str | None] = mapped_column(Text)  # consumer HEAD when the delivery was made
+    last_delivery: Mapped[dict | None] = mapped_column(JSONB)       # summary of DELIVERY_MANIFEST.json
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+                                                        onupdate=func.now())
 
 
 class Thesis(_Provenance, _Labelled, Base):

@@ -3,6 +3,11 @@
     python -m src.etl.paper_folders --dry-run     # parse + validate, print the report
     python -m src.etl.paper_folders               # load (one transaction, provenance in ops.run)
 
+The files are read from the P6 freeze (data/frozen/paper_folders_20261002), the stable copy
+once the folders are delivered to their repositories and removed. GHAI_PAPER_FOLDERS_ROOT
+overrides it, e.g. ``GHAI_PAPER_FOLDERS_ROOT=.`` for the live tree. Source paths stay
+repository-relative, so ops.source_file rows are comparable across roots.
+
 Sources and namespaces follow the inventory of 2026-10-02 and the author's decisions
 (API_PLAN_v1/11 §2.4). Every row is validated against src/contracts/research.py;
 rejected rows are reported, never coerced. Labels carry who made them: there are no
@@ -20,6 +25,7 @@ import hashlib
 import json
 import logging
 import math
+import os
 import re
 import uuid
 from dataclasses import dataclass, field
@@ -36,6 +42,18 @@ from src.services.identity import normalize_doi
 log = logging.getLogger(__name__)
 ROOT = Path(__file__).resolve().parents[2]
 
+
+def _source_root() -> Path:
+    from src.workbench.decommission import DEFAULT_NAME, FROZEN_DIR
+    raw = os.getenv("GHAI_PAPER_FOLDERS_ROOT")
+    if not raw:
+        return FROZEN_DIR / DEFAULT_NAME
+    path = Path(raw)
+    return path if path.is_absolute() else (ROOT / path).resolve()
+
+
+SOURCE_ROOT = _source_root()
+
 FS3 = "floodstate-eo:paper3"
 KT2 = "kakhovka-terrain:paper2"
 KR1 = "kakhovka-report:v1"
@@ -46,7 +64,7 @@ PROJECTS = {
     KT2: ("kakhovka-terrain", "Paper 2 — bed DEM, terrain and roughness; also the vegetation/roughness paper"),
     "swot-dnipro:paper1": ("SWOT-DNIPRO", "Paper 1 — water-surface geometry of the former reservoir"),
     KR1: ("knowledge-graph (archived)", "Earlier Kakhovka scientific report (src/paper_3, data/paper_3_audit)"),
-    ART1: ("article1 (new repository)", "Article 1 — flood-mapping methods review"),
+    ART1: ("floodstate-eo", "Article 1 — flood-mapping methods review (articles/flood_mapping_methods_review)"),
 }
 
 LA = "paper_unet-case-kakhovka/literature_audit_paper3"
@@ -61,7 +79,7 @@ R3 = "paper_3_audit"
 @dataclass
 class Batch:
     table: str                      # model class name in src.db.models
-    source: str                     # path relative to ROOT
+    source: str                     # repository-relative path, read under SOURCE_ROOT
     rows: list[dict] = field(default_factory=list)
     rejects: list[dict] = field(default_factory=list)
     children: list[tuple[str, list[dict]]] = field(default_factory=list)   # (table, rows) e.g. thesis refs
@@ -69,7 +87,7 @@ class Batch:
 
 
 def _p(rel: str) -> Path:
-    return ROOT / rel
+    return SOURCE_ROOT / rel
 
 
 def _blank(v) -> bool:
@@ -662,7 +680,8 @@ def load(batches: list[Batch]) -> uuid.UUID:
     run_id = uuid.uuid4()
     with session_scope() as s:
         s.add(M.Run(run_id=run_id, kind="etl", name="paper_folders", status="running", git_commit=commit,
-                    git_dirty=dirty, params={"sources": sorted({b.source for b in batches})}))
+                    git_dirty=dirty, params={"sources": sorted({b.source for b in batches}),
+                                             "source_root": _rel_root()}))
         s.flush()
         for pid, (repo, label) in PROJECTS.items():
             s.execute(insert(M.Project).values(project_id=pid, repo=repo, paper_label=label)
@@ -704,6 +723,13 @@ def load(batches: list[Batch]) -> uuid.UUID:
     return run_id
 
 
+def _rel_root() -> str:
+    try:
+        return SOURCE_ROOT.relative_to(ROOT).as_posix() or "."
+    except ValueError:
+        return str(SOURCE_ROOT)
+
+
 def report(batches: list[Batch]) -> str:
     lines = [f"{'table':18s} {'rows':>6s} {'rejects':>7s}  source"]
     for b in batches:
@@ -723,6 +749,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     batches = collect()
+    print(f"source root: {_rel_root()}")
     print(report(batches))
     if args.report:
         args.report.write_text(json.dumps([{"table": b.table, "source": b.source, "rows": len(b.rows),

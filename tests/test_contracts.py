@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 
+import pydantic
 import pytest
 
 from src.contracts import export as contract_export
@@ -42,10 +43,20 @@ def _check_sql(table, name: str) -> str:
     (models.ScreeningLabel.__table__, "relevance", research.RELEVANCES),
     (models.QuoteCheck.__table__, "verdict", research.CITATION_VERDICTS),
     (models.BibVerification.__table__, "verdict", research.BIB_VERDICTS),
-    (models.Project.__table__, "project_id", research.PROJECT_IDS),
 ])
 def test_database_checks_allow_exactly_the_contract_values(table, constraint, values):
     sql = _check_sql(table, constraint)
     for v in values:
         assert f"'{v}'" in sql
     assert sql.count("'") == 2 * len(values)
+
+
+def test_project_ids_follow_one_pattern_in_contract_and_database():
+    sql = _check_sql(models.Project.__table__, "project_id")
+    assert research.PROJECT_ID_PATTERN in sql
+    adapter = pydantic.TypeAdapter(research.ProjectId)
+    for good in research.SEED_PROJECT_IDS + ("article2", "new-repo:paper-4"):
+        assert adapter.validate_python(good) == good
+    for bad in ("Floodstate-eo:paper3", "a:b:c", ":paper", "repo:", "with space", "x" * 65):
+        with pytest.raises(pydantic.ValidationError):
+            adapter.validate_python(bad)

@@ -69,7 +69,7 @@ Keys are issued per consumer (`floodstate-eo`, `swot-dnipro`, `kakhovka-terrain`
 | Topic | Rule |
 |---|---|
 | Identifiers | `paper_id` is the corpus id (v1: the file stem, e.g. `10.1029_2025gl120832`). DOIs are accepted in any form (`https://doi.org/…`, `doi:…`, upper case) and normalised to lower case without prefix |
-| Namespaces | Data that belongs to one article carries `project_id`: `floodstate-eo:paper3`, `kakhovka-terrain:paper2`, `swot-dnipro:paper1`, `kakhovka-report:v1`, `article1` |
+| Namespaces | Data that belongs to one article carries `project_id`, `<repository>:<paper>` or a bare name in lower case (pattern `^[a-z0-9][a-z0-9-]*(:[a-z0-9][a-z0-9-]*)?$`). Registered: `floodstate-eo:paper3`, `kakhovka-terrain:paper2`, `swot-dnipro:paper1`, `kakhovka-report:v1` (archived), `article1` (in floodstate-eo, `articles/flood_mapping_methods_review/`). An unregistered id is `UNKNOWN_PROJECT` |
 | Pagination | `limit` (default 20, max 200) and opaque `cursor`; responses return `next_cursor` (null at the end) |
 | Idempotency | POST endpoints that create jobs accept `Idempotency-Key: <uuid>`; repeating it returns the original job (`200`, `"duplicate_of"`). Natural keys (normalised DOI, PDF sha256) also deduplicate |
 | Time | ISO 8601 with timezone, UTC |
@@ -113,6 +113,7 @@ All errors are `application/problem+json` ([SCHEMAS.md#problem](SCHEMAS.md#probl
 | 415 | `UNSUPPORTED_MEDIA_TYPE` | upload is not `application/pdf` | — |
 | 422 | `VALIDATION_FAILED` | body violates the contract; `errors[]` lists `{loc, msg, type}` | fix the data; nothing is coerced silently |
 | 422 | `INVALID_DOI` | value is not shaped like a DOI | — |
+| 422 | `UNKNOWN_PROJECT` | `project_id` matches the pattern but is not in the registry (`project.project`) | register the paper once with the workbench `init` step; never invent a namespace |
 | 424 | `SOURCE_UNAVAILABLE` | the full text needed for the answer is not in the corpus | acquire the source first, or report it as unverified |
 | 429 | `RATE_LIMITED` | request rate above the per-key limit | wait `Retry-After` |
 | 429 | `QUOTA_EXHAUSTED` | shared LLM quota used up for the window | wait `Retry-After`, or submit as a job |

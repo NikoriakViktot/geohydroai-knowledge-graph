@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-from src.paper_3.evidence import split_sentences
+from src.services.evidence_text import split_sentences
 
 ROOT = Path(__file__).resolve().parents[2]
 

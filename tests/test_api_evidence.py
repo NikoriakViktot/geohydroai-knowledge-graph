@@ -16,7 +16,8 @@ from fastapi.testclient import TestClient
 from src.api.app import create_app
 from src.contracts.identity import PaperIdentity
 from src.document.parser import TEIParser
-from src.services import fulltext, identity_store, quotes, thesis_validation
+from src.contracts.research import SEED_PROJECT_IDS
+from src.services import fulltext, identity_store, projects, quotes, thesis_validation
 
 from tests.test_api import READ_KEY, StubKeys, StubManifest
 
@@ -83,6 +84,7 @@ def make_client(monkeypatch, tei_file):
     monkeypatch.setattr(identity_store, "resolve", fake_resolve)
     monkeypatch.setattr(fulltext, "tei_path", lambda paper_id: tei_file if paper_id == "iqbal_2023" else None)
     monkeypatch.setattr(thesis_validation, "project_theses", lambda project_id: ({"T1", "T2"}, None))
+    monkeypatch.setattr(projects, "registered", lambda project_id: project_id in SEED_PROJECT_IDS)
     hawker = PaperIdentity(paper_id="hawker_2022", doi="10.1088/1748-9326/ac4d4f", title="FABDEM", year=2022,
                            identity_status="ok")
     monkeypatch.setattr(identity_store, "match_references",
@@ -301,7 +303,9 @@ claims:
 
 def test_unknown_project_is_a_contract_violation(client):
     r = client.post("/v1/theses/validate", headers=H, json={"kind": "theses", "project_id": "paper9", "document": []})
-    assert r.status_code == 422
+    assert r.status_code == 422 and r.json()["code"] == "UNKNOWN_PROJECT"
+    r = client.post("/v1/theses/validate", headers=H, json={"kind": "theses", "project_id": "Paper 9", "document": []})
+    assert r.status_code == 422 and r.json()["code"] == "VALIDATION_FAILED"
 
 
 def test_quote_fragments_helper():

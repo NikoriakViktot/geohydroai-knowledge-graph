@@ -2,13 +2,8 @@
   "additionalProperties": false,
   "properties": {
     "project_id": {
-      "enum": [
-        "floodstate-eo:paper3",
-        "kakhovka-terrain:paper2",
-        "swot-dnipro:paper1",
-        "kakhovka-report:v1",
-        "article1"
-      ],
+      "maxLength": 64,
+      "pattern": "^[a-z0-9][a-z0-9-]*(:[a-z0-9][a-z0-9-]*)?$",
       "title": "Project Id",
       "type": "string"
     },
