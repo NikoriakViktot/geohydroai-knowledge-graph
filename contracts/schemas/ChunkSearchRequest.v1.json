@@ -1,0 +1,204 @@
+{
+  "$defs": {
+    "SearchFilters": {
+      "additionalProperties": false,
+      "properties": {
+        "year_from": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year From"
+        },
+        "year_to": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year To"
+        },
+        "paper_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paper Ids"
+        },
+        "dois": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dois"
+        },
+        "chunk_types": {
+          "anyOf": [
+            {
+              "items": {
+                "enum": [
+                  "abstract",
+                  "sentence",
+                  "paragraph",
+                  "section",
+                  "figure",
+                  "table",
+                  "formula"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Chunk Types"
+        },
+        "sections": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prefix match on the section title",
+          "title": "Sections"
+        },
+        "exclude_cohorts": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude Cohorts",
+          "type": "array"
+        },
+        "identity_status": {
+          "default": [
+            "ok",
+            "no_doi",
+            "title_doi_mismatch"
+          ],
+          "description": "duplicates and non-papers are never searched",
+          "items": {
+            "enum": [
+              "ok",
+              "no_doi",
+              "title_doi_mismatch",
+              "truncated_json"
+            ],
+            "type": "string"
+          },
+          "title": "Identity Status",
+          "type": "array"
+        }
+      },
+      "title": "SearchFilters",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "maxLength": 1000,
+      "minLength": 3,
+      "title": "Query",
+      "type": "string"
+    },
+    "k": {
+      "default": 20,
+      "maximum": 200,
+      "minimum": 1,
+      "title": "K",
+      "type": "integer"
+    },
+    "filters": {
+      "$ref": "#/$defs/SearchFilters",
+      "default": {
+        "year_from": null,
+        "year_to": null,
+        "paper_ids": null,
+        "dois": null,
+        "chunk_types": null,
+        "sections": null,
+        "exclude_cohorts": [],
+        "identity_status": [
+          "ok",
+          "no_doi",
+          "title_doi_mismatch"
+        ]
+      }
+    },
+    "min_score": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Min Score"
+    },
+    "project_id": {
+      "anyOf": [
+        {
+          "enum": [
+            "floodstate-eo:paper3",
+            "kakhovka-terrain:paper2",
+            "swot-dnipro:paper1",
+            "kakhovka-report:v1",
+            "article1"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Project Id"
+    }
+  },
+  "required": [
+    "query"
+  ],
+  "title": "ChunkSearchRequest",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/ChunkSearchRequest.v1.json"
+}

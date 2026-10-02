@@ -66,6 +66,7 @@ class GHAI:
         self.graph = Graph(self)
         self.metrics = Metrics(self)
         self.ontology = Ontology(self)
+        self.search = Search(self)
 
     @classmethod
     def from_env(cls, **kwargs) -> "GHAI":
@@ -284,3 +285,20 @@ class Ontology(_Group):
 
     def entities(self, type: str | None = None, q: str | None = None) -> Iterator[dict]:
         return self._api.pages("ontology/entities", type=type, q=q, limit=1000)
+
+
+class Search(_Group):
+    def chunks(self, query: str, k: int = 20, filters: dict | None = None, min_score: float | None = None,
+               project_id: str | None = None) -> dict:
+        """Passages. An empty result with retrieval_validity NOT_MEASURED means only "this search found nothing"."""
+        return self._api.post("search/chunks", {"query": query, "k": k, "filters": filters or {},
+                                                "min_score": min_score, "project_id": project_id})
+
+    def papers(self, queries: list[str], k: int = 20, filters: dict | None = None, aggregate: str = "max",
+               max_candidates: int = 500) -> dict:
+        return self._api.post("search/papers", {"queries": queries, "k": k, "filters": filters or {},
+                                                "aggregate": aggregate, "max_candidates": max_candidates})
+
+    def similar(self, *, paper_id: str | None = None, doi: str | None = None, k: int = 20,
+                filters: dict | None = None) -> dict:
+        return self._api.post("search/similar", {"paper_id": paper_id, "doi": doi, "k": k, "filters": filters or {}})

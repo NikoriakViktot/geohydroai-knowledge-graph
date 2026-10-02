@@ -2,8 +2,9 @@
 
 **Backing data**:
 - ChromaDB collection `flood_papers_768d_v2`. It is being rebuilt on 2026-10-02 with unique chunk ids; v1 `flood_papers_768d` had abstract chunks for only 2,462 of 4,955 papers.
-- Model `allenai/specter2_base@3447645e`: 768-d, mean pooling, no adapter. The same encoder embeds queries and documents.
-- Filters on DOI, year, cohort and identity resolve through `core.paper` in Postgres. Chroma stores only chunk metadata.
+- Model `allenai/specter2_base@3447645e` (full revision `3447645e1def…`): 768-d, mean pooling, no adapter. The same encoder embeds queries and documents. The API loads it on the first search (CPU, a few seconds).
+- Filters on DOI, year, cohort and identity resolve through `core.paper` in Postgres. Chroma stores only chunk metadata, so the resulting paper set goes into Chroma as `paper_id $in`, or as the shorter `$nin` of the papers left out.
+- The collection is opened in-process for reading. Chroma server mode (one owner of the index) is planned (WP 1.2).
 
 **Chunk types** in the collection: `abstract`, `sentence` (95 %), `paragraph`, `section`, `figure`, `table`, `formula`.
 
@@ -12,7 +13,7 @@ All endpoints: **Scope** `read` · **Mode** S · p95 latency target 1.5 s (warm)
 ---
 
 ## `POST /search/chunks`
-- **Status**: planned (phase 1, WP 1.6)
+- **Status**: implemented (2026-10-02)
 - **Purpose**: find passages that say something. This is the basic evidence search.
 
 **Request**:
@@ -24,9 +25,9 @@ All endpoints: **Scope** `read` · **Mode** S · p95 latency target 1.5 s (warm)
 | `filters.year_from` / `year_to` | int? | — | no hidden upper cap (the old dashboard capped at 2025) |
 | `filters.paper_ids` / `filters.dois` | string[]? | — | restrict to these works |
 | `filters.chunk_types` | string[]? | all | e.g. `["abstract", "paragraph"]` |
-| `filters.sections` | string[]? | — | prefix match on section title |
+| `filters.sections` | string[]? | — | prefix match on the section title, case-insensitive. Applied after retrieving `5 × k` candidates, so fewer than `k` hits may come back |
 | `filters.exclude_cohorts` | string[] | `[]` | e.g. `["paper_3"]` to drop the harvested Kakhovka-report cohort |
-| `filters.identity_status` | string[] | `["ok", "no_doi", "title_doi_mismatch"]` | duplicates and non-papers are never searched |
+| `filters.identity_status` | string[] | `["ok", "no_doi", "title_doi_mismatch"]` | `truncated_json` may be added; `duplicate` and `not_a_paper` are refused (`422`): they are never searched |
 | `min_score` | float? | — | drop hits below this similarity |
 | `project_id` | string? | — | ties `retrieval_validity` to that project's acceptance gate |
 
@@ -35,8 +36,8 @@ All endpoints: **Scope** `read` · **Mode** S · p95 latency target 1.5 s (warm)
 | Field | Type | Notes |
 |---|---|---|
 | `hits` | `ChunkHit[]` | best first |
-| `coverage` | `Coverage` | papers and chunks actually searched |
-| `retrieval_validity` | `RetrievalValidity` | plus `validity_detail` |
+| `coverage` | `Coverage` | `{papers_in_slice, chunks_in_slice, papers_without_chunks, filters_applied, excluded_cohorts, note?}`: what was actually searched, counted from the index's own catalogue |
+| `retrieval_validity` | `NOT_MEASURED \| MEASURED_BELOW_GATE \| VALIDATED` | `NOT_MEASURED` until a recall measurement exists for (collection, manifest), with the reason in `validity_detail` |
 | `provenance` | `Provenance` | includes `collection`, `embedding_model` |
 
 ```json
@@ -65,17 +66,21 @@ All endpoints: **Scope** `read` · **Mode** S · p95 latency target 1.5 s (warm)
 ---
 
 ## `POST /search/papers`
-- **Status**: planned (phase 1)
+- **Status**: implemented (2026-10-02)
 - **Purpose**: which **papers** are most relevant to one or more queries (screening, reading lists).
 - **Request**: `{"queries": string[1..20], "k": 20, "max_candidates": 500, "filters": SearchFilters, "aggregate": "max" | "mean" | "count"}`.
-- **Response 200**: `{"papers": [{"paper": PaperRef, "score": float, "hits": int, "best_chunks": ChunkHit[≤3]}], "coverage", "retrieval_validity", "provenance"}`.
+- **Response 200**: `{"papers": [{"paper_id", "paper": PaperRef, "score": float, "hits": int, "queries_matched": int, "best_chunks": ChunkHit[≤3]}], "coverage", "retrieval_validity", "provenance"}`.
+- **Scoring**:
+  - Each query retrieves `max_candidates / len(queries)` chunks.
+  - A paper's score per query is its best chunk score.
+  - `aggregate` combines the queries: `max` (default), `mean` over the queries that matched, or `count` of matching chunks.
 - **Agent notes**: use several phrasings of one concept as separate `queries`. Aggregation over queries is more robust than one long query.
 
 ---
 
 ## `POST /search/similar`
-- **Status**: planned (phase 1)
-- **Purpose**: papers similar to a given paper, from the abstract and the best chunks.
+- **Status**: implemented (2026-10-02)
+- **Purpose**: papers similar to a given paper. The seed vector is the paper's abstract chunk; without one, it is the mean of up to 200 of its chunks. A duplicate seed resolves to its canonical paper.
 - **Request**: `{"paper_id" | "doi": string, "k": 20, "filters": SearchFilters}`.
 - **Response 200**: same shape as `/search/papers`; the seed paper is excluded.
 - **Errors**: `404 NOT_IN_CORPUS`; `424 SOURCE_UNAVAILABLE` (seed paper has no chunks yet).

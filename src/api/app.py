@@ -25,6 +25,7 @@ from src.api.routers import evidence as evidence_router
 from src.api.routers import graph as graph_router
 from src.api.routers import metrics as metrics_router
 from src.api.routers import papers as papers_router
+from src.api.routers import search as search_router
 from src.api.routers import planned as planned_router
 from src.api.routers import system as system_router
 
@@ -70,7 +71,8 @@ def create_app(key_store: KeyStore | None = None, manifest: ManifestCache | None
         return response
 
     for router in (system_router.router, docs_router.router, papers_router.router, evidence_router.router,
-                   biblio_router.router, graph_router.router, metrics_router.router):
+                   biblio_router.router, graph_router.router, metrics_router.router,
+                   search_router.router):
         app.include_router(router, prefix=PREFIX)
     app.include_router(planned_router.build_router(_implemented(app)), prefix=PREFIX)
 

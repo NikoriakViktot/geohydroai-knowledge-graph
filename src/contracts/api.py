@@ -623,3 +623,91 @@ class OntologyEntitiesResponse(_Contract):
     count: int
     next_cursor: str | None = None
     provenance: Provenance
+
+
+# ── search (Chroma projection; docs/api/endpoints/search.md) ──────────────────
+
+ChunkType = Literal["abstract", "sentence", "paragraph", "section", "figure", "table", "formula"]
+SearchableStatus = Literal["ok", "no_doi", "title_doi_mismatch", "truncated_json"]
+RetrievalValidity = Literal["NOT_MEASURED", "MEASURED_BELOW_GATE", "VALIDATED"]
+
+
+class SearchFilters(_Contract):
+    year_from: int | None = None
+    year_to: int | None = None
+    paper_ids: list[str] | None = None
+    dois: list[str] | None = None
+    chunk_types: list[ChunkType] | None = None
+    sections: list[str] | None = Field(default=None, description="prefix match on the section title")
+    exclude_cohorts: list[str] = []
+    identity_status: list[SearchableStatus] = Field(
+        default=["ok", "no_doi", "title_doi_mismatch"],
+        description="duplicates and non-papers are never searched")
+
+
+class ChunkSearchRequest(_Contract):
+    query: str = Field(min_length=3, max_length=1000)
+    k: int = Field(default=20, ge=1, le=200)
+    filters: SearchFilters = SearchFilters()
+    min_score: float | None = Field(default=None, ge=-1, le=1)
+    project_id: ProjectId | None = None
+
+
+class ChunkHit(_Contract):
+    chunk_id: str
+    score: float = Field(description="1 − cosine distance")
+    chunk_type: str | None = None
+    paper: PaperRef | None = None
+    section: str | None = None
+    page: int | None = None
+    text: str
+
+
+class SearchCoverage(_Contract):
+    papers_in_slice: int
+    chunks_in_slice: int
+    papers_without_chunks: int = Field(description="papers allowed by the filters that have no chunks in the index")
+    filters_applied: dict
+    excluded_cohorts: list[str] = []
+    note: str | None = None
+
+
+class ChunkSearchResponse(_Contract):
+    hits: list[ChunkHit]
+    coverage: SearchCoverage
+    retrieval_validity: RetrievalValidity
+    validity_detail: dict = {}
+    provenance: Provenance
+
+
+class PaperSearchRequest(_Contract):
+    queries: list[str] = Field(min_length=1, max_length=20)
+    k: int = Field(default=20, ge=1, le=200)
+    max_candidates: int = Field(default=500, ge=10, le=5000)
+    filters: SearchFilters = SearchFilters()
+    aggregate: Literal["max", "mean", "count"] = "max"
+    project_id: ProjectId | None = None
+
+
+class PaperHit(_Contract):
+    paper_id: str
+    paper: PaperRef | None = None
+    score: float
+    hits: int
+    queries_matched: int
+    best_chunks: list[ChunkHit]
+
+
+class PaperSearchResponse(_Contract):
+    papers: list[PaperHit]
+    coverage: SearchCoverage
+    retrieval_validity: RetrievalValidity
+    validity_detail: dict = {}
+    provenance: Provenance
+
+
+class SimilarRequest(_Contract):
+    paper_id: str | None = None
+    doi: str | None = None
+    k: int = Field(default=20, ge=1, le=200)
+    filters: SearchFilters = SearchFilters()
