@@ -73,6 +73,10 @@ _XML = "http://www.w3.org/XML/1998/namespace"
 
 _T = f"{{{_TEI}}}"   # prefix shorthand for Clark notation: {ns}localname
 
+#: For XML that does not come from our own GROBID run (API uploads): entities are not
+#: expanded, no DTD is loaded and nothing is fetched over the network.
+_SAFE_PARSER = etree.XMLParser(resolve_entities=False, load_dtd=False, no_network=True, huge_tree=False)
+
 
 def _tag(local: str) -> str:
     return f"{_T}{local}"
@@ -140,9 +144,10 @@ class TEIParser:
     # ── Public entry points ───────────────────────────────────────────────────
 
     def parse_text(self, xml_text: str, paper_id: str) -> TEIDocument:
-        """Parse from an in-memory TEI XML string (e.g. straight from GROBID)."""
+        """Parse from an in-memory TEI XML string (e.g. straight from GROBID, or a
+        document sent to the API): no entity expansion, no DTD, no network."""
         try:
-            root = etree.fromstring(xml_text.encode("utf-8"))
+            root = etree.fromstring(xml_text.encode("utf-8"), _SAFE_PARSER)
         except etree.XMLSyntaxError as exc:
             raise ValueError(f"Invalid TEI XML for {paper_id}: {exc}") from exc
         return self._build(root, paper_id)

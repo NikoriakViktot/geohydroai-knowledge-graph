@@ -218,3 +218,12 @@ def match_references(refs: list[tuple[str | None, str | None, int | None]]) -> l
                 row = rows[row.duplicate_of]
             out.append((_identity(s, row, frozenset()) if row is not None else None, how if row is not None else None))
         return out
+
+
+def papers_by_id(paper_ids: list[str]) -> dict[str, PaperIdentity]:
+    """Identity of several papers in one query (unknown ids are left out)."""
+    if not paper_ids:
+        return {}
+    with session_scope() as s:
+        rows = s.scalars(select(Paper).where(Paper.paper_id.in_(sorted(set(paper_ids)))))
+        return {r.paper_id: _identity(s, r, frozenset()) for r in rows}

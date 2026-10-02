@@ -66,6 +66,7 @@ def normalize_entity(
     raw_name: str,
     expected_type: Optional[str] = None,
     context: Optional[str] = None,
+    allow_semantic: bool = True,
 ) -> dict:
     """
     Normalise a raw extracted mention to a canonical ontology entity.
@@ -75,6 +76,8 @@ def normalize_entity(
         expected_type: Optional type hint ("method", "sensor", "metric", …).
                        Filters alias/semantic results to that type only when provided.
         context:       Optional surrounding text for disambiguation (sentence/paragraph).
+        allow_semantic: False skips the embedding fallback (deterministic matches only;
+                       the API's default, so no model is loaded).
 
     Returns:
         {
@@ -177,6 +180,8 @@ def normalize_entity(
                 }
 
     # ── 3. Semantic embedding fallback ────────────────────────────────────
+    if not allow_semantic:
+        return {**_UNKNOWN_RESULT_TEMPLATE, "raw_name": raw_name}
     try:
         from src.normalization.embedding_matcher import semantic_match
         sem_result = semantic_match(raw_name, expected_type=expected_type)

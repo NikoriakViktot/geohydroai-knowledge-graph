@@ -509,3 +509,117 @@ class TabularResponse(_Contract):
     rows: list[list]
     truncated: bool
     provenance: Provenance
+
+
+# ── metrics and ontology (docs/api/endpoints/metrics.md) ──────────────────────
+
+class FactEvidence(_Contract):
+    text: str | None = Field(default=None, description="the sentence, verbatim (text facts)")
+    passage_id: str | None = None
+    section: str | None = None
+    table_label: str | None = None
+    col_header: str | None = None
+    row_context: list[str] = []
+    page: int | None = None
+
+
+class MetricFact(_Contract):
+    metric: str = Field(description="canonical id, e.g. metric.nse")
+    label: str | None = None
+    value: float = Field(description="as a ratio for bounded metrics read from a percentage (94.2 % → 0.942)")
+    value_hi: float | None = Field(default=None, description="upper end when the paper gives a range")
+    raw_value: str | None = None
+    unit: str | None = Field(default=None, description="a recognised unit, else null")
+    unit_raw: str | None = Field(default=None, description="unrecognised text from the table column")
+    qualifier: Literal["range", ">", "<", "≥", "≤", "≈"] | None = Field(
+        default=None, description="'>' etc.: an inequality, usually a criterion rather than a result")
+    range_verdict: Literal["ok", "suspect", "unknown_metric"]
+    source: Literal["text", "table"]
+    fact_id: str | None = None
+    paper: PaperRef | None = None
+    evidence: FactEvidence
+
+
+class RejectedValue(_Contract):
+    raw: str
+    metric: str
+    reason: str
+    evidence: FactEvidence
+
+
+class MetricsExtractRequest(_Contract):
+    text: str | None = Field(default=None, max_length=50_000)
+    tei_xml: str | None = Field(default=None, max_length=5_000_000)
+    paper_id: str | None = None
+    metrics: list[str] = Field(default=[], description="canonical ids or names; empty = all")
+
+
+class MetricsExtractResponse(_Contract):
+    facts: list[MetricFact]
+    rejected: list[RejectedValue]
+    paper: PaperRef | None = None
+    provenance: Provenance
+
+
+class MetricFactsResponse(_Contract):
+    items: list[MetricFact]
+    next_cursor: str | None = None
+    summary: dict
+    coverage: dict
+    provenance: Provenance
+
+
+class MetricDefinition(_Contract):
+    canonical_id: str
+    name: str
+    aliases: list[str]
+    range: dict | None = Field(default=None, description="{lo, hi}; null bound = unbounded")
+    percent_scale: bool
+    group: str | None = None
+    in_registry: bool
+    extracted_from_text: bool = Field(description="POST /metrics/extract finds this metric in prose")
+
+
+class MetricOntologyResponse(_Contract):
+    metrics: list[MetricDefinition]
+    provenance: Provenance
+
+
+class NormalizeTerm(_Contract):
+    text: str = Field(min_length=1, max_length=200)
+    expected_type: str | None = None
+    context: str | None = Field(default=None, max_length=2000)
+
+
+class NormalizeRequest(_Contract):
+    terms: list[NormalizeTerm] = Field(min_length=1, max_length=200)
+    allow_semantic: bool = False
+
+
+class NormalizeResult(_Contract):
+    text: str
+    canonical_id: str | None = None
+    display_name: str | None = None
+    type: str | None = None
+    match_type: str
+    confidence: float
+
+
+class NormalizeResponse(_Contract):
+    results: list[NormalizeResult]
+    provenance: Provenance
+
+
+class OntologyEntity(_Contract):
+    canonical_id: str
+    display_name: str | None = None
+    type: str | None = None
+    aliases: list[str] = []
+    definition: str | None = None
+
+
+class OntologyEntitiesResponse(_Contract):
+    items: list[OntologyEntity]
+    count: int
+    next_cursor: str | None = None
+    provenance: Provenance

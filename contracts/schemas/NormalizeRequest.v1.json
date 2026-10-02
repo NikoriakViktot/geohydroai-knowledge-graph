@@ -1,0 +1,68 @@
+{
+  "$defs": {
+    "NormalizeTerm": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "expected_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Type"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "NormalizeTerm",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "terms": {
+      "items": {
+        "$ref": "#/$defs/NormalizeTerm"
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "title": "Terms",
+      "type": "array"
+    },
+    "allow_semantic": {
+      "default": false,
+      "title": "Allow Semantic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "terms"
+  ],
+  "title": "NormalizeRequest",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/NormalizeRequest.v1.json"
+}
