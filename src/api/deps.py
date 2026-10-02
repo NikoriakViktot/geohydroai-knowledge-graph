@@ -12,7 +12,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Protocol
 
-from fastapi import Request
+from fastapi import Request, Security
+from fastapi.security import APIKeyHeader
 from starlette.concurrency import run_in_threadpool
 
 from src.api.problems import Problem
@@ -66,11 +67,16 @@ class PostgresKeyStore:
         return principal
 
 
+#: Declared in OpenAPI, so Swagger UI (/docs) shows "Authorize" and sends the header.
+API_KEY_HEADER = APIKeyHeader(name="X-API-Key", auto_error=False,
+                              description="Your consumer key (python -m src.api.keys create …). Never share it.")
+
+
 def require_scope(scope: str):
     """Dependency: the request must carry an X-API-Key with `scope`."""
 
-    async def dependency(request: Request) -> Principal:
-        raw = request.headers.get("x-api-key")
+    async def dependency(request: Request, api_key: str | None = Security(API_KEY_HEADER)) -> Principal:
+        raw = api_key or request.headers.get("x-api-key")
         if not raw:
             raise Problem("UNAUTHENTICATED", "Send your consumer key in the X-API-Key header.")
         store: KeyStore = request.app.state.key_store

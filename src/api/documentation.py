@@ -43,19 +43,19 @@ def route_doc(method: str, path: str) -> dict:
     rule_ids = tuple(dict.fromkeys(r for d in docs for r in d.rules))
     body = "\n\n---\n\n".join(d.markdown.split("\n", 1)[1].strip() if "\n" in d.markdown else "" for d in docs)
     description = f"{body}\n\n{rules_markdown(rule_ids)}"
-    return {
-        "summary": main.summary,
-        "description": description,
-        "tags": [main.group],
-        "openapi_extra": {
-            "x-status": main.status,
-            "x-status-text": main.status_text,
-            "x-scope": main.scope,
-            "x-mode": main.mode,
-            "x-agent-rules": list(rule_ids),
-            "x-docs": f"/v1/docs/endpoint?method={method.upper()}&path={path}",
-        },
+    extra = {
+        "x-status": main.status,
+        "x-status-text": main.status_text,
+        "x-scope": main.scope,
+        "x-mode": main.mode,
+        "x-agent-rules": list(rule_ids),
+        "x-docs": f"/v1/docs/endpoint?method={method.upper()}&path={path}",
     }
+    if main.scope and main.scope.strip("` ").lower() not in ("none", "-", "—"):
+        # explicit: FastAPI 0.141 does not carry Security() of included routers into operations,
+        # and Swagger UI sends the key only for operations that declare it
+        extra["security"] = [{"APIKeyHeader": []}]
+    return {"summary": main.summary, "description": description, "tags": [main.group], "openapi_extra": extra}
 
 
 def api_description() -> str:
