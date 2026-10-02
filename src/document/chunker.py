@@ -246,7 +246,10 @@ class LayoutAwareChunker:
             return None
         fig_id, tab_id = self._nearest_floats(para.coords, doc)
         page, bbox     = self._layout(para.coords)
-        key            = f"{section.n or section.title[:12]}_p{idx}"
+        # The text signature keeps two sections with the same title prefix from
+        # sharing a paragraph id (the later one would be dropped as a duplicate).
+        text_sig       = hashlib.sha1(text.encode()).hexdigest()[:8]
+        key            = f"{section.n or section.title[:12]}_p{idx}_{text_sig}"
         all_cites      = tuple(c.ref_id for c in para.all_citations)
 
         return DocumentChunk(
@@ -280,9 +283,10 @@ class LayoutAwareChunker:
             for c in s.citations
         )
         page, bbox = self._layout(section.coords)
+        text_sig   = hashlib.sha1(text.encode()).hexdigest()[:8]
 
         return DocumentChunk(
-            chunk_id      = self._make_id(doc.paper_id, section.n or section.title[:24]),
+            chunk_id      = self._make_id(doc.paper_id, f"{section.n or section.title[:24]}_{text_sig}"),
             paper_id      = doc.paper_id,
             text          = text,
             section_title = section.title,
@@ -418,5 +422,8 @@ class LayoutAwareChunker:
 
     @staticmethod
     def _make_id(paper_id: str, key: str) -> str:
-        raw = f"{paper_id[:16]}:{key}"
+        # The full paper_id: hashing only its first 16 characters made every
+        # "10.1016_j.jhydro…" paper share the abstract / figure / table ids, and an
+        # upsert kept whichever paper came last (API_PLAN_v1 О-24).
+        raw = f"{paper_id}:{key}"
         return hashlib.sha1(raw.encode()).hexdigest()[:20]
