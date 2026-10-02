@@ -8,6 +8,9 @@
     python -m src.workbench <project_id> citations            # W1: citations -> quotes verified in the sources
     python -m src.workbench <project_id> bibliography         # W2: .bib audit + rendered reference list
     python -m src.workbench <project_id> review               # the paper's rules + markers + the steps above
+    python -m src.workbench <project_id> tables | figures     # inventories with sha256 and caption checks
+    python -m src.workbench <project_id> assemble [--final]   # manuscript + OPEN_ITEMS + docx; --final = gate
+    python -m src.workbench <project_id> translate            # other languages, numbers locked
     python -m src.workbench <project_id> deliver  [--from-inventory] [--dry-run] [--force]
 
 Checking steps stage their reports in data/workbench/<project>/out/<reviews>/workbench/; deliver sends them.
@@ -15,8 +18,8 @@ Checking steps stage their reports in data/workbench/<project>/out/<reviews>/wor
 Every step that writes into a paper repository plans first, refuses to overwrite work that is not
 committed (unless --force) and verifies what it wrote; the human commits there. ``--to DIR`` runs a
 step against a scratch directory instead of the repository (nothing is recorded).
-The building steps (passport, literature, analysis, figures, tables, assemble, translate) follow;
-the whole sequence is docs/api/PAPER_WORKFLOW.md.
+The remaining steps (passport, literature, analysis) follow; the whole sequence is
+docs/api/PAPER_WORKFLOW.md.
 """
 
 from __future__ import annotations
@@ -24,7 +27,8 @@ from __future__ import annotations
 import argparse
 import sys
 
-STEPS = ("status", "init", "pull", "theses", "citations", "bibliography", "review", "deliver")
+STEPS = ("status", "init", "pull", "theses", "citations", "bibliography", "review", "tables", "figures",
+         "assemble", "translate", "deliver")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -45,6 +49,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--force", action="store_true", help="overwrite files that differ and are not clean tracked files")
     ap.add_argument("--to", metavar="DIR", help="a scratch directory standing in for the paper repository")
     ap.add_argument("--from-inventory", action="store_true", help="deliver: the P6 freeze rows of this project")
+    ap.add_argument("--final", action="store_true", help="assemble: refuse a manuscript with open markers")
     args = ap.parse_args(argv)
 
     from src.workbench.steps import context
@@ -58,9 +63,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.step == "pull":
         from src.workbench.steps import pull
         return pull.run(ctx)
-    if args.step in ("theses", "citations", "bibliography", "review"):
+    if args.step in ("theses", "citations", "bibliography", "review", "translate"):
         import importlib
         return importlib.import_module(f"src.workbench.steps.{args.step}").run(ctx)
+    if args.step in ("tables", "figures"):
+        from src.workbench.steps import figures_tables
+        return getattr(figures_tables, args.step)(ctx)
+    if args.step == "assemble":
+        from src.workbench.steps import assemble
+        return assemble.run(ctx, final=args.final)
     from src.workbench.steps import deliver
     return deliver.run(ctx, from_inventory=args.from_inventory, dry_run=args.dry_run, force=args.force)
 

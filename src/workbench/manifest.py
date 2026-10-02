@@ -63,6 +63,7 @@ class Paths(_Model):
     passport: str | None = None
     literature_audit: str | None = Field(default=None, description="directory of the literature evidence run")
     review_rules: str | None = Field(default=None, description="the paper's review rules (ghai.review_rules/v1)")
+    glossary: str | None = Field(default=None, description="translation glossary (YAML: English term -> term)")
 
     @field_validator("*")
     @classmethod
@@ -72,6 +73,20 @@ class Paths(_Model):
 
 class Placeholders(_Model):
     dialect: Literal["ghai", "floodstate_fill", "none"] = "ghai"
+
+
+class Assembly(_Model):
+    references_csv: str | None = Field(default=None, description="legacy reference registry (Paper 1); else paths.bib")
+    table_specs: str | None = Field(default=None, description="YAML of claim-backed tables {id: {title, columns, rows, note}}")
+    sections: dict[str, str] = Field(default={}, description="{{section:NAME}} -> repository path of its text")
+    number_tables: bool = True
+    number_figures: bool = True
+    docx: str | None = Field(default=None, description="where the .docx goes; default <manuscript dir>/private/")
+
+    @field_validator("references_csv", "table_specs", "docx")
+    @classmethod
+    def _relative(cls, v: str | None) -> str | None:
+        return _rel(v)
 
 
 class Citation(_Model):
@@ -95,6 +110,7 @@ class ProjectManifest(_Model):
     publication_dir: str
     paths: Paths = Paths()
     placeholders: Placeholders = Placeholders()
+    assembly: Assembly = Assembly()
     citation: Citation = Citation()
     analysis: Analysis = Analysis()
     literature: Literature = Literature()
