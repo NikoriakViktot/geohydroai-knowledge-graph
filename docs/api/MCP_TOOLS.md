@@ -7,7 +7,7 @@ Every tool calls its REST endpoint in-process with your key (`src/api/mcp.py`). 
 The server also carries:
 - **instructions**: the five rules of AGENT_RULES §0, sent at `initialize`;
 - **resources**: every documentation page as `ghai://docs/<page>` (e.g. `ghai://docs/AGENT_RULES`, `ghai://docs/endpoints/search`), Markdown;
-- **prompts**: the standard workflows of AGENT_RULES §7 as `w1` … `w5`, each with an optional `project_id`.
+- **prompts**: the standard workflows of AGENT_RULES §7 as `w1` … `w6` (W6: build a paper, [PAPER_WORKFLOW.md](PAPER_WORKFLOW.md)), each with an optional `project_id`.
 
 ## Configuration in a consumer repository
 
@@ -29,14 +29,7 @@ The key comes from the environment of the `claude` process. Keep it in `~/.confi
 
 The server is local: requests must come to `127.0.0.1` or `localhost` (DNS-rebinding protection answers 421 otherwise), both WSL distributions reach it on the shared loopback, and a request without a known key is `401 UNAUTHENTICATED` before any MCP message is read. `Authorization: Bearer <key>` is accepted as well.
 
-Add to the consumer repository's `CLAUDE.md`:
-
-```markdown
-## Literature
-- Literature facts come only from the `ghai` MCP tools. Follow ghai://docs/AGENT_RULES.
-- Never quote a paper from memory; use `get_paper_text` or `verify_quotes`.
-- Record corpus_manifest_id and span ids for every citation you check.
-```
+The workbench step `init` writes `.mcp.json` and a section of the repository's `CLAUDE.md` (between `<!-- ghai:begin -->` and `<!-- ghai:end -->`): literature only from the `ghai` tools, never quoted from memory, provenance recorded, and how built outputs are delivered ([PAPER_WORKFLOW.md](PAPER_WORKFLOW.md)).
 
 ---
 

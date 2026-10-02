@@ -16,7 +16,9 @@ Agents MUST read the rules first. The non-negotiable ones:
 - [AGENT_RULES.md](AGENT_RULES.md): mandatory rules for AI agents, task → endpoint table, workflows, error handling, checklist
 - [README.md](README.md): base URL, auth and scopes, conventions, error codes, provenance and retrieval validity, jobs and quota
 - [SCHEMAS.md](SCHEMAS.md): Provenance, Problem, Coverage, RetrievalValidity, PaperIdentity (implemented), EvidenceSpan, ChunkHit, Job, QuoteResult, DoiVerifyResult, Thesis, AtomicClaim, ClaimCheckResult, ScreeningLabel, Candidate, Acquisition, MetricFact, GraphBundle
-- [MCP_TOOLS.md](MCP_TOOLS.md): MCP tools for Claude Code (`http://127.0.0.1:8090/mcp`)
+- [MCP_TOOLS.md](MCP_TOOLS.md): MCP tools for Claude Code (`http://127.0.0.1:8090/mcp`, implemented: 31 read tools, docs as resources, workflows W1–W6 as prompts)
+- [PAPER_WORKFLOW.md](PAPER_WORKFLOW.md): building a paper with the workbench: passport → theses → literature → citations → bibliography → tables/figures → assembly → review → delivery into the paper repository
+- [PROJECT_MANIFEST.md](PROJECT_MANIFEST.md): `ghai.project.yaml`, how a paper repository describes its paper (paths, placeholder dialect, citation style, review rules)
 
 ## Endpoints
 - [system](endpoints/system.md): GET /health, /capabilities, /stats, /manifest, /schemas/{name}, /client.py, /llms.txt; documentation served by the API: GET /v1/agent-rules (rules as JSON or ?format=markdown), /v1/docs/index, /v1/docs/pages/{name}, /v1/docs/endpoint?method=&path= (one endpoint with the full text of its rules); Swagger UI at /docs, OpenAPI at /v1/openapi.json (every operation carries x-agent-rules and x-status)
@@ -27,7 +29,7 @@ Agents MUST read the rules first. The non-negotiable ones:
 - [bibliography](endpoints/bibliography.md): GET /doi/{doi}; POST /doi/verify, /bib/format, /bib/audit, /bib/render, /manuscripts/citations
 - [evidence](endpoints/evidence.md): POST /quotes/verify, /claims/check, /theses/validate, /theses/extract, /theses/evidence, /theses/evidence-run, /theses/novelty; GET /theses/sets/{project_id}
 - [generate](endpoints/generate.md): POST /generate/synthesis, /generate/related-work, /generate/rewrite-check
-- [acquisition](endpoints/acquisition.md): POST /discovery/search, /discovery/snowball, /discovery/screen, /acquire, /ingest, /ingest/upload, /pipelines/discover-and-ingest; GET/PATCH /discovery/candidates
+- [acquisition](endpoints/acquisition.md): GET /locate (corpus files and legal open-access copies of a DOI or URL), /files/{token} (signed link that opens a corpus PDF for a person); POST /discovery/search, /discovery/snowball, /discovery/screen, /acquire, /ingest, /ingest/upload, /pipelines/discover-and-ingest; GET/PATCH /discovery/candidates
 - [jobs](endpoints/jobs.md): GET /jobs, /jobs/{id}, /jobs/{id}/events (SSE); DELETE /jobs/{id}; POST /jobs/{id}/retry
 - [bundles](endpoints/bundles.md): POST /bundles/import
 - [admin](endpoints/admin.md): POST /admin/manifest/freeze, /admin/rebuild/{graph|vectors|analytics}, /admin/integrity/check

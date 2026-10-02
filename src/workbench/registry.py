@@ -80,7 +80,14 @@ SEED: dict[str, dict] = {
             "tables": "outputs/paper/tables/",
             "figures": "outputs/paper/figures/",
             "passport": "outputs/paper/PASSPORT.md",
+            "glossary": "outputs/paper/templates/translate_glossary.yaml",
         },
+        "assembly": {
+            "references_csv": "outputs/paper/knowledge_repo/references/REFERENCES.csv",
+            "table_specs": "outputs/paper/templates/table_specs.yaml",
+            "sections": {"7_8": "outputs/paper/knowledge_repo/SECTION_7_8_STUB.md"},
+        },
+        "languages": ["en", "uk"],
     },
 }
 FIELDS = ("repo", "paper_label", "note", "distro", "repo_path", "publication_dir", "public", "manifest_path",
@@ -115,6 +122,7 @@ def target(project_id: str) -> dict:
     out = {k: (row.get(k) if row.get(k) is not None else seed.get(k))
            for k in ("repo", "repo_path", "publication_dir", "public", "manifest_path", "paper_label")}
     out["seed_paths"], out["seed_dialect"] = seed.get("paths", {}), seed.get("dialect", "ghai")
+    out["seed_assembly"], out["seed_languages"] = seed.get("assembly", {}), seed.get("languages", ["en"])
     out["distro"] = row.get("distro") or DISTRO
     out["project_id"] = project_id
     out["registered"] = bool(row)

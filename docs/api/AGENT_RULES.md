@@ -54,10 +54,11 @@
 | Id | Rule |
 |---|---|
 | R-DATA-1 | Theses, atomic claims, bibliographies and graph bundles **MUST** be sent in the contract formats ([SCHEMAS.md](SCHEMAS.md), `GET /schemas/{name}`). Validate first (`POST /theses/validate`). On `422`, fix the source file; you **MUST NOT** reshape data to get past the validator. |
-| R-DATA-2 | Every write **MUST** carry your `project_id` (`floodstate-eo:paper3`, `kakhovka-terrain:paper2`, `swot-dnipro:paper1`, `kakhovka-report:v1`, `article1`). You **MUST NOT** write into another project's namespace. |
+| R-DATA-2 | Every write **MUST** carry your `project_id` (`floodstate-eo:paper3`, `kakhovka-terrain:paper2`, `swot-dnipro:paper1`, `kakhovka-report:v1`, `article1`; a new paper is registered once by the workbench `init`). You **MUST NOT** write into another project's namespace. |
 | R-DATA-3 | You **MUST** acquire PDFs only through `POST /acquire` (open access) or upload files you are entitled to use (`POST /ingest/upload`). You **MUST NOT** fetch papers from shadow libraries or otherwise circumvent access controls. You **MUST NOT** ask for or reconstruct whole full texts, and **MUST NOT** fetch the file links (`files[].open_url`) that `GET /locate` returns: they are for a person to read the PDF in a browser. |
 | R-DATA-4 | You **MUST NOT** create article-specific folders, dumps or scripts in the knowledge repository. Results come from the API and are stored in your own repository. |
 | R-DATA-5 | Evidence is append-only. A correction is a new verdict (new run), never an edit or deletion of an old one. |
+| R-DATA-6 | Built outputs (manuscript, reports, bibliography, tables) reach a paper repository only through the workbench `deliver` step: planned, checked, verified by sha256 there, and committed by a person. You **MUST NOT** edit delivered files by hand without noting it (the next delivery reports them as conflicts), **MUST NOT** force a delivery over uncommitted work, and **MUST NOT** commit on a person's behalf. Binary builds (pdf, docx, tif) never enter a public repository's git ([PAPER_WORKFLOW.md](PAPER_WORKFLOW.md) §10). |
 
 ## 4. Language models and quota (R-LLM)
 
@@ -94,6 +95,8 @@
 | find new papers | `POST /discovery/search` / `/discovery/snowball` | `/discovery/screen` → review → `/acquire` → `/ingest` |
 | state that something is new or missing | `POST /theses/novelty` | obey R-SCI-3 |
 | draft related work | `POST /generate/related-work` | `POST /claims/check` on every citation |
+| build or check a manuscript (theses, literature, citations, bibliography, tables, assembly, review) | the workbench steps of [PAPER_WORKFLOW.md](PAPER_WORKFLOW.md), with the paper's `ghai.project.yaml` ([PROJECT_MANIFEST.md](PROJECT_MANIFEST.md)) | `review`; fix what it finds in the paper repository |
+| put built outputs into the paper repository | workbench `deliver` (`--dry-run` first) | the person reads `git status` and commits (R-DATA-6) |
 
 ## 7. Standard workflows
 
@@ -115,6 +118,8 @@
 **W4 — Add the literature that is missing**: `POST /pipelines/discover-and-ingest` with budgets, or the step-by-step `discovery/search` → `screen` → `PATCH candidates` → `acquire` → `ingest`. Re-run the searches of your claims afterwards.
 
 **W5 — Literature numbers for a comparison table**: `GET /metrics/facts` → for each value `GET /papers/{id}/tables` → `POST /quotes/verify` with `expected_numbers` → keep only `FOUND_*` with matching units and period.
+
+**W6 — Build a paper** ([PAPER_WORKFLOW.md](PAPER_WORKFLOW.md)): passport first; then `theses` (contract v1) → `literature` (evidence per atomic claim) → `citations` (W1) and `bibliography` (W2) → `tables`, `figures` → `assemble` (numbers only from OWN_EVIDENCE or table cells; tables and figures numbered by first appearance) → `review` (the paper's rules + markers + the steps above) → `assemble --final` (no open marker) → `deliver --dry-run`, then `deliver`; the person commits. Every step reads the paper repository through its `ghai.project.yaml` and writes only into staging until `deliver`.
 
 ## 8. Error handling for agents
 
@@ -157,3 +162,4 @@ The API attaches these rules to every endpoint in its OpenAPI description (`x-ag
 - [ ] Model verdicts labelled "model-assessed" (R-SCI-6).
 - [ ] Provenance written to your run manifest (R-SCI-8).
 - [ ] No API key in output or code (R-SEC-1).
+- [ ] For a manuscript: `assemble --final` passes, `review` has no unexplained CRITICAL or MAJOR finding, and the delivery was planned with `--dry-run` (R-DATA-6).

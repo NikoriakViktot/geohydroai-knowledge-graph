@@ -68,6 +68,7 @@ class Item:
     disposition: str = "deliver"    # deliver | private | code
     inventory: str | None = None    # freeze path of the INVENTORY row this item settles
     mtime: float | None = None      # when the source was last changed (epoch s); None = built just now
+    base_sha: str | None = None     # an edit of the repository's own file: the sha256 it was computed from
 
     @property
     def sha256(self) -> str:
@@ -124,6 +125,8 @@ def make_plan(project_id: str, remote, items: list[Item], *, public: bool, never
             act.kind = "same"
         elif st["sha256"] is None:
             act.kind = "new"
+        elif it.base_sha and st["sha256"] == it.base_sha:
+            act.kind, act.reason = "update", f"edit of the {st['git']} file as it is now (unchanged since read)"
         else:
             theirs = st.get("committed") or st.get("mtime")
             act.superseded = bool(it.mtime and theirs and theirs > it.mtime)

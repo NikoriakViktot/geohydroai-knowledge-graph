@@ -160,3 +160,23 @@ def test_a_file_changed_since_the_last_delivery_is_a_conflict(remote):
                         last_delivered={"docs/clean.md": DV.sha256(b"v1\n")}).actions[0].kind == "update"
     plan = DV.make_plan("p:x", remote, [built], public=True, last_delivered={"docs/clean.md": DV.sha256(b"v0\n")})
     assert plan.actions[0].kind == "conflict" and "since the last delivery" in plan.actions[0].reason
+
+
+def test_an_edit_computed_from_the_current_file_is_safe_even_when_untracked(remote, repo):
+    current = (repo / "docs/mine.md").read_bytes()                      # untracked
+    edit = DV.Item("docs/mine.md", current + b"appended\n", "init", base_sha=DV.sha256(current))
+    assert DV.make_plan("p:x", remote, [edit], public=True).actions[0].kind == "update"
+    (repo / "docs/mine.md").write_text("changed meanwhile\n", encoding="utf-8")
+    assert DV.make_plan("p:x", remote, [edit], public=True).actions[0].kind == "conflict"
+
+
+def test_init_plans_the_manifest_and_registers_nothing_on_a_dry_run(remote, repo, monkeypatch, capsys):
+    from src.workbench import registry, steps
+    target = {"project_id": "p:x", "repo_path": str(repo), "distro": "local", "publication_dir": "pub",
+              "manifest_path": "pub/ghai.project.yaml", "public": True, "paper_label": "P", "repo": "r",
+              "seed_paths": {"bib": "docs/r.bib"}}
+    monkeypatch.setattr(registry, "upsert", lambda *a, **k: (_ for _ in ()).throw(AssertionError("registered")))
+    ctx = steps.Context("p:x", target, remote, local_target=False)
+    assert I.run(ctx, dry_run=True) == 0
+    out = capsys.readouterr().out
+    assert "new      pub/ghai.project.yaml" in out and "kept as is" not in out

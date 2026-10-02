@@ -16,7 +16,7 @@ import re
 
 from src.workbench import manifest as M
 from src.workbench import registry
-from src.workbench.delivery import Item, make_plan, render, write
+from src.workbench.delivery import Item, make_plan, render, sha256, write
 from src.workbench.steps import Context
 
 MCP_URL = "http://127.0.0.1:8090/mcp"
@@ -31,6 +31,7 @@ def build_manifest(ctx: Context) -> M.ProjectManifest:
         repo=M.Repo(distro=t["distro"], path=t["repo_path"], public=bool(t.get("public", True))),
         publication_dir=t["publication_dir"], paths=M.Paths(**t.get("seed_paths", {})),
         placeholders=M.Placeholders(dialect=t.get("seed_dialect", "ghai")),
+        assembly=M.Assembly(**t.get("seed_assembly", {})), languages=t.get("seed_languages", ["en"]),
     )
 
 
@@ -60,6 +61,8 @@ Papers of this repository built with the workbench of the knowledge repository (
 - Manuscripts, tables, figures, bibliography and reviews are built in the knowledge repository and
   delivered here with a manifest under `.ghai/deliveries/`; review `git status` and commit. Files
   edited by hand after a delivery are reported as conflicts by the next one, never overwritten.
+- Run a build step from here with `ghai-workbench <project_id> <step>` (status, theses, literature,
+  citations, bibliography, tables, figures, assemble [--final], translate, review, deliver --dry-run).
 - The paper's own numbers stay in this repository (its analysis scripts and tables); the knowledge
   repository holds the literature.
 {END}
@@ -96,9 +99,11 @@ def run(ctx: Context, *, dry_run: bool = False, force: bool = False) -> int:
     m = current or build_manifest(ctx)
     text = M.dump(m)
     items = [] if current else [Item(manifest_path, text.encode("utf-8"), "workbench:init", "deliver")]
-    items.append(Item(".mcp.json", mcp_json(ctx.remote.read(".mcp.json")), "workbench:init", "deliver"))
-    items.append(Item("CLAUDE.md", claude_md(ctx.remote.read("CLAUDE.md"), papers_of_repo(ctx)), "workbench:init",
-                      "deliver"))
+    for path, build in ((".mcp.json", mcp_json),
+                        ("CLAUDE.md", lambda raw: claude_md(raw, papers_of_repo(ctx)))):
+        there = ctx.remote.read(path)            # edited from what is there: an untracked file is not clobbered
+        items.append(Item(path, build(there), "workbench:init", "deliver",
+                          base_sha=sha256(there) if there is not None else None))
     plan = make_plan(ctx.project_id, ctx.remote, items, public=ctx.public, never=tuple(m.blocked()), force=force)
     print(render(plan))
     if current:
@@ -110,7 +115,8 @@ def run(ctx: Context, *, dry_run: bool = False, force: bool = False) -> int:
     print(f"written {result['written']} files; manifest {result['manifest']}")
     if not ctx.local_target:
         raw = text if not current else (ctx.remote.read(manifest_path) or b"").decode("utf-8")
-        registry.upsert(ctx.project_id, repo=t.get("repo"), paper_label=m.title, distro=m.repo.distro,
+        registry.upsert(ctx.project_id, repo=m.repo.path.rstrip("/").rsplit("/", 1)[-1], paper_label=m.title,
+                        distro=m.repo.distro,
                         repo_path=m.repo.path, publication_dir=m.publication_dir, public=m.repo.public,
                         manifest_path=manifest_path, manifest_sha256=M.sha256_text(raw))
         print(f"registered {ctx.project_id} in project.project")
