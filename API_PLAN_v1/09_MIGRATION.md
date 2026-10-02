@@ -32,7 +32,7 @@
 | Ollama | `/usr/share/ollama/.ollama` | 6,6 GB | `mistral-nemo:12b` (`e7e06d107c6c`) | `ollama pull` + звірка digest | так |
 | HF-моделі | **`.hf_cache/`** (2,2 GiB) — це `HF_HOME` пайплайну (`src/ingestion/pipeline.py:85-86`): specter2 `3447645e` (+ `0044d716`), bge-large `d4aa6901`, MiniLM `c9745ed1`, Nougat. `~/.cache/huggingface/hub` (64 GB) — переважно чужі моделі | 2,2 GiB | — | **копіювати `.hf_cache` як є** (це закріплені ревізії); з `~/.cache` — нічого | так, але **ревізії мають збігатися** (§4.6) |
 | Секрети | `.env` | — | — | переписати вручну, **з ротацією** | — |
-| (майбутнє) API | `data/api/{jobs,identity,keys}.sqlite` | малі | SQLite | `.backup` | частково |
+| **PostgreSQL — шар правди** | контейнер `ghai-postgres` (PG 17.11 + pgvector 0.8.7), bind mount `data/postgres/pgdata` (власник — uid контейнера) | малий (МБ) | PostgreSQL 17 | **`pg_dump -Fc` → `pg_restore`** (не копіювати каталог даних між версіями) | частково: ідентичність — так (ETL з файлів); мітки, вердикти, тези — **ні** |
 
 **Разом**:
 - **до очищення** ≈ 80 GB робочих даних і ≈ 160 тис. файлів;
@@ -201,7 +201,8 @@ sqlite3 migration/openalex_doi.db "PRAGMA integrity_check;"                 # н
 | Що | Як | Як часто | Зберігати |
 |---|---|---|---|
 | `data/` (файли) | `restic`/`borg` інкрементально в окреме сховище | щодня | 14 щоденних, 8 тижневих, 6 місячних |
-| SQLite (кеші, jobs, identity, keys) | `.backup` → restic | щодня | так само |
+| PostgreSQL (шар правди) | `pg_dump -Fc ghai` → restic | щодня | так само |
+| SQLite-кеші (доки не перенесені в `biblio.http_cache`) | `.backup` → restic | щодня | так само |
 | DuckDB-реєстр | `EXPORT DATABASE` (Parquet) → restic | щодня | так само |
 | Neo4j | офлайн-дамп (Community) у вікні обслуговування **або** перебудова з файлів | щотижня + перед кожним `rebuild_graph` | 4 останні |
 | Chroma | зупинка сервера → tar; перед кожним `rebuild_vectors` нова колекція поруч | щотижня | 2 останні |

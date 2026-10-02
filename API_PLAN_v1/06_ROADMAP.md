@@ -70,7 +70,7 @@ flowchart LR
 | ID | Крок | Файли | Готово, коли | Залежить | Дні |
 |---|---|---|---|---|---|
 | 0.3.1 | `src/services/identity.py`: `normalize_doi`, `doi_slug` (обробляє `:`; таблиця псевдонімів для старих slug), `title_fingerprint`, `resolve(doi\|title\|file\|chroma_id)` (логіка `PaperResolver`) | новий | ≥ 40 тестів: регістр, `https://doi.org/`, `:`, `@`, «2024a», кирилиця, `…09.069reference:hydrol20760` | 0.2.1 | 1.5 |
-| 0.3.2 | Задача/CLI `integrity_check` будує `data/api/identity.sqlite` (схема 04 §5). Джерела: pdf, tei, paper_json, normalized, enriched, sodb, Chroma `paper_id` (SQLite read-only). Статуси `TITLE_DOI_MISMATCH` (GROBID-назва проти OpenAlex-назви), `DUPLICATE` (144 групи), `NO_DOI` | `src/services/identity.py`, `python -m src.services.identity build` | таблиця на всі 5 038 статей; звіт розбіжностей; 0 «невідомих» | 0.3.1 | 1.5 |
+| 0.3.2 | ✅ 2026-10-02: `python -m src.etl.identity` завантажує `core.paper` / `paper_alias` / `paper_file` / `cohort_member` у Postgres (міграція `0001`; 5 230 статей). Джерела: pdf, tei, paper_json, normalized, enriched, sodb, Chroma `paper_id` (SQLite read-only). Статуси `TITLE_DOI_MISMATCH` (GROBID-назва проти OpenAlex-назви), `DUPLICATE` (144 групи), `NO_DOI` | `src/services/identity.py`, `python -m src.services.identity build` | таблиця на всі 5 038 статей; звіт розбіжностей; 0 «невідомих» | 0.3.1 | 1.5 |
 | 0.3.3 | Перевести на `identity.resolve` 4 найважливіші місця: `tools/paper3_audit/corpus.py`, `paper_3/_utils.py:55,71`, `harvest_openalex.py:219`, `missing_reference_recovery.py:288` | ці файли | наявні тести зелені; один поріг збігу назв у конфігу | 0.3.2 | 1 |
 
 ### WP0.4 Граф (О-1, О-2)
@@ -120,7 +120,7 @@ flowchart LR
 - тести зелені з чистого clone;
 - граф має семантичні ребра;
 - Chroma v2 перевірено;
-- `identity.sqlite` без невідомих розбіжностей;
+- ідентичність у Postgres (`core.paper`) без невідомих розбіжностей;
 - `references.parquet` повний;
 - екстракція не втрачає від'ємні або «великі» значення.
 
@@ -130,16 +130,16 @@ flowchart LR
 
 | ID | Крок | Файли | Готово, коли | Залежить | Дні |
 |---|---|---|---|---|---|
-| 1.1 | Залежності: `fastapi`, `python-multipart`, `sse-starlette`, `mcp`; скелет `src/api/app.py` з `lifespan`: Settings; Neo4j driver (READ); Chroma HttpClient; SPECTER2-енкодер (CPU, закріплена ревізія); DuckDB in-memory з view над `data/parquet`; `identity.sqlite` | `src/api/{app,deps}.py` | `uvicorn` стартує; `/health` показує стан 5 залежностей | Ф0 | 1 |
+| 1.1 | Залежності: `fastapi`, `python-multipart`, `sse-starlette`, `mcp`; скелет `src/api/app.py` з `lifespan`: Settings; Neo4j driver (READ); Chroma HttpClient; SPECTER2-енкодер (CPU, закріплена ревізія); DuckDB in-memory з view над `data/parquet`; пул з'єднань Postgres (шар правди) | `src/api/{app,deps}.py` | `uvicorn` стартує; `/health` показує стан 5 залежностей | Ф0 | 1 |
 | 1.2 | Chroma-сервер: `scripts/ghai_up.sh` / `ghai_down.sh`; `VectorStore(mode="http")`; дашборд і `VectorStoreActor` також на HttpClient (один власник `.chromadb`) | `chroma_store.py`, `actors/vectorstore_actor.py`, `scripts/` | два процеси одночасно читають; коректна зупинка без хвоста WAL | 1.1 | 1.5 |
-| 1.3 | Автентифікація: `data/api/keys.sqlite` (хеш, споживач, скоупи), CLI `python -m src.api.keys create --consumer floodstate-eo --scopes read,llm`; problem+json; `request_id`; JSON-логи | `src/api/deps.py`, `src/api/errors.py` | тести 401/403/429 | 1.1 | 1 |
+| 1.3 | Автентифікація: `ops.api_key` у Postgres (хеш, споживач, скоупи), CLI `python -m src.api.keys create --consumer floodstate-eo --scopes read,llm`; problem+json; `request_id`; JSON-логи | `src/api/deps.py`, `src/api/errors.py` | тести 401/403/429 | 1.1 | 1 |
 | 1.4 | `src/services/models.py` — контракти з 03 §4; `GET /schemas/{name}` | новий | JSON Schema для `Thesis`, `AtomicClaim`, `BibEntry`, `GraphBundle`, `CitationOccurrence` | 1.1 | 1 |
 | 1.5 | `papers`: `resolve`, `resolve-batch`, деталі, `sections`/`text` (TEI через `src/document`), `references`, `entities`, `tables` | `src/services/corpus.py`, `routers/papers.py` | контрактні тести на фікстурах TEI | 1.4, 0.3 | 2 |
 | 1.6 | `search`: префільтр (ідентичність/DuckDB → `$in` батчами) → ембединг запиту → Chroma → join метаданих → агрегування по статтях; `coverage`; `retrieval_validity=NOT_MEASURED`, поки для `(collection, manifest)` немає виміряного recall | `src/services/search.py`, `routers/search.py` | тест: фільтр за роком не обрізає до 500 статей (О-27); p95 < 1,5 с на теплому сервері | 1.2, 1.5 | 2 |
 | 1.7 | `graph`: сусідство статті, цитування in/out, сутність → статті, whitelist іменованих запитів (параметри, ліміт хопів 1–3), `admin/cypher` у READ-режимі з таймаутом | `src/services/graph_read.py`, `routers/graph.py` | тести з mock-драйвером; немає f-рядків у Cypher (О-33) | 1.1, 0.4 | 1.5 |
 | 1.8 | `metrics` і `ontology`: `extract` (regex + таблиці, синхронно), `facts` (DuckDB, параметризований SQL), `ontology/normalize` (`allow_semantic=false`), `metrics/ontology` | `src/services/{metrics,ontology}.py` | тести; немає f-рядків у SQL | 1.4, 0.7 | 1.5 |
 | 1.9 | `quotes/verify`: повний текст з TEI (abstract/body/back, підписи, таблиці) → `verify_quote` (перенести в `src/services/quotes.py`); `…`-фрагменти; `expected_numbers`; атрибуція через `<ref type="bibr">` у знайденому реченні; `SOURCE_UNAVAILABLE` з підказкою на `/acquire` | `src/services/quotes.py`, `routers/quotes.py` | **регресійні фікстури 2026-10-01**: Johnson, Olofsson, Zheng, Bates → `FOUND_EXACT`; Iqbal 1.12–1.61 → `attribution.cites_other_sources=true`; Lefebvre «71 %» → `NOT_FOUND` | 1.5 | 2 |
-| 1.10 | `doi`/`bib`: спільний HTTP-шар (httpx, кеш SQLite з TTL, 429/`Retry-After`, `mailto`); Crossref + OpenAlex з порівнянням полів (назва, рік online/print, том, сторінки, автори); `bib/format` (ключі `Surname_Year` + псевдоніми); `bib/audit` (задача, якщо > 50); `bib/render`; `manuscripts/citations` (автор-рік з комою й без, et al., кілька посилань в одних дужках) | `src/services/{http,doi}.py`, `routers/{doi,bib,manuscripts}.py` | фікстури: Biancamaria (online 2015 / print 2016 → `VERIFIED_WITH_NOTES`), Monti (сторінки «50-50»), Pedregosa (`UNRESOLVED`, JMLR) | 1.4, 0.3 | 3 |
+| 1.10 | `doi`/`bib`: спільний HTTP-шар (httpx, кеш `biblio.http_cache` з TTL, 429/`Retry-After`, `mailto`); Crossref + OpenAlex з порівнянням полів (назва, рік online/print, том, сторінки, автори); `bib/format` (ключі `Surname_Year` + псевдоніми); `bib/audit` (задача, якщо > 50); `bib/render`; `manuscripts/citations` (автор-рік з комою й без, et al., кілька посилань в одних дужках) | `src/services/{http,doi}.py`, `routers/{doi,bib,manuscripts}.py` | фікстури: Biancamaria (online 2015 / print 2016 → `VERIFIED_WITH_NOTES`), Monti (сторінки «50-50»), Pedregosa (`UNRESOLVED`, JMLR) | 1.4, 0.3 | 3 |
 | 1.11 | Клієнт `clients/python/ghai_client` (httpx, TypedDict, опційно pydantic) + `GET /client.py` | `clients/python/` | установка в floodstate-eo `.venv`; e2e-тест проти TestClient | 1.5–1.10 | 1 |
 | 1.12 | MCP-адаптер (читальні інструменти з 04 §9) на `/mcp` | `src/api/mcp.py` | Claude Code у floodstate-eo бачить інструменти `ghai` | 1.11 | 1 |
 | 1.13 | **Перша інтеграція**: у floodstate-eo `p100b_open_citations.py` викликає `/quotes/verify` і записує статуси в `open_citations.json` | (репозиторій floodstate-eo) | 22 посилання отримують статуси автоматично | 1.11 | 0.5 |
@@ -158,7 +158,7 @@ flowchart LR
 | 2.4 | `process_paper_local(xml, ner_fn, encode_fn, judge_fn, vector_sink)`; Ray-задача — адаптер. Нормалізація **після** judge. Атомарні записи. Жодного фолбеку на MiniLM (О-12, О-31) | `orchestration/process_paper.py`, `ingestion/pipeline.py`, `actors/embedding_actor.py` | тести наявні + нові (judge змінює сутність → normalized відображає зміну) | Ф0 | 2 |
 | 2.5 | `write_paper_subgraph(paper_id)` + підвищення заглушки + `ingest_run_id` на ребрах + admin-задача `compact_paper` (05 §6) | `src/graph/` | тест: повторний інжест не дублює вузли; старі ребра відфільтровуються | 0.4 | 2 |
 | 2.6 | Інжест у Chroma для однієї статті: `delete` + `upsert`; інвалідація кешів (`_pack_cache`, `data_neo4j` lru, PaperStore, DuckDB-view) | `chroma_store.py`, `services/search.py` | тест: повторний інжест → та сама кількість чанків | 0.5 | 1 |
-| 2.7 | Клієнт збагачення без акторів (SQLite-кеш, 429, політика оновлення) | `src/enrichment/`, `services/http.py` | тест з mock HTTP | 1.10 | 1 |
+| 2.7 | Клієнт збагачення без акторів (кеш у Postgres, 429, політика оновлення) | `src/enrichment/`, `services/http.py` | тест з mock HTTP | 1.10 | 1 |
 | 2.8 | Кроки задачі `ingest` (05 §5, 1–13); керування GROBID-контейнером (старт/зупинка, `is_alive`); `GROBID_URL` з конфігу; Nougat опційно (локальний парсер); `/ingest`, `/ingest/upload` | `src/jobs/steps/*.py`, `routers/ingest.py` | **e2e**: PDF → вузли + вектори ≤ 5 хв; падіння на кроці 9 → `retry` продовжує з 9 | 2.2–2.7 | 3 |
 | 2.9 | Реєстр за стадіями (рядок на кожен крок; `paper_id` + `sha256`) | `registry_db.py` | `registry.cli stats` показує всі стадії | 2.8 | 1 |
 | 2.10 | Батч-задачі: `rebuild_analytics` (щоночі), повторна екстракція метрик по корпусу після WP0.7 → оновлення NumericFact | `jobs/steps/batch.py` | NumericFact з `range_verdict`; звіт: скільки значень повернуто з «відкинутих» | 2.8 | 1.5 |
@@ -182,7 +182,7 @@ flowchart LR
 
 | ID | Крок | Файли | Готово, коли | Залежить | Дні |
 |---|---|---|---|---|---|
-| 4.1 | `services/llm.py`:<br>• провайдери Gemini-лейни, Ollama, опційно Anthropic і локальний LoRA (08);<br>• quota ledger у SQLite (міграція `quota_ledger.*.json`);<br>• кеш за `prompt_hash`;<br>• pydantic-вивід з `repair_count`;<br>• модель — аргумент;<br>• перевірка «вже зроблено» **до** виклику (О-36);<br>• `google.generativeai` → `google.genai` (О-19) | новий; `ai_gateway.py` стає адаптером | тест: квота не перевищується за паралельних задач | Ф1 | 2 |
+| 4.1 | `services/llm.py`:<br>• провайдери Gemini-лейни, Ollama, опційно Anthropic і локальний LoRA (08);<br>• quota ledger у Postgres `ops.llm_call` (міграція `quota_ledger.*.json`);<br>• кеш за `prompt_hash`;<br>• pydantic-вивід з `repair_count`;<br>• модель — аргумент;<br>• перевірка «вже зроблено» **до** виклику (О-36);<br>• `google.generativeai` → `google.genai` (О-19) | новий; `ai_gateway.py` стає адаптером | тест: квота не перевищується за паралельних задач | Ф1 | 2 |
 | 4.2 | `claims/check` (синхронно — одне твердження; пакет — задача): докази через `search` + `quotes`; вердикти з 03 §4; `suggested_rewrite` | `services/claims.py` | **фікстури 2026-10-01**: Lehnigk (Discussion) → `CONTRADICTED`; Zheng «by design» → `OVERSTATED`; Hawker/Iqbal → вторинне цитування; Johnson → `SUPPORTED` | 4.1, 1.9 | 2.5 |
 | 4.3 | `theses`:<br>• `validate` (JSON Schema; закриває О-13);<br>• `evidence-run` — перенести пайплайн `tools/paper3_audit` (claims → retrieve → select → screen → export) у задачу з конфігом бандла замість `config.py`;<br>• `novelty` з воротами;<br>• **новий** LLM-витяг атомарних тверджень за схемою `atomic_claims.yaml` | `services/theses.py`; адаптація `tools/paper3_audit/*` | прогін бандла floodstate-eo через API дає ті самі 02/03/05, що й CLI (порівняння на копії) | 4.1, 3.6 | 4 |
 | 4.4 | `generate`:<br>• `synthesis` — винести з `callbacks.py:1741-1761`; evidence pack серіалізується в JSON; перевірка, що кожен DOI у тексті є в pack;<br>• `related-work` (задача);<br>• `rewrite-check`;<br>• блокування чисел і DOI токенами, як у `translate` | `services/generate.py` | тест: відповідь з DOI поза pack → речення позначено `unsupported` | 4.1 | 2 |
@@ -220,7 +220,7 @@ flowchart LR
 5. 0.6.1 — ключ дедуплікації посилань + тест.
 6. 0.7.1 і 0.7.2 — NSE ÷100 і юнікодний мінус + тести.
 7. 0.2.1 — єдиний `Settings`, `.env` до всього.
-8. 0.3.1 і 0.3.2 — ідентичність і `identity.sqlite`.
+8. ✅ 0.3.1 і 0.3.2 — ідентичність у Postgres (`core.*`).
 9. 0.2.5, потім 0.4.2–0.4.4 — спершу compose на правильний том Neo4j, далі граф з одним ключем і перебудова.
 10. 0.5.3–0.5.4 — Chroma: злиття WAL і реіндекс у `flood_papers_768d_v2`.
 

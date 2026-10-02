@@ -19,7 +19,7 @@
  │ singletons: Neo4j driver (READ), Chroma HttpClient, SPECTER2 query-encoder (CPU),│
  │             LLM gateway + quota ledger, identity table (read)                    │
  └───────────────┬───────────────────────────────┬──────────────────────────────────┘
-                 │ reads                          │ jobs.sqlite (WAL)
+                 │ reads                          │ Postgres ops.job (SKIP LOCKED)
                  ▼                                ▼
    neo4j :7687  chroma server :8001      ┌──────────── worker (1 процес) ───────────────┐
    (docker)     (chroma run, .chromadb)  │ claim job → steps → write                     │
@@ -51,7 +51,7 @@
 |---|---|---|---|
 | A1 | **ChromaDB у режимі сервера** | PersistentClient у API і worker | PersistentClient не безпечний для двох процесів. Холодне завантаження HNSW займає ~4.5 GB і до 30 хв. Відомий збій 1.5.9 стався саме тоді, коли процес завершився з незалитим WAL (зараз у черзі **252 upsert-и** від 2026-09-19, які не потрапили в HNSW-сегмент). Сервер тримає індекс у пам'яті й контрольовано зупиняється |
 | A2 | **Один writer (worker)** | Запис з API | DuckDB-реєстр підтримує лише одного писача. MERGE-інваріант простіше гарантувати в одному місці. Хто запустив задачу, видно в job log |
-| A3 | **Черга задач у SQLite (WAL)** | Redis + arq/RQ, Celery | Redis не встановлений. Одна машина, десятки задач на день. SQLite дає атомарний `UPDATE … RETURNING` і бекап одним файлом. Ray лишається для GPU-батчів усередині кроків |
+| A3 | **Черга задач і весь стан сервісу — у PostgreSQL** (`ops.job`, `SELECT … FOR UPDATE SKIP LOCKED`; див. [11](11_POSTGRES_TRUTH_LAYER.md)) | SQLite-файли (перший варіант плану); Redis + arq/RQ, Celery | Postgres уже є шаром правди: задачі, ідентичність, ключі й журнал LLM в одній транзакційній базі з даними, один бекап (`pg_dump`). Redis не потрібен для десятків задач на день. Ray лишається для GPU-батчів усередині кроків |
 | A4 | **Сервісний шар `src/services/`** | Роутери кличуть CLI-скрипти | CLI-скрипти прив'язані до шляхів Kakhovka/Paper 3. Dash-логіку треба відв'язати від `dash`. Три реалізації Crossref/bib треба звести в одну |
 | A5 | **API читає реєстр через Parquet-знімки** | Пряме читання `pipeline_registry.duckdb` | DuckDB не відкриває read-only з'єднання, поки інший процес тримає write lock. Реєстр уже має `data/registry/parquet/` |
 | A6 | **SPECTER2-енкодер запитів на CPU в API** | Виклик Ray EmbeddingActor | Енкодинг одного запиту на CPU займає десятки мс, і Ray-кластер для читання не потрібен. Обов'язково та сама модель і адаптер, що при індексації, інакше простір векторів не збігається |
@@ -70,10 +70,10 @@
 | ChromaDB `flood_papers_768d` | api, worker (HttpClient) | **лише worker** (upsert, детерміновані `chunk_id`) | сервер :8001 |
 | `data/literature/{pdf,grobid_xml,paper_json}`, `data/{normalized,enriched,sodb}` | api (файли), worker | **лише worker** | атомарний запис: tmp + rename |
 | `data/registry/pipeline_registry.duckdb` | api — через Parquet-знімки | **лише worker** | single-writer + RLock |
-| `data/api/jobs.sqlite` | api, worker | api: INSERT/cancel; worker: claim/update | WAL |
-| `data/api/identity.sqlite` (нове) | api, worker | worker | таблиця ідентичності §5 |
-| `data/cache/*.db` (OpenAlex/Crossref/URL) | api, worker | api і worker (кеш HTTP-відповідей) | SQLite WAL; ключ — нормалізований DOI/URL |
-| quota ledger LLM | api, worker | api і worker | SQLite-таблиця замість JSON-файлів `quota_ledger.*.json` |
+| **PostgreSQL `ghai-postgres`** (`core`, `biblio`, `project`, `evidence`, `ops`) | api, worker | api: задачі (INSERT/cancel), мітки від користувачів; worker: усе інше | шар правди ([11](11_POSTGRES_TRUTH_LAYER.md)); `127.0.0.1:5433` |
+| `core.paper` / `paper_alias` / `paper_file` | api, worker | worker (ETL `src/etl/identity.py`) | ідентичність §5 — **завантажено 2026-10-02**: 5 230 статей |
+| `biblio.http_cache` (замінить `data/cache/*.db` і `_work/*_cache.json`) | api, worker | api і worker | ключ — нормалізований DOI/URL; TTL; таймаути не кешуються |
+| `ops.llm_call` (журнал і квота LLM) | api, worker | api і worker | замість JSON-файлів `quota_ledger.*.json` |
 
 ---
 
@@ -97,7 +97,7 @@ flowchart TB
     GEN[generate] --- LLM[llm + quota] --- HTTP[http] --- DOI[doi/bib] --- DISC[discovery] --- ACQ[acquisition] --- ING[ingestion]
   end
   subgraph Jobs[src/jobs — єдиний писач]
-    STORE[jobs.sqlite] --- WORKER[worker + steps]
+    STORE[(Postgres ops.job)] --- WORKER[worker + steps]
   end
   subgraph Domain[наявні бібліотеки]
     DOC[src/document] --- EXT[src/extraction + ingestion/knowledge] --- GRAPH[src/graph] --- NORM[src/normalization + ontology] --- P3["src/paper_3 + tools/paper3_audit<br/>(частини, що переносяться)"]
@@ -140,7 +140,7 @@ src/services/            # чистий Python; без fastapi/dash/ray
     theses.py            # extract / evidence / novelty з воротами
     generate.py          # synthesis / related-work, grounding-перевірка
     analytics.py         # DuckDB in-memory view над data/parquet; лише параметризований SQL
-    http.py              # спільний HTTP-шар: httpx, SQLite-кеш з TTL, 429/Retry-After, mailto
+    http.py              # спільний HTTP-шар: httpx, кеш у biblio.http_cache з TTL, 429/Retry-After, mailto
     discovery.py         # OpenAlex/Crossref/arXiv search, snowball, screening
     acquisition.py       # OA-PDF: OpenAlex best_oa_location, Unpaywall, arXiv, PMC
     ingestion.py         # покроковий per-paper ланцюг (05_PIPELINES.md)
@@ -152,7 +152,7 @@ src/api/
     routers/{system,papers,search,graph,metrics,ontology,doi,quotes,theses,generate,discovery,ingest,jobs,admin}.py
     mcp.py               # MCP-адаптер (streamable HTTP на /mcp)
 src/jobs/
-    store.py             # jobs.sqlite: enqueue / claim / update / events
+    store.py             # Postgres ops.job: enqueue / claim (SKIP LOCKED) / update / events
     worker.py            # цикл: claim → run steps → artifacts; семафори ресурсів
     steps/*.py           # тонкі обгортки над src/services/ingestion.py тощо
 clients/python/ghai_client/   # типізований клієнт (httpx), генерується з OpenAPI
@@ -193,7 +193,7 @@ CREATE TABLE paper_identity (
   - Ollama `mistral-nemo:12b` — локально, judge і дешеві задачі.
   - Опційно Anthropic: SDK `anthropic` 0.104 уже встановлений.
   - Застарілий `google.generativeai` (бібліотека сама пише, що підтримку припинено) замінити на `google.genai` усюди.
-- **Quota ledger** — одна SQLite-таблиця `(model, window, used, limit)`. Ліміти Gemini: 15 RPM / 500 RPD на модель, за `reference_gemini_quota`. Зараз кожен репозиторій і кожен інструмент витрачає квоту окремо. Через API квота стає спільною і видимою.
+- **Quota ledger** — таблиця `ops.llm_call` у Postgres; квота — агрегат за вікно `(model, window)`. Ліміти Gemini: 15 RPM / 500 RPD на модель, за `reference_gemini_quota`. Зараз кожен репозиторій і кожен інструмент витрачає квоту окремо. Через API квота стає спільною і видимою.
 - **Кеш відповідей** за `prompt_hash` (модель + промпт + evidence ids). Повторний запит не витрачає квоту.
 - **Структурований вивід.** Відповідь валідується pydantic-схемою. Невалідну відповідь не «лагодимо мовчки», як `judge_normalizer` (зауваження F-EXT-3), а рахуємо `repair_count` і повертаємо в `provenance.llm`.
 - **Grounding-перевірка.** Кожне речення відповіді має `evidence_ids ⊆ наданий набір`. Інакше речення отримує позначку `unsupported` або відкидається, залежно від режиму.
@@ -204,7 +204,7 @@ CREATE TABLE paper_identity (
 
 - Структуровані логи (JSON) з `request_id` / `job_id`. `print` у сервісах заборонено (зауваження F-ANA-2).
 - `/health` для кожної залежності: `neo4j` (`RETURN 1`), `chroma` (`heartbeat`), `grobid` (`/api/isalive`), `ollama` (`/api/tags`), `gemini` (залишок квоти).
-- Метрики задач: тривалість кроків, падіння за типом, обсяг квоти. Таблиця `job_events` у `jobs.sqlite`, перегляд у Dash.
+- Метрики задач: тривалість кроків, падіння за типом, обсяг квоти. Таблиця `ops.job_event` у Postgres, перегляд у Dash.
 - Кожен інжест пише в реєстр `run_id` і `git_commit`. Брудне робоче дерево позначається `dirty=true`, як WARN у воротах Paper 3.
 
 ---
@@ -212,7 +212,7 @@ CREATE TABLE paper_identity (
 ## 8. Безпека
 
 - Bind лише `127.0.0.1`. WSL2-дистрибутиви ділять мережевий простір віртуальної машини. Як саме доступ працює з `Ubuntu-24.04`, перевірено в [07_CONSUMERS.md](07_CONSUMERS.md).
-- API-ключі: хеші в `data/api/keys.sqlite`; сирі ключі лише в `.env` споживачів. Ключ має скоупи й ім'я споживача.
+- API-ключі: хеші в `ops.api_key` (Postgres); сирі ключі лише в `.env` споживачів. Ключ має скоупи й ім'я споживача.
 - Секрети (`NEO4J_PASSWORD`, `GEMINI_API_KEY`, OpenAlex `mailto`) беруться з `.env` через `pydantic-settings`. Дефолти в коді заборонені. Пароль Neo4j `python2024` досі записаний у `docker-compose.yml` і в CLAUDE.md (пункт 0.5 ремедіації — ротація — відкритий).
 - Сирий Cypher дозволений лише для `admin`, лише `READ_ACCESS` і з таймаутом. Більше ніде рядки від клієнта не потрапляють у Cypher, тільки параметри.
 - Шляхи файлів у відповідях — відносні від кореня даних. Завантаження (`/ingest/upload`): лише `application/pdf`, ≤ 100 MB, перевірка сигнатури `%PDF`, SHA-256 до запису.
@@ -244,4 +244,4 @@ CREATE TABLE paper_identity (
 - Етап 1 — процеси на хості (venv), сховища в docker. GPU, Ray і локальні 75 GB даних простіше обслуговувати без контейнера для api/worker.
 - `scripts/ghai_up.sh` / `ghai_down.sh`: `docker compose up -d neo4j` → `chroma run …` → `uvicorn …` → `python -m src.jobs.worker`. Зупинка йде у зворотному порядку, і Chroma зупиняється коректно (див. A1).
 - Пізніше — `systemd --user` юніти (якщо в WSL увімкнено systemd) з `Restart=on-failure`.
-- Бекап: `jobs.sqlite`, `identity.sqlite`, `keys.sqlite`, `data/cache/*.db` — щодня. Neo4j — `neo4j-admin database dump` перед кожним `rebuild_graph`. Chroma — копія `.chromadb` перед `rebuild_vectors`. Реіндекс іде в нову колекцію з атомарним перемиканням `COLLECTION_NAME`.
+- Бекап: `pg_dump -Fc ghai` (увесь шар правди: ідентичність, бібліографія, тези, докази, задачі, ключі) — щодня. Neo4j — `neo4j-admin database dump` перед кожним `rebuild_graph`. Chroma — копія `.chromadb` перед `rebuild_vectors`. Реіндекс іде в нову колекцію з атомарним перемиканням `COLLECTION_NAME`.
