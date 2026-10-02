@@ -101,3 +101,24 @@ def test_cites_rows_come_from_nested_layout(enriched_dir):
     assert by_title["An integrated evaluation"]["target_doi"] == "10.5194/nhess-19-2405-2019"
     assert by_title["A title-only reference"]["target_doi"] is None
     assert all(r["source_paper_id"] == "paper_a" for r in rows)
+
+
+def test_entity_edges_carry_raw_evidence_role_and_page():
+    """normalized_entities hold only the canonical id and raw name; the edge must take the
+    surface form, evidence, role and PDF page from the raw extraction (metrics by `type`)."""
+    from src.graph.graph_loader import _edge_row, _raw_index
+    doc = {"entities": {
+        "methods": [{"name": "HEC-HMS", "role": "used", "final_score": 0.97, "evidence": "We ran HEC-HMS for the basin.",
+                     "alt_evidence": "HEC-HMS was calibrated.", "provenance": {"page": 4, "section": "Methods"}}],
+        "metrics": [{"type": "RMSE", "name": "Root Mean Square Error", "evidence": {"snippet": "RMSE of 1.2 m"}},
+                    {"type": "RMSE", "name": "Root Mean Square Error", "evidence": {"snippet": "RMSE of 0.8 m"}}]}}
+    index = _raw_index(doc)
+    m = _edge_row("p1", {"raw_name": "HEC-HMS", "canonical_id": "method.hec_hms", "confidence": 1.0},
+                  index[("methods", "HEC-HMS")])
+    assert (m["surface_form"], m["role"], m["page"], m["section"], m["extraction_score"]) == (
+        "HEC-HMS", "used", 4, "Methods", 0.97)
+    assert m["evidence"] == ["We ran HEC-HMS for the basin.", "HEC-HMS was calibrated."]
+    r = _edge_row("p1", {"raw_name": "RMSE", "canonical_id": "metric.rmse"}, index[("metrics", "RMSE")])
+    assert r["evidence"] == ["RMSE of 1.2 m", "RMSE of 0.8 m"] and r["mentions"] == 2 and r["role"] is None
+    bare = _edge_row("p1", {"raw_name": "X", "canonical_id": "method.x"}, [])
+    assert bare["evidence"] == [] and bare["page"] is None and bare["surface_form"] == "X"

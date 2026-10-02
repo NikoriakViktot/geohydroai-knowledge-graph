@@ -365,3 +365,137 @@ class DoiVerifyResponse(_Contract):
     results: list[DoiVerifyResult]
     summary: dict[str, int]
     provenance: Provenance
+
+
+# ── graph (Neo4j projection, read-only; docs/api/endpoints/graph.md) ───────────
+
+class GraphPaper(_Contract):
+    paper_id: str | None = Field(default=None, description="null for a cited work outside the corpus")
+    doi: str | None = None
+    title: str | None = None
+    year: int | None = None
+    venue: str | None = None
+    identity_status: str | None = Field(default=None, description="null for reference stubs")
+    is_reference_stub: bool = False
+    cited_by_count: int | None = None
+    openalex_id: str | None = None
+
+
+class GraphPaperHead(GraphPaper):
+    study_type: str | None = None
+    primary_country: str | None = None
+
+
+class GraphEntityEdge(_Contract):
+    canonical_id: str | None = None
+    display_name: str | None = None
+    family: str | None = None
+    confidence: float | None = None
+    role: Literal["used", "mentioned"] | None = Field(default=None, description="null when the extractor gave none")
+    surface_form: str | None = None
+    evidence: list[str] | None = None
+    mention_in_evidence: bool | None = Field(default=None, description="the evidence contains the surface form; "
+                                                                       "false means the snippet cannot support the edge")
+    page: int | None = None
+    section: str | None = None
+
+
+class GraphAuthor(_Contract):
+    name: str | None = None
+    orcid: str | None = None
+    position: str | None = None
+    corresponding: bool | None = None
+    institutions: list[str] = Field(default=[], description="all affiliations known for the author, not per paper")
+
+
+class GraphTopic(_Contract):
+    topic_id: str | None = None
+    name: str | None = None
+    score: float | None = None
+
+
+class GraphFact(_Contract):
+    fact_id: str | None = None
+    metric: str | None = None
+    canonical_id: str | None = None
+    value: float | None = None
+    raw_cell: str | None = None
+    table_label: str | None = None
+    row_context: str | None = None
+    col_header: str | None = None
+    page: int | None = None
+    confidence: float | None = None
+
+
+class GraphPaperResponse(_Contract):
+    paper: GraphPaperHead
+    authors: list[GraphAuthor] | None = None
+    methods: list[GraphEntityEdge] | None = None
+    sensors: list[GraphEntityEdge] | None = None
+    metrics: list[GraphEntityEdge] | None = None
+    topics: list[GraphTopic] | None = None
+    countries: list[str] | None = None
+    flood_events: list[dict] | None = None
+    facts: list[GraphFact] | None = None
+    counts: dict[str, int]
+    provenance: Provenance
+
+
+class CitationItem(GraphPaper):
+    direction: Literal["out", "in"]
+
+
+class CitationsResponse(_Contract):
+    items: list[CitationItem]
+    next_cursor: str | None = None
+    counts: dict[str, int]
+    provenance: Provenance
+
+
+class EntityPaperItem(GraphPaper):
+    confidence: float | None = None
+    role: Literal["used", "mentioned"] | None = None
+    surface_form: str | None = None
+    evidence: list[str] | None = None
+    mention_in_evidence: bool | None = None
+    page: int | None = None
+    score: float | None = Field(default=None, description="topic score (HAS_TOPIC only)")
+
+
+class EntityPapersResponse(_Contract):
+    items: list[EntityPaperItem]
+    count: int = Field(description="all matching papers, not just this page")
+    next_cursor: str | None = None
+    coverage: dict[str, int]
+    provenance: Provenance
+
+
+class NamedQueryInfo(_Contract):
+    name: str
+    description: str
+    params: dict[str, dict]
+    returns: list[str]
+    one_of: list[str] = []
+
+
+class NamedQueriesResponse(_Contract):
+    queries: list[NamedQueryInfo]
+    provenance: Provenance
+
+
+class GraphQueryRequest(_Contract):
+    params: dict = {}
+    limit: int = Field(default=100, ge=1, le=1000)
+
+
+class CypherRequest(_Contract):
+    query: str = Field(min_length=1, max_length=20_000)
+    params: dict = {}
+    limit: int = Field(default=1000, ge=1, le=1000)
+
+
+class TabularResponse(_Contract):
+    columns: list[str]
+    rows: list[list]
+    truncated: bool
+    provenance: Provenance

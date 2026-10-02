@@ -13,7 +13,7 @@ from src.api import docs_loader
 from src.api.app import create_app
 from src.api.deps import Principal, hash_key
 from src.contracts.identity import PaperIdentity
-from src.services import fulltext, identity_store, thesis_validation
+from src.services import fulltext, graph_read, identity_store, thesis_validation
 
 READ_KEY, NOSCOPE_KEY = "test-read-key", "test-noscope-key"
 
@@ -54,6 +54,8 @@ def client(monkeypatch):
     monkeypatch.setattr(identity_store, "resolve", fake_resolve)
     monkeypatch.setattr(fulltext, "tei_path", lambda paper_id: None)
     monkeypatch.setattr(thesis_validation, "project_theses", lambda project_id: (None, "not checked in tests"))
+    monkeypatch.setattr(graph_read, "run_read", lambda query, params=None, limit=1000: ([], [], False))
+    monkeypatch.setattr(graph_read, "explain_type", lambda query, params: "r")
     return TestClient(create_app(key_store=StubKeys(), manifest=StubManifest()))
 
 

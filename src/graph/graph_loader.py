@@ -467,31 +467,66 @@ def _iter_enriched(limit: int | None = None) -> Iterator[tuple[str, dict]]:
             log.warning("Skipping %s: %s", f.name, exc)
 
 
-def _edge_row(paper_id: str, ent: dict) -> dict:
-    """
-    Build a full provenance-carrying edge row from a normalized entity dict.
-    Fields beyond canonical_id/confidence are written to Neo4j relationship
-    properties for trust-aware graph queries.
+_MAX_EVIDENCE = 3
 
-    Coordinate provenance (page, section, bbox) is extracted from
-    entity["provenance"] when present — set by entity_grounder.py.
+
+def _raw_index(doc: dict) -> dict[tuple[str, str], list[dict]]:
+    """(source field, surface name) → raw extracted entities of one paper.
+
+    normalized_entities carry only the canonical id and the raw name; the surface form,
+    evidence snippets, role (used / mentioned) and PDF coordinates live on the raw
+    entities in doc["entities"][field], indexed by `name` and by `type` (a metric's
+    raw_name is its type, e.g. "RMSE", while its name is "Root Mean Square Error")."""
+    index: dict[tuple[str, str], list[dict]] = {}
+    for field, items in (doc.get("entities") or {}).items():
+        if not isinstance(items, list):
+            continue
+        for raw in items:
+            if isinstance(raw, dict):
+                for name in {raw.get("name"), raw.get("type")} - {None, ""}:
+                    index.setdefault((field, str(name)), []).append(raw)
+    return index
+
+
+def _evidence(raws: list[dict]) -> list[str]:
+    out: list[str] = []
+    for raw in raws:
+        for value in (raw.get("evidence"), raw.get("alt_evidence")):
+            text = value.get("snippet") if isinstance(value, dict) else value
+            if isinstance(text, str) and text.strip() and text.strip() not in out:
+                out.append(text.strip())
+    return out[:_MAX_EVIDENCE]
+
+
+def _edge_row(paper_id: str, ent: dict, raws: list[dict] | None = None) -> dict:
     """
-    prov = ent.get("provenance") or {}
+    Build a full provenance-carrying edge row from a normalized entity dict and the raw
+    extractions it was normalised from (same paper, same field, same surface name).
+
+    Coordinate provenance (page, section, bbox) comes from the first raw extraction that
+    has it (set by entity_grounder.py), else from the normalized entity.
+    """
+    raws = raws or []
+    first = raws[0] if raws else {}
+    prov = next((r.get("provenance") for r in raws if r.get("provenance")), None) or ent.get("provenance") or {}
+    roles = {r.get("role") for r in raws if r.get("role")}
     return {
         "paper_id":          paper_id,
         "canonical_id":      ent.get("canonical_id", ""),
         "confidence":        float(ent.get("edge_confidence") or ent.get("confidence", 1.0)),
-        "surface_form":      ent.get("surface_form", ent.get("name", "")),
-        "extraction_score":  float(ent.get("extraction_score", ent.get("confidence", 1.0))),
+        "surface_form":      ent.get("surface_form") or ent.get("raw_name") or first.get("name") or ent.get("name", ""),
+        "extraction_score":  float(first.get("final_score", ent.get("extraction_score", ent.get("confidence", 1.0)))),
         "disambig_conf":     float(ent.get("disambig_confidence", 1.0)),
-        "evidence":          ent.get("disambig_evidence") or [],
+        "evidence":          _evidence(raws) or list(ent.get("disambig_evidence") or []),
+        "role":              "used" if "used" in roles else (sorted(roles)[0] if roles else None),
+        "mentions":          len(raws),
         "resolver_version":  ent.get("resolver_version", ""),
         "ontology_version":  ent.get("ontology_version", ""),
         # PDF grounding
-        "page":              prov.get("page", 0),
-        "section":           prov.get("section", ""),
+        "page":              prov.get("page") or None,
+        "section":           prov.get("section") or None,
         "bbox":              prov.get("bbox"),          # [x, y, w, h] or None
-        "coord_match":       prov.get("match", ""),    # "exact" | "partial" | ""
+        "coord_match":       prov.get("match") or None,  # "exact" | "partial"
     }
 
 
@@ -519,27 +554,31 @@ def load_entity_edges_from_enriched(
     n = 0
     for pid, doc in _iter_enriched(limit):
         ne = doc.get("normalized_entities", {})
+        raw = _raw_index(doc)
+
+        def raws(ent: dict, field: str) -> list[dict]:
+            return raw.get((ent.get("source_field") or field, str(ent.get("raw_name") or "")), [])
 
         # Methods
         for ent in ne.get("methods", []):
             cid = ent.get("canonical_id")
             if cid and (pid, cid) not in seen_pm:
                 seen_pm.add((pid, cid))
-                pm_edges.append(_edge_row(pid, ent))
+                pm_edges.append(_edge_row(pid, ent, raws(ent, "methods")))
 
         # Satellites → mapped to Sensor nodes (canonical_id is sensor.*)
         for ent in ne.get("satellites", []):
             cid = ent.get("canonical_id")
             if cid and cid.startswith("sensor.") and (pid, cid) not in seen_ps:
                 seen_ps.add((pid, cid))
-                ps_edges.append(_edge_row(pid, ent))
+                ps_edges.append(_edge_row(pid, ent, raws(ent, "satellites")))
 
         # Metrics
         for ent in ne.get("metrics", []):
             cid = ent.get("canonical_id")
             if cid and (pid, cid) not in seen_pmet:
                 seen_pmet.add((pid, cid))
-                pmet_edges.append(_edge_row(pid, ent))
+                pmet_edges.append(_edge_row(pid, ent, raws(ent, "metrics")))
 
         # Author → Institution (from openalex)
         oa = doc.get("openalex") or {}

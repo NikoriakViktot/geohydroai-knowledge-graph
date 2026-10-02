@@ -1,0 +1,30 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "maxLength": 20000,
+      "minLength": 1,
+      "title": "Query",
+      "type": "string"
+    },
+    "params": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Params",
+      "type": "object"
+    },
+    "limit": {
+      "default": 1000,
+      "maximum": 1000,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "query"
+  ],
+  "title": "CypherRequest",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/CypherRequest.v1.json"
+}

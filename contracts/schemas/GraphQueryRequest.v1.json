@@ -1,0 +1,21 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "params": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Params",
+      "type": "object"
+    },
+    "limit": {
+      "default": 100,
+      "maximum": 1000,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    }
+  },
+  "title": "GraphQueryRequest",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/GraphQueryRequest.v1.json"
+}

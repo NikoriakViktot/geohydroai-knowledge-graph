@@ -190,6 +190,11 @@ class GraphWriter:
             e.disambig_conf     = r.disambig_conf,
             e.evidence          = r.evidence,
             e.surface_form      = r.surface_form,
+            e.role              = r.role,
+            e.mentions          = r.mentions,
+            e.page              = r.page,
+            e.section           = r.section,
+            e.coord_match       = r.coord_match,
             e.resolver_version  = r.resolver_version,
             e.ontology_version  = r.ontology_version
         """
@@ -206,6 +211,11 @@ class GraphWriter:
             e.disambig_conf     = r.disambig_conf,
             e.evidence          = r.evidence,
             e.surface_form      = r.surface_form,
+            e.role              = r.role,
+            e.mentions          = r.mentions,
+            e.page              = r.page,
+            e.section           = r.section,
+            e.coord_match       = r.coord_match,
             e.resolver_version  = r.resolver_version,
             e.ontology_version  = r.ontology_version
         """
@@ -222,6 +232,11 @@ class GraphWriter:
             e.disambig_conf     = r.disambig_conf,
             e.evidence          = r.evidence,
             e.surface_form      = r.surface_form,
+            e.role              = r.role,
+            e.mentions          = r.mentions,
+            e.page              = r.page,
+            e.section           = r.section,
+            e.coord_match       = r.coord_match,
             e.resolver_version  = r.resolver_version,
             e.ontology_version  = r.ontology_version
         """

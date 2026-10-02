@@ -61,6 +61,10 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                    help="Take Paper identity (canonical DOI, duplicates, non-papers) from the "
                         "PostgreSQL layer of truth (default). 'none' builds from parquet alone "
                         "and must be asked for explicitly: there is no silent fallback.")
+    p.add_argument("--only", choices=["entity-edges"], default=None,
+                   help="Re-write one step on the existing graph instead of the full build: "
+                        "'entity-edges' MERGEs the Paper→Method/Sensor/Metric edges again, "
+                        "refreshing their properties (evidence, role, page) in place.")
     p.add_argument("--log-level", default="INFO",
                    choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     return p.parse_args(argv)
@@ -291,6 +295,27 @@ def build(args: argparse.Namespace) -> None:
 
 # ── Entry point ────────────────────────────────────────────────────────────────
 
+def entity_edges_only(args: argparse.Namespace) -> None:
+    """Refresh the Paper→Method/Sensor/Metric edges of an existing graph (MERGE + SET only)."""
+    t = time.perf_counter()
+    with GraphWriter(uri=args.uri, user=args.user, password=args.password) as gw:
+        if not gw.verify_connection():
+            log.error("Cannot reach Neo4j at %s — aborting.", args.uri)
+            sys.exit(1)
+        excluded: set[str] = set()
+        if args.identity == "postgres":
+            identity = loader.load_identity_from_postgres()
+            excluded = {pid for pid, r in identity.items()
+                        if r["identity_status"] in loader.EXCLUDED_IDENTITY_STATUSES}
+        pm, ps, pmet, _ai = loader.load_entity_edges_from_enriched(limit=args.limit)
+        pm, ps, pmet = (loader.drop_excluded(x, excluded) for x in (pm, ps, pmet))
+        log.info("paper→method=%d  paper→sensor=%d  paper→metric=%d", len(pm), len(ps), len(pmet))
+        gw.write_paper_method_edges(pm)
+        gw.write_paper_sensor_edges(ps)
+        gw.write_paper_metric_edges(pmet)
+    log.info("entity edges refreshed (%s)", _elapsed(t))
+
+
 def main(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
     logging.basicConfig(
@@ -298,6 +323,9 @@ def main(argv: list[str] | None = None) -> None:
         format="%(asctime)s  %(levelname)-8s  %(name)s  %(message)s",
         datefmt="%H:%M:%S",
     )
+    if args.only == "entity-edges":
+        entity_edges_only(args)
+        return
     build(args)
 
 
