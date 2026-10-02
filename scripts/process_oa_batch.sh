@@ -4,7 +4,8 @@
 #
 # The pipeline writes Chroma; the API holds the same Chroma directory open, and ChromaDB 1.5.9 must
 # have one writer and a fresh reload afterwards, so the API is stopped for the pipeline stage and
-# restarted (also on failure). GROBID is stopped first: it needs 5.3 GB.
+# restarted (also on failure). GROBID is stopped first: it needs 5.3 GB. Nougat runs before the
+# pipeline (which reads regions.parquet) while the API is still up.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 RUN=${1:?run directory, e.g. data/acquisition/oa_20261002}
@@ -20,8 +21,26 @@ n=$(find "$RUN/xml_new" -name '*.tei.xml' | wc -l)
 step "batch $RUN: $n TEI files"
 [ "$n" -gt 0 ] || { echo "nothing to process"; exit 0; }
 
-step "stop GROBID and the API"
+step "stop GROBID (5.3 GB RAM; TensorFlow holds most of the GPU)"
 docker stop grobid >/dev/null 2>&1 || true
+
+step "Nougat regions (formulas, tables, figure text → data/sodb/<id>/regions.parquet; the API stays up)"
+TOKENIZERS_PARALLELISM=false NOUGAT_GPU_FRACTION=1.0 \
+  $PY -m src.ingestion.nougat_region_pipeline --pdf-dir data/literature/pdf_oa --workers "${NOUGAT_WORKERS:-3}" \
+  || echo "Nougat failed; the pipeline continues on GROBID text alone"
+$PY - <<'PY'
+import glob, pandas as pd
+n = empty = 0
+for f in glob.glob("data/sodb/*/regions.parquet"):
+    d = pd.read_parquet(f, columns=["source_parser", "nougat_text", "nougat_latex", "created_at"])
+    if d.empty or str(d["created_at"].max()) < "2026-10-02":     # zero-row files: papers with no regions
+        continue
+    n += 1
+    empty += int(((d["nougat_text"].fillna("") + d["nougat_latex"].fillna("")).str.len() == 0).all())
+print(f"Nougat check: {n} papers with new regions, {empty} with every region empty")
+PY
+
+step "stop the API (one Chroma writer)"
 systemctl --user stop ghai-api
 trap 'systemctl --user start ghai-api; echo "API restarted"' EXIT
 

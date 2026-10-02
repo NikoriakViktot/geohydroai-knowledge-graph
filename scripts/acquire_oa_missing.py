@@ -325,6 +325,9 @@ def more_sources(run: Path, delay: float) -> None:
 # ── GROBID ─────────────────────────────────────────────────────────────────────
 
 def grobid_all(run: Path) -> None:
+    # Header consolidation blocks on an unreachable CrossRef until GROBID's own timeout (180 s client
+    # timeouts measured 2026-10-02); the metadata of acquired works come from OpenAlex anyway.
+    os.environ.setdefault("GROBID_CONSOLIDATE_HEADER", "0")
     from src.ingestion.grobid_client import GROBIDClient
     got = [r for r in read_csv(run / "downloads.csv") if r["status"] == "ok"]
     links = run / "xml_new"
