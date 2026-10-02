@@ -36,6 +36,7 @@ from src.extraction.regex_extractor import (
     _OPERATIONAL_KW, _DL_KW, _ML_KW,
     _METHODS_RULES,
 )
+from src.extraction.numbers import normalize_minus, parse_number, to_ratio
 from src.extraction.section_parser import parse_document_sections, describe_parsed
 
 logger = logging.getLogger(__name__)
@@ -120,6 +121,7 @@ _NRT_RE = re.compile(
 
 def _literal_in_text(value: float, text: str) -> bool:
     """Return True if *value* appears literally in *text* in at least one form."""
+    text = normalize_minus(text)  # "−0.27" (U+2212) is the same literal as "-0.27"
     for raw in [f"{value:.4f}", f"{value:.3f}", f"{value:.2f}",
                 f"{value * 100:.2f}", f"{value * 100:.1f}", f"{value * 100:.0f}"]:
         cleaned = raw.rstrip("0").rstrip(".")
@@ -130,10 +132,11 @@ def _literal_in_text(value: float, text: str) -> bool:
     return False
 
 
-def _parse_float(raw: str) -> float:
-    """Normalise 0–100 scale to 0–1."""
-    n = float(raw.replace(",", "."))
-    return round(n / 100.0 if n > 1.0 else n, 4)
+def _parse_float(raw: str, lo: float = 0.0, hi: float = 1.0) -> float:
+    """Parse a metric value; 0–100 → 0–1 only for bounded ratio metrics (OA, F1,
+    IoU, kappa). NSE/KGE/R² (lo = -inf) are never rescaled: NSE 1.7 stays 1.7
+    and is rejected by the range check instead of becoming 0.017."""
+    return round(to_ratio(parse_number(raw), lo, hi), 4)
 
 
 def _snippet(text: str, start: int, end: int, context: int = 80) -> str:
@@ -312,8 +315,8 @@ def _scan_metric_with_snippet(
             groups = [g for g in m.groups() if g is not None]
             if len(groups) == 2:
                 try:
-                    a = _parse_float(groups[0])
-                    b = _parse_float(groups[1])
+                    a = _parse_float(groups[0], lo, hi)
+                    b = _parse_float(groups[1], lo, hi)
                     if lo <= a <= b <= hi:
                         val = round(mean([a, b]), 4)
                         if _literal_in_text(a, text) and _literal_in_text(b, text):
@@ -322,7 +325,7 @@ def _scan_metric_with_snippet(
                     continue
             elif len(groups) == 1:
                 try:
-                    val = _parse_float(groups[0])
+                    val = _parse_float(groups[0], lo, hi)
                     if lo <= val <= hi and _literal_in_text(val, text):
                         return val, _snippet(text, m.start(), m.end())
                 except ValueError:
@@ -444,7 +447,7 @@ def _scan_raw_metric(
             groups = [g for g in m.groups() if g is not None]
             if groups:
                 try:
-                    val = float(groups[0].replace(",", "."))
+                    val = parse_number(groups[0])
                     if val >= 0:
                         from src.extraction.metric_ontology import normalize_unit
                         unit = normalize_unit(groups[1] if len(groups) > 1 else None)

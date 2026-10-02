@@ -43,6 +43,8 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from src.extraction.numbers import parse_number
+
 log = logging.getLogger("geohydro.extraction.table_extractor")
 
 _TEI_NS = "http://www.tei-c.org/ns/1.0"
@@ -254,9 +256,9 @@ def _split_unit(text: str) -> tuple[str, str | None]:
 def _parse_float(text: str | None) -> float | None:
     if text is None:
         return None
-    t = text.strip().rstrip("%").replace(",", ".")
     try:
-        return float(t)
+        # Unicode minus, thin spaces, decimal comma and a trailing % are accepted.
+        return parse_number(text)
     except ValueError:
         return None
 

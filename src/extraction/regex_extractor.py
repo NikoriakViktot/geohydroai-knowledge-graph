@@ -19,6 +19,7 @@ import re
 from statistics import mean
 
 from src.extraction.base import BaseExtractor, ExtractionResult
+from src.extraction.numbers import SIGNED_NUMBER, parse_number, to_ratio
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +31,9 @@ def _r(pattern: str) -> re.Pattern:
 
 
 # Sign-aware (Фаза 2.1): NSE/Kappa/KGE/R²/PBIAS бувають від'ємними —
-# "NSE = -0.27" має витягуватись як -0.27, а не губитись.
-_NUM   = r"(-?[\d]+\.?[\d]*)"
+# "NSE = -0.27" має витягуватись як -0.27, а не губитись. Журнали часто
+# друкують мінус як U+2212 ("−0.27"), тому знак береться з numbers.SIGNED_NUMBER.
+_NUM   = SIGNED_NUMBER
 _PCT   = r"%?"
 _SEP   = r"\s*(?:[=:>]|of|was|is|at|:|=)?\s*"
 _RANGE = rf"{_NUM}\s*[-–]\s*{_NUM}"
@@ -563,9 +565,9 @@ def _collect_evidence(text: str) -> list[str]:
 
 # ── Metric parsing ────────────────────────────────────────────────────────────
 
-def _parse_number(raw: str) -> float:
-    num = float(raw.replace(",", "."))
-    return num / 100.0 if num > 1.0 else num
+def _parse_number(raw: str, lo: float = 0.0, hi: float = 1.0) -> float:
+    """Parse a metric value; percentages become ratios only for bounded metrics."""
+    return to_ratio(parse_number(raw), lo, hi)
 
 
 def _extract_metric(
@@ -585,14 +587,14 @@ def _extract_metric(
             groups = [g for g in m.groups() if g is not None]
             if len(groups) == 2:
                 try:
-                    a, b = _parse_number(groups[0]), _parse_number(groups[1])
+                    a, b = _parse_number(groups[0], lo, hi), _parse_number(groups[1], lo, hi)
                     if lo <= a <= b <= hi:
                         return round(mean([a, b]), 4)
                 except ValueError:
                     continue
             elif len(groups) == 1:
                 try:
-                    val = _parse_number(groups[0])
+                    val = _parse_number(groups[0], lo, hi)
                     if lo <= val <= hi:
                         return round(val, 4)
                 except ValueError:
