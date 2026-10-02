@@ -103,10 +103,12 @@ All errors are `application/problem+json` ([SCHEMAS.md#problem](SCHEMAS.md#probl
 | 400 | `BAD_REQUEST` | malformed JSON, unknown query parameter | fix the request |
 | 401 | `UNAUTHENTICATED` | missing or invalid `X-API-Key` | stop; ask the operator for a key |
 | 403 | `FORBIDDEN_SCOPE` | key lacks the scope | stop; do not retry with another key |
+| 403 | `INVALID_LINK` | a `/files/{token}` link this server did not sign, or whose file is gone | ask `GET /locate` for a new link |
 | 404 | `NOT_FOUND` | unknown job, schema, named query | check the id |
 | 404 | `NOT_IN_CORPUS` | paper/DOI not in the corpus | consider `POST /discovery/search` or `POST /acquire` |
 | 409 | `GATE_NOT_PASSED` | a gap/novelty statement was requested but the acceptance gate is not passed | report `RETRIEVAL_UNVALIDATED`; never claim a gap |
 | 409 | `CONFLICT` | state conflict (e.g. candidate already ingested) | re-read the resource |
+| 410 | `LINK_EXPIRED` | a `/files/{token}` link older than 12 hours | ask `GET /locate` for a new link |
 | 413 | `PAYLOAD_TOO_LARGE` | upload > 100 MB, batch above its limit | split the request |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` | upload is not `application/pdf` | — |
 | 422 | `VALIDATION_FAILED` | body violates the contract; `errors[]` lists `{loc, msg, type}` | fix the data; nothing is coerced silently |

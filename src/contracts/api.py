@@ -722,6 +722,8 @@ class FileLocation(_Contract):
     windows_path: str | None = Field(default=None, description="\\\\wsl.localhost\\<distro>\\… when the API runs in WSL")
     exists: bool
     status: str = Field(description="ok, or e.g. duplicate_copy")
+    open_url: str | None = Field(default=None, description="signed link that opens the PDF in a browser for 12 hours "
+                                                          "(GET /v1/files/{token}); for people, not for agents")
 
 
 class OALocation(_Contract):

@@ -2,7 +2,7 @@
 
     python -m src.services.locate 10.1016/j.isprsjprs.2019.10.017
     python -m src.services.locate https://www.sciencedirect.com/science/article/pii/S0924271619302485 --open
-    scripts/pdf <doi|url|arXiv id|paper_id> [...] [--json] [--open]
+    scripts/pdf <doi|url|arXiv id|paper_id> [...] [--json] [--open | --browser]
 
 The query may be a DOI (any form), a publisher URL with the DOI in its path, a
 ScienceDirect PII URL (DOI via Crossref's alternative-id), an arXiv id or URL, or a
@@ -271,11 +271,58 @@ def _open(r: dict) -> None:
         subprocess.run([opener, target], check=False)
 
 
+def _ghai_env() -> tuple[str, str | None]:
+    """GHAI_API_URL and GHAI_API_KEY from the environment, else from ~/.config/ghai/env."""
+    url, key = os.environ.get("GHAI_API_URL"), os.environ.get("GHAI_API_KEY")
+    conf = Path.home() / ".config" / "ghai" / "env"
+    if (not url or not key) and conf.is_file():
+        for line in conf.read_text().splitlines():
+            m = re.match(r"\s*(?:export\s+)?(GHAI_API_URL|GHAI_API_KEY)=(.*)", line)
+            if m and m.group(1) == "GHAI_API_URL":
+                url = url or m.group(2).strip().strip("'\"")
+            elif m:
+                key = key or m.group(2).strip().strip("'\"")
+    return (url or "http://127.0.0.1:8090/v1").rstrip("/"), key
+
+
+def _open_in_browser(query: str) -> bool:
+    """Ask the running API for a signed link to the local PDF and open it in the default browser."""
+    import shutil
+    import subprocess
+
+    import httpx
+    url, key = _ghai_env()
+    if not key:
+        print("  BROWSER  no API key (GHAI_API_KEY or ~/.config/ghai/env)")
+        return False
+    try:
+        r = httpx.get(f"{url}/locate", params={"q": query}, headers={"X-API-Key": key}, timeout=60)
+    except httpx.HTTPError:
+        print(f"  BROWSER  the API at {url} is not running (scripts/ghai_api.sh)")
+        return False
+    if r.status_code != 200:
+        print(f"  BROWSER  {r.status_code}: {r.json().get('detail', '') if r.headers.get('content-type', '').startswith('application') else ''}")
+        return False
+    link = next((f.get("open_url") for f in r.json().get("files", []) if f.get("open_url")), None)
+    if not link:
+        print("  BROWSER  no local PDF to open")
+        return False
+    opener = shutil.which("explorer.exe") or shutil.which("wslview") or shutil.which("xdg-open")
+    if not opener:
+        print(f"  BROWSER  open this link: {link}")
+        return True
+    subprocess.run([opener, link], check=False)
+    print("  BROWSER  opened the local PDF in the default browser")
+    return True
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Find a paper's PDF: corpus files and legal open-access copies.")
     ap.add_argument("queries", nargs="+", help="DOI, doi.org or publisher URL, arXiv id, or corpus paper_id")
     ap.add_argument("--json", action="store_true", help="print JSON")
-    ap.add_argument("--open", action="store_true", help="open the local PDF or the best open copy")
+    ap.add_argument("--open", action="store_true", help="open the local PDF (default PDF app) or the best open copy")
+    ap.add_argument("--browser", action="store_true",
+                    help="open the local PDF in the browser through the running API (signed link)")
     ap.add_argument("--no-fetch", action="store_true", help="never fetch publisher pages to find a DOI")
     args = ap.parse_args(argv)
     results = [locate(q, allow_fetch=not args.no_fetch) for q in args.queries]
@@ -284,7 +331,11 @@ def main(argv: list[str] | None = None) -> int:
     else:
         for r in results:
             _print(r)
-    if args.open:
+    if args.browser:
+        for q, r in zip(args.queries, results):
+            if not _open_in_browser(q):
+                _open(r)
+    elif args.open:
         for r in results:
             _open(r)
     return 0 if all(r["doi"] or r["in_corpus"] for r in results) else 1

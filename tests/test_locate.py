@@ -75,6 +75,9 @@ def test_endpoint(monkeypatch, tmp_path):
     pdf.write_bytes(b"%PDF-1.4")
     monkeypatch.setattr(identity_store, "resolve", lambda **kw: identity_store.Resolved("alias", 1.0, paper, None)
                         if paper.doi in (kw.get("doi"),) or kw.get("paper_id") == "liang2020" else None)
+    from src.services import filelinks
+    monkeypatch.setattr(filelinks, "_SECRET", b"test-secret")
+    monkeypatch.setattr(filelinks, "relative", lambda path: "data/literature/pdf/liang2020.pdf")
     monkeypatch.setattr(locate, "corpus_files", lambda ids: [{"paper_id": "liang2020", "kind": "pdf", "path": str(pdf),
                                                               "windows_path": None, "exists": True, "status": "ok"}])
     monkeypatch.setattr(doi_service, "lookup", lambda d, refresh=False: doi_service.Registries(
@@ -86,6 +89,44 @@ def test_endpoint(monkeypatch, tmp_path):
     body = client.get("/v1/locate", headers={"X-API-Key": READ_KEY}, params={"q": "liang2020"}).json()
     assert body["doi"] == paper.doi and body["in_corpus"]["paper_id"] == "liang2020"
     assert body["files"][0]["exists"] and body["oa_status"] == "bronze" and body["best_pdf_url"] is None
+    assert body["files"][0]["open_url"].startswith("http://testserver/v1/files/")
     assert body["open_access"][0]["host"] == "publisher" and body["doi_url"].endswith(paper.doi)
     r = client.get("/v1/locate", headers={"X-API-Key": READ_KEY}, params={"q": "https://example.org/no-doi-here"})
     assert r.status_code == 404 and "give the DOI" in r.json()["detail"]
+
+
+def test_file_links_sign_verify_expire(tmp_path, monkeypatch):
+    from src.services import filelinks
+    monkeypatch.setattr(filelinks, "_SECRET", b"test-secret")
+    pdf = filelinks.ROOT / "data" / "literature" / "pdf"
+    target = next(pdf.glob("*.pdf"), None) if pdf.is_dir() else None
+    if target is None:
+        pytest.skip("no corpus PDF on this machine")
+    rel = filelinks.relative(target)
+    token = filelinks.sign(rel, ttl=60, now=1000)
+    assert filelinks.verify(token, now=1030) == target.resolve()
+    with pytest.raises(filelinks.ExpiredLink):
+        filelinks.verify(token, now=2000)
+    payload, mac = token.split(".")
+    with pytest.raises(filelinks.InvalidLink):
+        filelinks.verify(payload + "." + mac[:-2] + ("AA" if mac[-2:] != "AA" else "BB"), now=1030)
+    with pytest.raises(filelinks.InvalidLink):
+        filelinks.verify(filelinks.sign("../etc/passwd", now=1000), now=1030)
+    with pytest.raises(filelinks.InvalidLink):
+        filelinks.verify("garbage", now=1030)
+
+
+def test_file_route_serves_the_pdf_inline(monkeypatch, tmp_path):
+    from src.services import filelinks
+    monkeypatch.setattr(filelinks, "_SECRET", b"test-secret")
+    folder = filelinks.ROOT / "data" / "literature" / "pdf"
+    target = next(folder.glob("*.pdf"), None) if folder.is_dir() else None
+    if target is None:
+        pytest.skip("no corpus PDF on this machine")
+    client = TestClient(create_app(key_store=StubKeys(), manifest=StubManifest()))
+    r = client.get(f"/v1/files/{filelinks.sign(filelinks.relative(target))}")
+    assert r.status_code == 200 and r.headers["content-type"] == "application/pdf"
+    assert r.headers["content-disposition"].startswith("inline") and r.content[:4] == b"%PDF"
+    assert client.get("/v1/files/garbage").json()["code"] == "INVALID_LINK"
+    expired = filelinks.sign(filelinks.relative(target), ttl=-10)
+    assert client.get(f"/v1/files/{expired}").status_code == 410

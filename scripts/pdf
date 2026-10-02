@@ -2,6 +2,7 @@
 # Find a paper's PDF: the corpus copy (with its \\wsl.localhost path) and legal open-access copies.
 #   scripts/pdf 10.1016/j.isprsjprs.2019.10.017
 #   scripts/pdf https://www.sciencedirect.com/science/article/pii/S0924271619302485 --open
+#   scripts/pdf 10.1016/j.rse.2017.09.032 --browser     # the local PDF in the browser (needs the API running)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 exec .venv/bin/python -m src.services.locate "$@"

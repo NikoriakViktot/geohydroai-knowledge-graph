@@ -9,10 +9,11 @@ Docs: Swagger UI at /docs, OpenAPI at /v1/openapi.json, agent rules at
 from __future__ import annotations
 
 import uuid
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.api import docs_loader
@@ -75,6 +76,16 @@ def create_app(key_store: KeyStore | None = None, manifest: ManifestCache | None
                    search_router.router):
         app.include_router(router, prefix=PREFIX)
     app.include_router(planned_router.build_router(_implemented(app)), prefix=PREFIX)
+
+    @app.get("/ui", include_in_schema=False)
+    def ui() -> HTMLResponse:
+        """A small page for people: find a paper, open its local PDF in the browser."""
+        return HTMLResponse((Path(__file__).parent / "static" / "ui.html").read_text(encoding="utf-8"),
+                            headers={"Cache-Control": "no-cache"})
+
+    @app.get("/", include_in_schema=False)
+    def root() -> RedirectResponse:
+        return RedirectResponse("/ui")
 
     @app.get("/llms.txt", include_in_schema=False)
     def llms_txt() -> PlainTextResponse:

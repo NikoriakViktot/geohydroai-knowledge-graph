@@ -70,7 +70,29 @@ async def locate(request: Request,
         raise _store_error(exc) from exc
     if not body["doi"] and not body["in_corpus"]:
         raise Problem("NOT_FOUND", "; ".join(body["notes"]) or f"cannot resolve {q!r}")
+    from src.services import filelinks
+    base = str(request.base_url).rstrip("/")
+    for f in body["files"]:
+        if f["kind"] == "pdf" and f["exists"]:
+            f["open_url"] = f"{base}/v1/files/{filelinks.sign(filelinks.relative(f['path']))}"
     return LocateResponse(**body, provenance=provenance(request))
+
+
+@router.get("/files/{token}", **route_doc("GET", "/files/{token}"))
+async def file_link(token: str):
+    """A corpus PDF through a signed link from /locate (no API key: browsers cannot send one)."""
+    from fastapi.responses import FileResponse
+
+    from src.services import filelinks
+    try:
+        path = filelinks.verify(token)
+    except filelinks.ExpiredLink as exc:
+        raise Problem("LINK_EXPIRED", "this file link has expired; ask GET /v1/locate for a new one") from exc
+    except filelinks.InvalidLink as exc:
+        raise Problem("INVALID_LINK", str(exc)) from exc
+    media = "application/pdf" if path.suffix.lower() == ".pdf" else "application/octet-stream"
+    return FileResponse(path, media_type=media, filename=path.name, content_disposition_type="inline",
+                        headers={"Cache-Control": "private, max-age=3600", "X-Robots-Tag": "noindex"})
 
 
 @router.post("/manuscripts/citations", response_model=ManuscriptCitationsResponse,

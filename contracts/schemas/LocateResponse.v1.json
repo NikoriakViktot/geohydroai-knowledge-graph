@@ -41,6 +41,19 @@
           "description": "ok, or e.g. duplicate_copy",
           "title": "Status",
           "type": "string"
+        },
+        "open_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "signed link that opens the PDF in a browser for 12 hours (GET /v1/files/{token}); for people, not for agents",
+          "title": "Open Url"
         }
       },
       "required": [

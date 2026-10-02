@@ -55,7 +55,7 @@
 |---|---|
 | R-DATA-1 | Theses, atomic claims, bibliographies and graph bundles **MUST** be sent in the contract formats ([SCHEMAS.md](SCHEMAS.md), `GET /schemas/{name}`). Validate first (`POST /theses/validate`). On `422`, fix the source file; you **MUST NOT** reshape data to get past the validator. |
 | R-DATA-2 | Every write **MUST** carry your `project_id` (`floodstate-eo:paper3`, `kakhovka-terrain:paper2`, `swot-dnipro:paper1`, `kakhovka-report:v1`, `article1`). You **MUST NOT** write into another project's namespace. |
-| R-DATA-3 | You **MUST** acquire PDFs only through `POST /acquire` (open access) or upload files you are entitled to use (`POST /ingest/upload`). You **MUST NOT** fetch papers from shadow libraries or otherwise circumvent access controls. You **MUST NOT** ask for or reconstruct whole full texts. |
+| R-DATA-3 | You **MUST** acquire PDFs only through `POST /acquire` (open access) or upload files you are entitled to use (`POST /ingest/upload`). You **MUST NOT** fetch papers from shadow libraries or otherwise circumvent access controls. You **MUST NOT** ask for or reconstruct whole full texts, and **MUST NOT** fetch the file links (`files[].open_url`) that `GET /locate` returns: they are for a person to read the PDF in a browser. |
 | R-DATA-4 | You **MUST NOT** create article-specific folders, dumps or scripts in the knowledge repository. Results come from the API and are stored in your own repository. |
 | R-DATA-5 | Evidence is append-only. A correction is a new verdict (new run), never an edit or deletion of an old one. |
 

@@ -22,12 +22,26 @@ A paywalled work ends as `needs_manual`; a human may then upload a copy they are
   - The API never fetches other pages: give the DOI. The command line may read a publisher page's `citation_doi` tag; MDPI and some others refuse automated readers.
 - **Response 200**: `{"query", "doi", "resolved_from", "title", "year", "venue", "in_corpus": PaperRef?, "files": [{"paper_id", "kind": "pdf"|"tei", "path", "windows_path", "exists", "status"}], "is_oa", "oa_status", "best_pdf_url", "open_access": [{"url", "kind": "pdf"|"landing", "version", "license", "host", "source"}], "doi_url", "notes", "provenance"}`.
   - `windows_path` is the `\\wsl.localhost\<distro>\…` form, to open a corpus PDF from Windows.
+  - `open_url` (PDFs only) opens the PDF in a browser for 12 hours: `GET /files/{token}`. The page `/ui` uses it.
   - `open_access` lists PDFs first, then landing pages, by version: published, then accepted, then submitted.
   - Sources: OpenAlex locations, Unpaywall (contact from `OPEN_ALEX_EMAIL`, never stored) and arXiv. Answers are cached in `biblio.http_cache`.
 - **Errors**: `404 NOT_FOUND` when the query resolves to nothing (`detail` says why); `503`.
 - **Agent notes**:
   - `oa_status = bronze` means free to read on the publisher site without an open licence. Do not redistribute the file.
   - When nothing is open, the copy must come from the user's own access (`POST /ingest/upload`). Shadow libraries are never an option.
+
+---
+
+## `GET /files/{token}`
+- **Status**: implemented (2026-10-02) · **Scope**: none (signed link) · S
+- **Purpose**: open a corpus PDF in a browser. A browser cannot send `X-API-Key` when it follows a link, so `GET /locate` returns `files[].open_url = …/v1/files/<token>`. The token names the file and an expiry 12 hours ahead, signed with HMAC-SHA256.
+- **Response 200**: the PDF itself, `Content-Disposition: inline`, so the browser's own viewer shows it.
+- **Errors**: `403 INVALID_LINK` (not signed here, outside the corpus files, or the file is gone); `410 LINK_EXPIRED`.
+- **Security**:
+  - The server listens on 127.0.0.1 only.
+  - A link opens one file until it expires.
+  - The signing secret is `GHAI_FILE_SECRET`, or `~/.config/ghai/file_secret` (created once, mode 0600).
+- **Agent notes**: these links are for a person reading the paper. Agents do not fetch them (R-DATA-3); read passages through `/papers/{id}/text`.
 
 ---
 

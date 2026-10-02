@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пошук статті</title>
+<style>
+  :root { --bg: #f7f7f5; --card: #ffffff; --text: #1d1d1b; --muted: #5f5f5a; --line: #deded8;
+          --accent: #1f5fa8; --accent-text: #ffffff; --ok: #2e7d32; --warn: #a15c00; --bad: #b3261e; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161615; --card: #20201f; --text: #ececea; --muted: #a8a8a2; --line: #3a3a37;
+            --accent: #6aa5ea; --accent-text: #0e1a29; --ok: #7bc47f; --warn: #e0a54a; --bad: #f08a83; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: .95rem; }
+  form { display: flex; gap: 8px; flex-wrap: wrap; }
+  input[type=text], input[type=password] { flex: 1 1 320px; min-width: 0; padding: 10px 12px; font: inherit;
+         color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
+  button, .btn { padding: 10px 16px; font: inherit; border-radius: 8px; border: 1px solid var(--accent);
+         background: var(--accent); color: var(--accent-text); cursor: pointer; text-decoration: none;
+         display: inline-block; }
+  .btn.secondary, button.secondary { background: transparent; color: var(--accent); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-top: 16px; }
+  .title { font-weight: 600; font-size: 1.1rem; margin: 0 0 4px; }
+  .meta { color: var(--muted); font-size: .95rem; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+  code { font-size: .85rem; word-break: break-all; color: var(--muted); }
+  .ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+  ul { padding-left: 20px; margin: 6px 0; } li { margin: 4px 0; word-break: break-all; }
+  .keybox { margin-top: 12px; display: none; }
+  .small { font-size: .85rem; color: var(--muted); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Пошук статті</h1>
+  <p class="sub">DOI, посилання видавця (Wiley, Springer, ScienceDirect, IOP…), arXiv або paper_id корпусу.
+    Локальний PDF відкривається в браузері; відкриті копії — лише легальні (OpenAlex, Unpaywall, arXiv).</p>
+
+  <form id="search">
+    <label class="visually-hidden" for="q" hidden>Запит</label>
+    <input id="q" type="text" placeholder="10.1016/j.rse.2017.09.032" autocomplete="off" autofocus>
+    <button type="submit">Знайти</button>
+  </form>
+
+  <div class="keybox" id="keybox">
+    <form id="keyform" class="row">
+      <label for="key" class="small">API-ключ (лежить у ~/.config/ghai/env, змінна GHAI_API_KEY); зберігається лише в цьому браузері:</label>
+      <input id="key" type="password" autocomplete="off" placeholder="GHAI_API_KEY">
+      <button type="submit">Зберегти ключ</button>
+    </form>
+  </div>
+  <p class="small"><a href="#" id="changekey">Змінити ключ</a> · <a href="/docs">Swagger</a></p>
+
+  <div id="out" aria-live="polite"></div>
+</main>
+<script>
+(function () {
+  const out = document.getElementById("out");
+  const keybox = document.getElementById("keybox");
+  const store = {
+    get() { try { return localStorage.getItem("ghai_api_key") || ""; } catch (e) { return ""; } },
+    set(v) { try { localStorage.setItem("ghai_api_key", v); } catch (e) { /* private mode */ } },
+  };
+  let memKey = store.get();
+
+  function el(tag, attrs, ...children) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (k === "class") n.className = v; else if (v !== undefined && v !== null) n.setAttribute(k, v);
+    }
+    for (const c of children) n.append(c instanceof Node ? c : document.createTextNode(c ?? ""));
+    return n;
+  }
+  function showKeybox(msg) {
+    keybox.style.display = "block";
+    if (msg) out.replaceChildren(el("div", {class: "card bad"}, msg));
+    document.getElementById("key").focus();
+  }
+  function copyButton(text) {
+    const b = el("button", {class: "secondary", type: "button"}, "Копіювати шлях");
+    b.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(text); b.textContent = "Скопійовано"; }
+      catch (e) { b.textContent = "Не вдалося"; }
+    });
+    return b;
+  }
+
+  async function search(q, openNow) {
+    if (!q) return;
+    if (!memKey) { showKeybox("Спершу введіть API-ключ."); return; }
+    out.replaceChildren(el("div", {class: "card"}, "Шукаю…"));
+    let r;
+    try {
+      r = await fetch("/v1/locate?q=" + encodeURIComponent(q), {headers: {"X-API-Key": memKey}});
+    } catch (e) {
+      out.replaceChildren(el("div", {class: "card bad"}, "Сервер недоступний."));
+      return;
+    }
+    const b = await r.json().catch(() => ({}));
+    if (r.status === 401) { showKeybox("Ключ не підійшов: введіть його ще раз."); return; }
+    if (!r.ok) { out.replaceChildren(el("div", {class: "card bad"}, b.detail || ("Помилка " + r.status))); return; }
+
+    const pdfs = (b.files || []).filter(f => f.kind === "pdf" && f.exists);
+    if (openNow && pdfs.length && pdfs[0].open_url) { window.location.href = pdfs[0].open_url; return; }
+
+    const card = el("div", {class: "card"});
+    card.append(el("p", {class: "title"}, b.title || q));
+    card.append(el("div", {class: "meta"}, [b.year, b.venue].filter(Boolean).join(" · ")));
+    if (b.doi_url) card.append(el("div", {class: "row"}, "DOI: ", el("a", {href: b.doi_url, target: "_blank", rel: "noopener"}, b.doi)));
+
+    if (b.in_corpus) {
+      card.append(el("div", {class: "row ok"}, "У корпусі: " + b.in_corpus.paper_id));
+      for (const f of pdfs) {
+        const row = el("div", {class: "row"});
+        if (f.open_url) row.append(el("a", {class: "btn", href: f.open_url, target: "_blank", rel: "noopener"}, "Відкрити PDF"));
+        if (f.windows_path) row.append(copyButton(f.windows_path));
+        row.append(el("code", {}, f.windows_path || f.path));
+        card.append(row);
+      }
+      for (const f of (b.files || []).filter(f => f.kind === "tei" && f.exists)) {
+        card.append(el("div", {class: "row small"}, "TEI: ", el("code", {}, f.windows_path || f.path)));
+      }
+      if (!pdfs.length) card.append(el("div", {class: "row warn"}, "Локального PDF немає."));
+    } else {
+      card.append(el("div", {class: "row warn"}, "Статті немає в корпусі."));
+    }
+
+    const oa = b.open_access || [];
+    card.append(el("div", {class: "row"}, "Відкритий доступ: ", el("strong", {}, b.oa_status || (oa.length ? "так" : "немає"))));
+    if (oa.length) {
+      const ul = el("ul");
+      for (const x of oa.slice(0, 8)) {
+        ul.append(el("li", {}, el("a", {href: x.url, target: "_blank", rel: "noopener"}, x.kind === "pdf" ? "PDF" : "сторінка"),
+          " ", el("span", {class: "small"}, [x.version, x.host, x.source].filter(Boolean).join(", ")), " ",
+          el("code", {}, x.url)));
+      }
+      card.append(ul);
+    }
+    for (const n of (b.notes || [])) card.append(el("div", {class: "row small"}, n));
+    out.replaceChildren(card);
+  }
+
+  document.getElementById("search").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const q = document.getElementById("q").value.trim();
+    history.replaceState(null, "", "?q=" + encodeURIComponent(q));
+    search(q, false);
+  });
+  document.getElementById("keyform").addEventListener("submit", (e) => {
+    e.preventDefault();
+    memKey = document.getElementById("key").value.trim();
+    store.set(memKey);
+    keybox.style.display = "none";
+    const q = document.getElementById("q").value.trim();
+    if (q) search(q, false);
+  });
+  document.getElementById("changekey").addEventListener("click", (e) => { e.preventDefault(); showKeybox(); });
+
+  const params = new URLSearchParams(location.search);
+  const q0 = params.get("q");
+  if (!memKey) showKeybox();
+  if (q0) { document.getElementById("q").value = q0; search(q0, params.get("open") === "1"); }
+})();
+</script>
+</body>
+</html>
