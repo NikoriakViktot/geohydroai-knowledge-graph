@@ -55,7 +55,8 @@ Papers of this repository built with the workbench of the knowledge repository (
 
 - Literature facts come only from the `ghai` MCP tools (`.mcp.json`; the key is `GHAI_API_KEY` in
   `~/.config/ghai/env`, never in this repository). Read the resources `ghai://docs/AGENT_RULES` and
-  `ghai://docs/PAPER_WORKFLOW` before writing from the literature.
+  `ghai://docs/PAPER_WORKFLOW` before writing from the literature, and `ghai://docs/QUERY_GUIDE`
+  (or the MCP prompt `research`) before searching.
 - Never quote a paper from memory: use `get_paper_text` or `verify_quotes`, and record
   `corpus_manifest_id` and span ids for every citation you check.
 - Manuscripts, tables, figures, bibliography and reviews are built in the knowledge repository and

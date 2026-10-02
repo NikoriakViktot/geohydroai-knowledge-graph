@@ -28,6 +28,7 @@
 | [endpoints/jobs.md](endpoints/jobs.md) | asynchronous jobs: status, events, cancel, retry |
 | [endpoints/bundles.md](endpoints/bundles.md) | consumer bundles (graph.json, open_citations.json) and contract validation |
 | [endpoints/admin.md](endpoints/admin.md) | rebuilds, integrity check, manifest freeze, raw Cypher |
+| [QUERY_GUIDE.md](QUERY_GUIDE.md) | **how to query the corpus and which data to choose**: agent prompt, sources and their limits, query wording, scores, filters, recipes |
 | [MCP_TOOLS.md](MCP_TOOLS.md) | the same capabilities as MCP tools for Claude Code sessions (implemented) |
 | [PAPER_WORKFLOW.md](PAPER_WORKFLOW.md) | **building a paper**: what the paper repository prepares, the workbench steps, delivery back into it |
 | [PROJECT_MANIFEST.md](PROJECT_MANIFEST.md) | `ghai.project.yaml`: how a paper repository describes its paper to the workbench |

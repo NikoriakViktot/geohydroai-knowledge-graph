@@ -14,6 +14,7 @@ Agents MUST read the rules first. The non-negotiable ones:
 
 ## Rules and conventions
 - [AGENT_RULES.md](AGENT_RULES.md): mandatory rules for AI agents, task → endpoint table, workflows, error handling, checklist
+- [QUERY_GUIDE.md](QUERY_GUIDE.md): how to query the corpus and choose the data source: agent prompt (MCP prompt `research`), store limits, English sentence-like queries, compressed similarity scores, filters, recipes
 - [README.md](README.md): base URL, auth and scopes, conventions, error codes, provenance and retrieval validity, jobs and quota
 - [SCHEMAS.md](SCHEMAS.md): Provenance, Problem, Coverage, RetrievalValidity, PaperIdentity (implemented), EvidenceSpan, ChunkHit, Job, QuoteResult, DoiVerifyResult, Thesis, AtomicClaim, ClaimCheckResult, ScreeningLabel, Candidate, Acquisition, MetricFact, GraphBundle
 - [MCP_TOOLS.md](MCP_TOOLS.md): MCP tools for Claude Code (`http://127.0.0.1:8090/mcp`, implemented: 31 read tools, docs as resources, workflows W1–W6 as prompts)

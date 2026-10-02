@@ -174,7 +174,10 @@ def instructions() -> str:
     return (
         "Tools of the GeoHydroAI Knowledge API (REST /v1, a corpus of ~4.8k flood, hydrology and "
         "remote-sensing papers). Every answer carries `provenance`; record it. Before writing anything "
-        "from the literature read the resource ghai://docs/AGENT_RULES. The rules that matter most:\n\n"
+        "from the literature read the resource ghai://docs/AGENT_RULES; before searching, ghai://docs/QUERY_GUIDE "
+        "(queries in English, written like a sentence of a paper, several phrasings; similarity scores rank but "
+        "do not prove relevance; a zero in the graph is not a zero in the literature), or start from the prompt "
+        "`research`. The rules that matter most:\n\n"
         + docs_loader.top_rules_markdown()
     )
 
@@ -497,6 +500,9 @@ def build_server(api: Any) -> MCPServer:
     for wid, (title, steps) in workflows().items():
         server.prompt(name=wid.lower(), title=f"{wid} — {title}",
                       description=f"Workflow {wid} of AGENT_RULES.md: {title}")(_workflow_prompt(wid, title, steps))
+    server.prompt(name="research", title="Research a question in the corpus",
+                  description="How to query the corpus and choose the data source (QUERY_GUIDE.md §0), "
+                              "applied to your question")(_research_prompt)
     return server
 
 
@@ -504,6 +510,20 @@ def _page_reader(name: str):
     def read() -> str:
         return docs_loader.read_page(name)
     return read
+
+
+def research_instructions() -> str:
+    """The agent prompt of QUERY_GUIDE.md §0 (its fenced block)."""
+    section = docs_loader.read_page("QUERY_GUIDE").split("## 0.", 1)[-1].split("\n## ", 1)[0]
+    m = re.search(r"```text\n(.*?)\n```", section, re.S)
+    return m.group(1).strip() if m else section.strip()
+
+
+def _research_prompt(question: str, project_id: str = "") -> str:
+    who = f" The answer is for project `{project_id}`; pass it as project_id to the search tools." if project_id else ""
+    return (f"{research_instructions()}\n\nQuestion: {question}{who}\n\n"
+            "The full guide (sources, measured score ranges, filters, recipes) is the resource "
+            "ghai://docs/QUERY_GUIDE; the rules are ghai://docs/AGENT_RULES.")
 
 
 def _workflow_prompt(wid: str, title: str, steps: str):

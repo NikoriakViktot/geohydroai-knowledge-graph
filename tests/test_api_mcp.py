@@ -131,6 +131,17 @@ def test_documentation_resources_and_workflow_prompts(mcp_client):
     assert "POST /manuscripts/citations" in text and "floodstate-eo:paper3" in text
 
 
+def test_research_prompt_carries_the_query_guide(mcp_client):
+    assert "ghai://docs/QUERY_GUIDE" in rpc(mcp_client, "initialize", INIT).json()["result"]["instructions"]
+    prompts = {p["name"]: p for p in rpc(mcp_client, "prompts/list").json()["result"]["prompts"]}
+    assert {a["name"] for a in prompts["research"]["arguments"]} == {"question", "project_id"}
+    r = rpc(mcp_client, "prompts/get", {"name": "research",
+                                        "arguments": {"question": "Which SAR thresholds map floods?"}}).json()
+    text = r["result"]["messages"][0]["content"]["text"]
+    assert "Write queries in English" in text and "Question: Which SAR thresholds map floods?" in text
+    assert "```" not in text
+
+
 def test_dns_rebinding_is_refused(mcp_client):
     r = rpc(mcp_client, "initialize", INIT, headers={"Host": "attacker.example"})
     assert r.status_code == 421

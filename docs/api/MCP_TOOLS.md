@@ -7,7 +7,7 @@ Every tool calls its REST endpoint in-process with your key (`src/api/mcp.py`). 
 The server also carries:
 - **instructions**: the five rules of AGENT_RULES §0, sent at `initialize`;
 - **resources**: every documentation page as `ghai://docs/<page>` (e.g. `ghai://docs/AGENT_RULES`, `ghai://docs/endpoints/search`), Markdown;
-- **prompts**: the standard workflows of AGENT_RULES §7 as `w1` … `w6` (W6: build a paper, [PAPER_WORKFLOW.md](PAPER_WORKFLOW.md)), each with an optional `project_id`.
+- **prompts**: the standard workflows of AGENT_RULES §7 as `w1` … `w6` (W6: build a paper, [PAPER_WORKFLOW.md](PAPER_WORKFLOW.md)), each with an optional `project_id`, and `research` (arguments `question`, `project_id`): the agent prompt of [QUERY_GUIDE.md](QUERY_GUIDE.md) §0 applied to a question.
 
 ## Configuration in a consumer repository
 
