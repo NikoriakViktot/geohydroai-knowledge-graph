@@ -63,7 +63,7 @@ def run(ctx: Context, argv: list[str], *, refresh: bool = False, seed_work: str 
             print(f"{p.work_dir} is not empty; --seed-work only fills an empty work directory")
             return 1
         shutil.copytree(src, p.work_dir, dirs_exist_ok=True)
-        for f in p.work_dir.rglob("*"):
+        for f in [p.work_dir, *p.work_dir.rglob("*")]:          # a frozen _work is read-only
             f.chmod(f.stat().st_mode | 0o200)
         print(f"seeded {p.work_dir} from {src}")
     p.work_dir.mkdir(parents=True, exist_ok=True)
