@@ -23,6 +23,7 @@
 | [09_MIGRATION.md](09_MIGRATION.md) | Перенесення бази даних і файлів на інший сервер: інвентар, передумови, методи по кожній базі, cutover, бекапи, ризики |
 | [10_DATA_CLEANUP.md](10_DATA_CLEANUP.md) | Застарілі й невикористовувані дані: що безпечно видалити, що архівувати, що спершу виправити |
 | [11_POSTGRES_TRUTH_LAYER.md](11_POSTGRES_TRUTH_LAYER.md) | **PostgreSQL як шар правди**: схеми `core`/`biblio`/`project`/`evidence`/`ops`, контракти (pydantic → JSON Schema), проєкції (Neo4j, Chroma, Parquet), кінець тек «під статтю»; що вже піднято й завантажено |
+| [`docs/api/`](../docs/api/README.md) | **Довідник API** (кожен ендпоінт: запит, відповідь, помилки, приклади) + [**правила для ІІ-агентів**](../docs/api/AGENT_RULES.md) + [MCP-інструменти](../docs/api/MCP_TOOLS.md) + [`llms.txt`](../docs/api/llms.txt) |
 
 **Звідки дані**:
 - Повний прогін тестів 2026-10-02: 1 413 тестів, 1 405 пройшли, 8 пропущено.
