@@ -1,0 +1,95 @@
+{
+ "message": {
+  "DOI": "10.24425/agg.2023.146162",
+  "title": [
+   "The Nova Kakhovka dam collapse flooding as seen from Sentinel-1 SAR satellite images"
+  ],
+  "subtitle": [],
+  "type": "journal-article",
+  "volume": null,
+  "issue": null,
+  "page": "50-50",
+  "article-number": null,
+  "container-title": [
+   "Advances in Geodesy and Geoinformation"
+  ],
+  "publisher": "Polish Academy of Sciences Chancellery",
+  "published-online": {
+   "date-parts": [
+    [
+     2024,
+     6,
+     21
+    ]
+   ]
+  },
+  "published-print": null,
+  "issued": {
+   "date-parts": [
+    [
+     2024,
+     6,
+     21
+    ]
+   ]
+  },
+  "author": [
+   {
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ],
+    "ORCID": "https://orcid.org/0009-0006-1608-6648",
+    "given": "Roberto",
+    "family": "Monti",
+    "sequence": "first",
+    "affiliation": [
+     {
+      "name": "Politecnico di Milano, Milan, Italy"
+     }
+    ],
+    "authenticated-orcid": false
+   },
+   {
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ],
+    "ORCID": "https://orcid.org/0000-0001-6050-1972",
+    "given": "Lorenzo",
+    "family": "Rossi",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Politecnico di Milano, Milan, Italy"
+     }
+    ],
+    "authenticated-orcid": false
+   },
+   {
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ],
+    "ORCID": "https://orcid.org/0000-0002-4027-9347",
+    "given": "Mirko",
+    "family": "Reguzzoni",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Politecnico di Milano, Milan, Italy"
+     }
+    ],
+    "authenticated-orcid": false
+   }
+  ],
+  "license": null,
+  "URL": "https://doi.org/10.24425/agg.2023.146162"
+ }
+}

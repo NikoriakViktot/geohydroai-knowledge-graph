@@ -34,7 +34,9 @@
 | 0.7.1 / 0.7.2 NSE ÷100, юнікодний мінус | ✅ · 0.7.3 / 0.7.4 — ⏳ |
 | 1.1 скелет API, 1.3 ключі, 1.4 контракти (частково), 1.5 `papers/resolve*` | ✅ `src/api` з документацією й правилами в OpenAPI, `GET /v1/agent-rules` |
 | 1.6 `GET /papers/{id}/sections`, `/text` · 1.9 `POST /quotes/verify` · `POST /theses/validate` | ✅ без LLM. Ручна перевірка 01.10 відтворюється: Johnson/Olofsson/Bates/Zheng → `FOUND_EXACT`; Iqbal → вторинна цитата з DOI Hawker 2022; Lefebvre → `SOURCE_UNAVAILABLE` (немає в корпусі); `found_in` для цитат співцитованих праць. Бандл тез FS3 валідний (51/175/112), CSV-дамп KT2 відхиляється |
-| PostgreSQL-шар правди P0–P3 ([11](11_POSTGRES_TRUTH_LAYER.md)) | ✅ міграції 0001–0003; дані тек статей імпортовано (26 джерел) |
+| 1.5 `GET /papers/{id}/references`, `/tables` | ✅ бібліографія GROBID зі зіставленням з корпусом (DOI-аліас або точна нормалізована назва, без нечіткого збігу) і лічильником внутрішньотекстових посилань; таблиці з клітинками (`facts` — після 1.8). ⏳ `/entities` (потрібен контракт `MetricFact`) |
+| 1.10 `GET /doi/{doi}`, `POST /doi/verify` · міграція 0004 `biblio.http_cache` | ✅ Crossref → DataCite → OpenAlex з джерелом кожного поля; кешуються лише 200 і остаточні 404/410, збої — ні; ключ OpenAlex не потрапляє в кеш і відповіді. Бібліографія floodstate-eo (85 записів, 9 с): 30 `VERIFIED`, 33 `VERIFIED_WITH_NOTES`, 22 `UNRESOLVED` (без DOI), 0 `MISMATCH`. ⏳ `bib/format`, `bib/audit`, `bib/render`, `manuscripts/citations`. `openalex_extended` (61 580) не годиться як кеш: записи обрізані `select=` (без `biblio`, `type`, дат) |
+| PostgreSQL-шар правди P0–P3 ([11](11_POSTGRES_TRUTH_LAYER.md)) | ✅ міграції 0001–0004; дані тек статей імпортовано (26 джерел) |
 
 ## 0. Порядок і залежності
 

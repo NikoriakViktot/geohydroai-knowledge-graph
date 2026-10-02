@@ -1,0 +1,101 @@
+{
+ "message": {
+  "DOI": "10.1007/s10712-015-9346-y",
+  "title": [
+   "The SWOT Mission and Its Capabilities for Land Hydrology"
+  ],
+  "subtitle": [],
+  "type": "journal-article",
+  "volume": "37",
+  "issue": "2",
+  "page": "307-337",
+  "article-number": null,
+  "container-title": [
+   "Surveys in Geophysics"
+  ],
+  "publisher": "Springer Science and Business Media LLC",
+  "published-online": {
+   "date-parts": [
+    [
+     2015,
+     10,
+     27
+    ]
+   ]
+  },
+  "published-print": {
+   "date-parts": [
+    [
+     2016,
+     3
+    ]
+   ]
+  },
+  "issued": {
+   "date-parts": [
+    [
+     2015,
+     10,
+     27
+    ]
+   ]
+  },
+  "author": [
+   {
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ],
+    "given": "Sylvain",
+    "family": "Biancamaria",
+    "sequence": "first",
+    "affiliation": []
+   },
+   {
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ],
+    "given": "Dennis P.",
+    "family": "Lettenmaier",
+    "sequence": "additional",
+    "affiliation": []
+   },
+   {
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ],
+    "given": "Tamlin M.",
+    "family": "Pavelsky",
+    "sequence": "additional",
+    "affiliation": []
+   }
+  ],
+  "license": [
+   {
+    "URL": "http://www.springer.com/tdm",
+    "start": {
+     "date-time": "2015-10-27T00:00:00Z",
+     "timestamp": 1445904000000,
+     "date-parts": [
+      [
+       2015,
+       10,
+       27
+      ]
+     ]
+    },
+    "delay-in-days": 0,
+    "content-version": "tdm"
+   }
+  ],
+  "URL": "https://doi.org/10.1007/s10712-015-9346-y"
+ }
+}

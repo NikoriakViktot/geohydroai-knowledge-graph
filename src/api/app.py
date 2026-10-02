@@ -19,6 +19,7 @@ from src.api import docs_loader
 from src.api.deps import API_VERSION, KeyStore, ManifestCache, PostgresKeyStore
 from src.api.documentation import api_description, route_doc
 from src.api.problems import Problem, http_handler, problem_handler, validation_handler
+from src.api.routers import biblio as biblio_router
 from src.api.routers import docs as docs_router
 from src.api.routers import evidence as evidence_router
 from src.api.routers import papers as papers_router
@@ -66,7 +67,8 @@ def create_app(key_store: KeyStore | None = None, manifest: ManifestCache | None
         response.headers["Link"] = _LINK
         return response
 
-    for router in (system_router.router, docs_router.router, papers_router.router, evidence_router.router):
+    for router in (system_router.router, docs_router.router, papers_router.router, evidence_router.router,
+                   biblio_router.router):
         app.include_router(router, prefix=PREFIX)
     app.include_router(planned_router.build_router(_implemented(app)), prefix=PREFIX)
 

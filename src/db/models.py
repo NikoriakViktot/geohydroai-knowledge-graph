@@ -315,6 +315,31 @@ class TechnicalSource(_Provenance, Base):
     extra: Mapped[dict] = mapped_column(JSONB, default=dict)
 
 
+#: Upstream services whose responses biblio.http_cache keeps.
+HTTP_SERVICES = ("crossref", "openalex", "datacite", "unpaywall", "url")
+
+
+class HttpCache(Base):
+    """A registry's answer: a 200 body, or a definitive 404/410. Timeouts, 429 and 5xx are never
+    stored, so a failed lookup is not remembered as "not found". `url` never carries credentials."""
+
+    __tablename__ = "http_cache"
+    __table_args__ = (
+        CheckConstraint(_in("service", HTTP_SERVICES), name="service"),
+        CheckConstraint("status IN (200, 404, 410)", name="status"),
+        Index("ix_http_cache_expires_at", "expires_at"),
+        {"schema": "biblio"},
+    )
+
+    service: Mapped[str] = mapped_column(Text, primary_key=True)
+    key: Mapped[str] = mapped_column(Text, primary_key=True)
+    url: Mapped[str] = mapped_column(Text)
+    status: Mapped[int] = mapped_column(SmallInteger)
+    response: Mapped[dict | None] = mapped_column(JSONB)
+    fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class CiteKey(_Provenance, Base):
     __tablename__ = "cite_key"
     __table_args__ = ({"schema": "biblio"},)

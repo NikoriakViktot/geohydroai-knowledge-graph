@@ -277,3 +277,91 @@ class TablesResponse(_Contract):
     paper: PaperRef
     tables: list[TableEntry]
     provenance: Provenance
+
+
+# ── bibliography: DOI metadata and verification (docs/api/endpoints/bibliography.md) ──
+
+RegistryName = Literal["crossref", "openalex", "datacite"]
+
+
+class DoiAuthor(_Contract):
+    family: str
+    given: str | None = None
+    orcid: str | None = None
+
+
+class DoiMetadata(_Contract):
+    doi: str
+    title: str | None = None
+    authors: list[DoiAuthor] = []
+    year_issued: int | None = Field(default=None, description="the registry's year: the earlier of online and print")
+    year_online: int | None = None
+    year_print: int | None = None
+    date_online: str | None = Field(default=None, description="ISO date, possibly partial (2015-10-27, 2016-03)")
+    date_print: str | None = None
+    venue: str | None = None
+    volume: str | None = None
+    issue: str | None = None
+    pages: str | None = None
+    article_number: str | None = None
+    type: str | None = None
+    publisher: str | None = None
+    is_oa: bool | None = None
+    oa_status: str | None = None
+    oa_url: str | None = None
+    licence: str | None = None
+    url: str | None = None
+    sources: dict[str, RegistryName] = Field(default={}, description="which registry supplied each field")
+    fetched: dict[str, Literal["network", "cache", "stale_cache", "not_found", "unavailable"]] = Field(
+        default={}, description="per registry: how its answer was obtained, or why there is none")
+
+
+class DoiResponse(DoiMetadata):
+    in_corpus: PaperRef | None = None
+    provenance: Provenance
+
+
+class BibInput(_Contract):
+    key: str | None = Field(default=None, description="echoed back; with project_id, a cite key to look up the DOI")
+    doi: str | None = None
+    title: str | None = None
+    authors: str | list[str] | None = Field(default=None, description="BibTeX 'Family, G. and …', or a list")
+    year: int | str | None = Field(default=None, description="'2024a' is read as 2024")
+    journal: str | None = None
+    volume: str | int | None = None
+    issue: str | int | None = None
+    pages: str | None = None
+    bibtex: str | None = Field(default=None, description="one raw BibTeX entry instead of the fields")
+
+
+class DoiVerifyRequest(_Contract):
+    entries: list[BibInput] = Field(min_length=1, max_length=50)
+    project_id: ProjectId | None = Field(default=None, description="lets entries without a DOI use their cite key")
+    refresh: bool = Field(default=False, description="ignore cached registry answers")
+
+
+class FieldDiff(_Contract):
+    field: str
+    given: str | None = None
+    registry: str | None = None
+    source: RegistryName | None = None
+    severity: Literal["info", "minor", "major"]
+
+
+DoiVerdict = Literal["VERIFIED", "VERIFIED_WITH_NOTES", "MISMATCH", "UNRESOLVED", "NOT_A_DOI"]
+
+
+class DoiVerifyResult(_Contract):
+    input_key: str | None = None
+    doi: str | None = None
+    verdict: DoiVerdict
+    diffs: list[FieldDiff] = []
+    notes: list[str] = []
+    registry: DoiMetadata | None = None
+    in_corpus: PaperRef | None = None
+
+
+class DoiVerifyResponse(_Contract):
+    results: list[DoiVerifyResult]
+    summary: dict[str, int]
+    provenance: Provenance

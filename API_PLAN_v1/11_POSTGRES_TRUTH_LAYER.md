@@ -83,7 +83,7 @@
 | `biblio.verification` | `id` | `work_id`, `checked_against` (crossref · openalex · datacite · fulltext · human), `verdict` (`verified` · `verified_with_notes` · `mismatch` · `unresolved`), `diffs` (jsonb), `checked_at`, `labeler_kind`, `labeler`, `run_id` | bib-нотатки «Crossref-verified», 07/07b, `citation_verification.md` |
 | `biblio.cite_key` | (`project_id`, `key`) | `work_id`, `canonical_key`, `aliases` | `citation_keys.yaml`, `references.bib` споживачів (`Roberts_2017` ↔ `Roberts_2017_blockCV`) |
 | `biblio.technical_source` | `source_id` | `cite_as`, `source_type` (стандарт, місія, реєстр, датасет), `url`, `url_sha256`, `status` | `src/paper_3/briefs/technical_sources.yaml` |
-| `biblio.http_cache` | (`service`, `key`) | `response` (jsonb), `status`, `fetched_at`, `ttl` | `_work/{crossref,openalex,url}_cache.json`, `data/cache/*.db`. Таймаути **не** кешуються як «не знайдено» |
+| `biblio.http_cache` ✅ (0004) | (`service`, `key`) | `response` (jsonb), `status` (200/404/410), `url` без секретів, `fetched_at`, `expires_at` | `_work/{crossref,openalex,url}_cache.json`, `data/cache/*.db`. Таймаути **не** кешуються як «не знайдено» |
 
 ### project — простори імен статей
 

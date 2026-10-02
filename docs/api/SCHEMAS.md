@@ -160,20 +160,28 @@ Contract status: **implemented** (`contracts/schemas/QuoteVerifyRequest.v1.json`
 | `detail` | string? | why, for `NOT_FOUND`, `SOURCE_UNAVAILABLE` and `FOUND_FUZZY` |
 
 ## DoiMetadata / DoiVerifyResult
-Contract status: planned (phase 1, migration 0002 `biblio`).
+Contract status: **implemented** (`contracts/schemas/DoiMetadata.v1.json`, `DoiResponse.v1.json`, `DoiVerifyRequest.v1.json`, `DoiVerifyResponse.v1.json`; migration 0004 `biblio.http_cache`).
 
-`DoiMetadata`: `{doi, title, authors: [{given?, family, orcid?}], year_online?, year_print?, venue?, volume?, issue?, pages?, article_number?, type, publisher?, is_oa?, oa_status?, licence?, url?, sources: {field: crossref|openalex|datacite}}`.
+`DoiMetadata` fields:
+- `doi`, `title`;
+- `authors: [{family, given?, orcid?}]`;
+- `year_issued?`, `year_online?`, `year_print?`, `date_online?`, `date_print?`;
+- `venue?`, `volume?`, `issue?`, `pages?`, `article_number?`, `type?`, `publisher?`;
+- `is_oa?`, `oa_status?`, `oa_url?`, `licence?`, `url?`;
+- `sources: {field: crossref|openalex|datacite}`;
+- `fetched: {registry: network|cache|stale_cache|not_found|unavailable}`.
 
 `DoiVerifyResult`:
 
 | Field | Type | Notes |
 |---|---|---|
 | `input_key` | string? | bib key from the request |
+| `doi` | string? | normalised |
 | `verdict` | `VERIFIED \| VERIFIED_WITH_NOTES \| MISMATCH \| UNRESOLVED \| NOT_A_DOI` | |
 | `diffs` | `FieldDiff[]` | `{field, given, registry, source, severity: info\|minor\|major}` |
-| `notes` | string[] | e.g. "online 2015-10-27, print 2016-03 (vol. 37)" |
+| `notes` | string[] | e.g. "online 2015-10-27, print 2016-03 (vol. 37): …" |
 | `registry` | `DoiMetadata?` | |
-| `in_corpus` | `PaperRef?` | |
+| `in_corpus` | `PaperRef?` | canonical paper when the DOI is in the corpus |
 
 ## BibEntry
 Contract status: planned (migration 0002): `{project_id, key, type: article|book|incollection|inproceedings|dataset|misc|techreport, doi?, fields: {title, author, year, journal?, volume?, number?, pages?, url?, publisher?, note?}, verification?: {status, method, verified_on, labeler_kind, labeler}}`. Key convention `Surname_YYYY` (`Wilson_Sader_2002`, `UNOSAT_3616_2023`); aliases in `biblio.cite_key`.

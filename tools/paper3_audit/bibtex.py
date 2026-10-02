@@ -49,60 +49,9 @@ def snapshot_floodstate_files(work_dir: Path = WORK_DIR, reader=wsl_cat) -> dict
     return result
 
 
-def _split_fields(body: str) -> dict[str, str]:
-    """Parse ``key={value}, key2="value"`` with nested braces."""
-    fields: dict[str, str] = {}
-    i, n = 0, len(body)
-    while i < n:
-        m = re.compile(r"\s*([A-Za-z_][\w-]*)\s*=\s*").match(body, i)
-        if not m:
-            break
-        key = m.group(1).lower()
-        i = m.end()
-        if i >= n:
-            break
-        if body[i] == "{":
-            depth, j = 0, i
-            while j < n:
-                if body[j] == "{":
-                    depth += 1
-                elif body[j] == "}":
-                    depth -= 1
-                    if depth == 0:
-                        break
-                j += 1
-            value = body[i + 1:j]
-            i = j + 1
-        elif body[i] == '"':
-            j = body.find('"', i + 1)
-            value = body[i + 1:j]
-            i = j + 1
-        else:
-            j = body.find(",", i)
-            j = n if j == -1 else j
-            value = body[i:j].strip()
-            i = j
-        fields[key] = " ".join(value.split())
-        comma = body.find(",", i)
-        i = n if comma == -1 else comma + 1
-    return fields
-
-
-def parse_bib(text: str) -> list[dict]:
-    """→ [{'key', 'type', 'fields': {...}}] in file order. Comments are ignored."""
-    entries = []
-    for m in _ENTRY.finditer(text):
-        start = m.end()
-        depth, j = 1, start
-        while j < len(text) and depth:
-            if text[j] == "{":
-                depth += 1
-            elif text[j] == "}":
-                depth -= 1
-            j += 1
-        body = text[start:j - 1]
-        entries.append({"key": m.group(2), "type": m.group(1).lower(), "fields": _split_fields(body)})
-    return entries
+# Parsing lives in src/services/bibtex.py (shared with the API); re-exported here.
+from src.services.bibtex import parse_bib  # noqa: E402,F401
+from src.services.bibtex import split_fields as _split_fields  # noqa: E402,F401
 
 
 def load_bib_entries(work_dir: Path = WORK_DIR) -> dict[str, dict]:

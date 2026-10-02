@@ -1,0 +1,50 @@
+{
+ "id": "https://openalex.org/W2208198711",
+ "doi": "https://doi.org/10.1007/s10712-015-9346-y",
+ "title": "The SWOT Mission and Its Capabilities for Land Hydrology",
+ "publication_year": 2015,
+ "publication_date": "2015-10-27",
+ "type": "article",
+ "biblio": {
+  "issue": "2",
+  "volume": "37",
+  "last_page": "337",
+  "first_page": "307"
+ },
+ "open_access": {
+  "is_oa": true,
+  "oa_url": "https://hal.science/hal-02136974v1/file/Biancamaria_etal2016_SurvGeophys.pdf",
+  "oa_status": "green",
+  "any_repository_has_fulltext": true
+ },
+ "authorships": [
+  {
+   "author": {
+    "display_name": "Sylvain Biancamaria",
+    "orcid": "https://orcid.org/0000-0002-6162-0436"
+   },
+   "raw_author_name": "Sylvain Biancamaria"
+  },
+  {
+   "author": {
+    "display_name": "Dennis P. Lettenmaier",
+    "orcid": "https://orcid.org/0000-0002-0914-0726"
+   },
+   "raw_author_name": "Dennis P. Lettenmaier"
+  },
+  {
+   "author": {
+    "display_name": "Tamlin M. Pavelsky",
+    "orcid": "https://orcid.org/0000-0002-0613-3838"
+   },
+   "raw_author_name": "Tamlin M. Pavelsky"
+  }
+ ],
+ "primary_location": {
+  "source": {
+   "display_name": "Surveys in Geophysics"
+  },
+  "license": null,
+  "landing_page_url": "https://doi.org/10.1007/s10712-015-9346-y"
+ }
+}

@@ -1,9 +1,10 @@
 # Bibliography — DOI metadata, verification, BibTeX, manuscript citations
 
 **Backing data**:
-- `biblio.*` in Postgres (migration 0002): works, verifications, cite keys, technical sources, and an HTTP cache with TTL.
-- Crossref and OpenAlex (polite pool, contact from `OPEN_ALEX_EMAIL`).
-- Failed or timed-out lookups are **not** cached as "not found".
+- `biblio.*` in Postgres (migrations 0003–0004): verifications, cite keys, technical sources, and `biblio.http_cache`.
+- `biblio.http_cache` keeps registry answers: a 200 for 180 days; a definitive 404/410 for 30 days.
+- Crossref is the primary registry. DataCite answers for DOIs Crossref does not know (datasets). OpenAlex fills gaps and supplies the open-access fields. Contact for the polite pools: `OPEN_ALEX_EMAIL`.
+- Failed or timed-out lookups are **not** cached as "not found". When a refresh fails and an expired answer exists, that answer is used and the response says so (`fetched[registry] = "stale_cache"`).
 
 **Citation-key convention**:
 - `Surname_YYYY`, with two authors `Wilson_Sader_2002`;
@@ -14,11 +15,18 @@
 ---
 
 ## `GET /doi/{doi}`
-- **Status**: planned (phase 1, WP 1.10) · **Scope** `read` · S
-- **Purpose**: registry metadata for a DOI, merged from Crossref and OpenAlex (DataCite for dataset DOIs). The source of each field is reported.
-- **Path**: URL-encoded DOI in any form.
-- **Response 200**: `DoiMetadata` + `{"in_corpus": PaperRef?, "provenance"}`.
-- **Errors**: `422 INVALID_DOI`; `404 NOT_FOUND` (no registry knows it, e.g. JMLR papers without a DOI); `504 UPSTREAM_TIMEOUT`.
+- **Status**: implemented (2026-10-02) · **Scope** `read` · S
+- **Purpose**: registry metadata for a DOI, merged from Crossref, DataCite and OpenAlex. Each field names its source.
+- **Path**: the DOI in any form (`10.1007/…`, `https://doi.org/…`, `doi:…`); slashes need no encoding. Query: `refresh=true` ignores cached answers.
+- **Response 200**: `DoiMetadata` + `{"in_corpus": PaperRef?, "provenance"}`. Key fields:
+  - `year_online`, `year_print`, `year_issued`, and `date_online`, `date_print` (partial ISO dates);
+  - `sources`: the registry of each field;
+  - `fetched`: per registry, `network | cache | stale_cache | not_found | unavailable`.
+- **Errors**:
+  - `422 INVALID_DOI`;
+  - `404 NOT_FOUND`: no registry knows it, e.g. JMLR papers without a DOI;
+  - `504 UPSTREAM_TIMEOUT`: a registry did not answer and nothing is cached. Retry later; it is not "not found".
+  - `503 STORE_UNAVAILABLE`: the cache in Postgres is unavailable.
 - **Agent notes**:
   - `year_online` and `year_print` can differ: Biancamaria et al. was online 2015-10-27 and in print 2016-03, vol. 37.
   - Cite the print year with its volume unless the journal style says otherwise, and keep both in the bib note.
@@ -26,37 +34,59 @@
 ---
 
 ## `POST /doi/verify`
-- **Status**: planned (phase 1) · **Scope** `read` · S for ≤ 50 entries, **J** above
+- **Status**: implemented (2026-10-02; ≤ 50 entries per request) · **Scope** `read` · S · **no LLM**
 - **Purpose**: verify bibliography entries field by field against the registries.
 
-**Request**: `{"entries": [{"key": "Monti_2024", "doi": "10.24425/agg.2023.146162", "title": "The Nova Kakhovka dam collapse flooding as seen from Sentinel-1 SAR satellite images", "authors": "Monti, R. and Rossi, L. and Reguzzoni, M.", "year": 2024, "journal": "Advances in Geodesy and Geoinformation", "volume": null, "pages": null}], "project_id": "floodstate-eo:paper3"}`. Entries may also be raw BibTeX strings: `{"bibtex": "@article{…}"}`.
+**Request**: `{"entries": [BibInput] (1–50), "project_id": ProjectId?, "refresh": false}`.
+- `BibInput` fields: `{key?, doi?, title?, authors?, year?, journal?, volume?, issue?, pages?}`. `authors` is a BibTeX `"Family, G. and …"` string or a list; `"and others"` marks a truncated list.
+- An entry may instead be `{"bibtex": "@article{…}"}`.
+- With `project_id`, an entry without a DOI takes it from the project's cite key (`biblio.cite_key`).
+
+```json
+{"entries": [{"key": "Monti_2024", "doi": "10.24425/agg.2023.146162", "title": "The Nova Kakhovka dam collapse flooding as seen from Sentinel-1 SAR satellite images", "authors": "Monti, R. and Rossi, L. and Reguzzoni, M.", "year": 2024, "journal": "Advances in Geodesy and Geoinformation"}],
+ "project_id": "floodstate-eo:paper3"}
+```
 
 **Response 200**: `{"results": [DoiVerifyResult], "summary": {"VERIFIED": n, "VERIFIED_WITH_NOTES": n, "MISMATCH": n, "UNRESOLVED": n, "NOT_A_DOI": n}, "provenance"}`
 
 **Rules**:
 
-| Check | Accepted when |
-|---|---|
-| Title | similarity ≥ 0.90 after normalisation |
-| Year | equal to the online or print year (± 0); a 1-year difference explained by online/print gives `VERIFIED_WITH_NOTES` |
-| Authors | family names and initials compared |
-| Volume, pages | `article_number` accepted for pages; a registry value such as `50-50` is reported, not trusted |
-| Suffix years | "2024a" is accepted as 2024 |
+| Check | Accepted when | Otherwise |
+|---|---|---|
+| Title | similarity ≥ 0.90 after normalisation; the subtitle is optional | `major` (`MISMATCH`); 0.90–0.98 is `info` |
+| Year | equal to the online, print or issued year; "2024a" is read as 2024 | `major`. When online ≠ print, a note gives both dates |
+| Authors | the first family name agrees (accents and case ignored) | `major`. Other missing names, a different count (unless `and others`), or different initials are `minor` |
+| Journal | one name contains the other, or similarity ≥ 0.85; abbreviations are fine | `info` |
+| Volume, issue, pages | equal; `article_number` is accepted for pages | `minor`. A field the registry has but the entry lacks is `info`. A registry range such as `50-50` is a note, not a difference |
 
-Results are stored in `biblio.verification` with `labeler_kind = rule`.
+**Verdict**:
+- `MISMATCH` if any difference is `major`.
+- `VERIFIED_WITH_NOTES` if there are other differences or notes.
+- `VERIFIED` otherwise.
+- `UNRESOLVED` when there is no DOI, no registry knows it, or the registries did not answer (the notes say which).
+- `NOT_A_DOI` when the DOI field is malformed.
+
+**Results are not stored**: the endpoint is read-only. Registry answers are cached.
 
 ```json
-{"results": [{"input_key": "Monti_2024", "verdict": "VERIFIED_WITH_NOTES",
-  "diffs": [{"field": "pages", "given": null, "registry": "50-50", "source": "crossref", "severity": "info"}],
-  "notes": ["Crossref pages '50-50' look like an article-number artefact; take pages from the journal page",
-            "first-author given name: Roberto"],
-  "registry": {"doi": "10.24425/agg.2023.146162", "year_online": 2024, "…": "…"},
+{"results": [{"input_key": "Monti_2024", "doi": "10.24425/agg.2023.146162", "verdict": "VERIFIED_WITH_NOTES",
+  "diffs": [],
+  "notes": ["crossref pages '50-50' look like an article-number artefact; take the pages from the journal page"],
+  "registry": {"doi": "10.24425/agg.2023.146162", "year_online": 2024, "authors": [{"family": "Monti", "given": "Roberto", "orcid": "0009-0006-1608-6648"}, "…"], "…": "…"},
   "in_corpus": {"paper_id": "10.24425_agg.2023.146162", "…": "…"}}],
  "summary": {"VERIFIED_WITH_NOTES": 1}, "provenance": {"…": "…"}}
 ```
 
+Regression fixtures:
+- Biancamaria 2016 → `VERIFIED_WITH_NOTES` (online 2015-10-27, print 2016-03, vol. 37);
+- Monti 2024 → `VERIFIED_WITH_NOTES` (pages `50-50`);
+- Pedregosa 2011 (JMLR, no DOI) → `UNRESOLVED`;
+- ICESat-2 ATL13 v6 (`10.5067/ATLAS/ATL13.006`, DataCite) → `VERIFIED`.
+
 **Agent notes**:
 - A `VERIFIED` DOI says the bibliographic record is right. It says nothing about whether the cited **content** supports your sentence: use `POST /quotes/verify` / `POST /claims/check` for that.
+- `UNRESOLVED` with "did not answer" means "not checked". Retry later; do not drop the reference.
+- `registry.authors[].given` gives full given names. Take initials from there; do not guess them.
 
 ---
 

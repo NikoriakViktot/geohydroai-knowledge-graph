@@ -1,0 +1,114 @@
+{
+ "data": {
+  "attributes": {
+   "doi": "10.5067/atlas/atl13.006",
+   "titles": [
+    {
+     "title": "ATLAS/ICESat-2 L3A Along Track Inland Surface Water Data, Version 6"
+    }
+   ],
+   "creators": [
+    {
+     "name": "Jasinski,  Michael",
+     "givenName": " Michael",
+     "familyName": "Jasinski",
+     "affiliation": [],
+     "nameIdentifiers": []
+    },
+    {
+     "name": "Stoll,  Jeremy",
+     "givenName": " Jeremy",
+     "familyName": "Stoll",
+     "affiliation": [],
+     "nameIdentifiers": []
+    },
+    {
+     "name": "Hancock,  David",
+     "givenName": " David",
+     "familyName": "Hancock",
+     "affiliation": [],
+     "nameIdentifiers": []
+    },
+    {
+     "name": "Robbins,  John",
+     "givenName": " John",
+     "familyName": "Robbins",
+     "affiliation": [],
+     "nameIdentifiers": []
+    },
+    {
+     "name": "Nattala,  Jyothi",
+     "givenName": " Jyothi",
+     "familyName": "Nattala",
+     "affiliation": [],
+     "nameIdentifiers": []
+    },
+    {
+     "name": "Pavelsky,  Tamlin",
+     "givenName": " Tamlin",
+     "familyName": "Pavelsky",
+     "affiliation": [],
+     "nameIdentifiers": []
+    },
+    {
+     "name": "Morison,  Jamie",
+     "givenName": " Jamie",
+     "familyName": "Morison",
+     "affiliation": [],
+     "nameIdentifiers": []
+    },
+    {
+     "name": "Jones,  Benjamin",
+     "givenName": " Benjamin",
+     "familyName": "Jones",
+     "affiliation": [],
+     "nameIdentifiers": []
+    },
+    {
+     "name": "Ondrusek,  Michael",
+     "givenName": " Michael",
+     "familyName": "Ondrusek",
+     "affiliation": [],
+     "nameIdentifiers": []
+    },
+    {
+     "name": "Parrish,  Christopher",
+     "givenName": " Christopher",
+     "familyName": "Parrish",
+     "affiliation": [],
+     "nameIdentifiers": []
+    },
+    {
+     "name": "Carabajal,  Claudia",
+     "givenName": " Claudia",
+     "familyName": "Carabajal",
+     "affiliation": [],
+     "nameIdentifiers": []
+    },
+    {
+     "name": "the ICESat-2 Science Team",
+     "affiliation": [],
+     "nameIdentifiers": []
+    }
+   ],
+   "publicationYear": 2023,
+   "publisher": "NASA National Snow and Ice Data Center Distributed Active Archive Center",
+   "types": {
+    "ris": "DATA",
+    "bibtex": "misc",
+    "citeproc": "dataset",
+    "schemaOrg": "Dataset",
+    "resourceType": "Dataset",
+    "resourceTypeGeneral": "Dataset"
+   },
+   "url": "http://nsidc.org/data/ATL13/versions/6",
+   "dates": [
+    {
+     "date": "2023",
+     "dateType": "Issued"
+    }
+   ],
+   "rightsList": []
+  }
+ }
+}
