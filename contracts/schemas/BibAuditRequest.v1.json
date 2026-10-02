@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "bibtex": {
+      "maxLength": 5000000,
+      "minLength": 1,
+      "title": "Bibtex",
+      "type": "string"
+    },
+    "project_id": {
+      "anyOf": [
+        {
+          "enum": [
+            "floodstate-eo:paper3",
+            "kakhovka-terrain:paper2",
+            "swot-dnipro:paper1",
+            "kakhovka-report:v1",
+            "article1"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Project Id"
+    },
+    "search_missing": {
+      "default": true,
+      "description": "look up DOIs for entries that have none (Crossref)",
+      "title": "Search Missing",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "bibtex"
+  ],
+  "title": "BibAuditRequest",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/BibAuditRequest.v1.json"
+}

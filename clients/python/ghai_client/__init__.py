@@ -67,6 +67,7 @@ class GHAI:
         self.metrics = Metrics(self)
         self.ontology = Ontology(self)
         self.search = Search(self)
+        self.bib = Bib(self)
 
     @classmethod
     def from_env(cls, **kwargs) -> "GHAI":
@@ -307,3 +308,26 @@ class Search(_Group):
     def similar(self, *, paper_id: str | None = None, doi: str | None = None, k: int = 20,
                 filters: dict | None = None) -> dict:
         return self._api.post("search/similar", {"paper_id": paper_id, "doi": doi, "k": k, "filters": filters or {}})
+
+
+class Bib(_Group):
+    def format(self, dois: list[str], project_id: str | None = None) -> list[dict]:
+        """DOIs → BibTeX in the house key convention (Surname_YYYY), batches of 100."""
+        out = []
+        for i in range(0, len(dois), 100):
+            out += self._api.post("bib/format", {"dois": dois[i:i + 100], "project_id": project_id})["entries"]
+        return out
+
+    def render(self, bibtex: str, *, keys: list[str] | None = None, manuscript: str | None = None,
+               style: str = "apa") -> dict:
+        """style: apa | agu | copernicus | elsevier-harvard."""
+        return self._api.post("bib/render", {"bibtex": bibtex, "keys": keys, "manuscript": manuscript, "style": style})
+
+    def audit(self, bibtex: str, project_id: str | None = None, search_missing: bool = True) -> dict:
+        return self._api.post("bib/audit", {"bibtex": bibtex, "project_id": project_id,
+                                            "search_missing": search_missing})
+
+    def citations(self, manuscript: str, bibtex: str, project_id: str | None = None) -> dict:
+        """Every author–year citation of a manuscript, resolved to bib keys (POST /manuscripts/citations)."""
+        return self._api.post("manuscripts/citations", {"manuscript": manuscript, "bibtex": bibtex,
+                                                        "project_id": project_id})

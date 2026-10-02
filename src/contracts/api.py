@@ -779,3 +779,67 @@ class ManuscriptCitationsResponse(_Contract):
     uncited_entries: list[str]
     summary: dict[str, int]
     provenance: Provenance
+
+
+class BibFormatRequest(_Contract):
+    dois: list[str] = Field(min_length=1, max_length=100)
+    project_id: ProjectId | None = Field(default=None, description="avoid keys already used in this project")
+    key_style: Literal["Surname_YYYY"] = "Surname_YYYY"
+
+
+class BibFormatEntry(_Contract):
+    doi: str
+    key: str | None = None
+    bibtex: str | None = None
+    collision: bool = False
+    notes: list[str] = []
+    in_corpus: PaperRef | None = None
+
+
+class BibFormatResponse(_Contract):
+    entries: list[BibFormatEntry]
+    provenance: Provenance
+
+
+class BibRenderRequest(_Contract):
+    bibtex: str = Field(min_length=1, max_length=5_000_000)
+    keys: list[str] | None = None
+    manuscript: str | None = Field(default=None, max_length=2_000_000)
+    style: Literal["apa", "agu", "copernicus", "elsevier-harvard"] = "apa"
+
+
+class RenderedReference(_Contract):
+    key: str
+    text: str
+
+
+class BibRenderResponse(_Contract):
+    references: list[RenderedReference]
+    unresolved_keys: list[str] = []
+    uncited_entries: list[str] = []
+    provenance: Provenance
+
+
+class BibAuditRequest(_Contract):
+    bibtex: str = Field(min_length=1, max_length=5_000_000)
+    project_id: ProjectId | None = None
+    search_missing: bool = Field(default=True, description="look up DOIs for entries that have none (Crossref)")
+
+
+class BibAuditEntry(_Contract):
+    key: str
+    type: str
+    status: Literal["ok", "fix", "unresolved"]
+    doi: str | None = None
+    verdict: DoiVerdict | None = None
+    suggested_doi: str | None = None
+    problems: list[str] = []
+    warnings: list[str] = []
+    suggested_bibtex: str | None = None
+
+
+class BibAuditResponse(_Contract):
+    entries: list[BibAuditEntry]
+    summary: dict[str, int]
+    mixed_field_names: list[str] = []
+    provenance: Provenance

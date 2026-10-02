@@ -11,8 +11,9 @@ from src.api.deps import provenance, require_scope
 from src.api.documentation import route_doc
 from src.api.problems import Problem
 from src.contracts.api import (
-    DoiResponse, DoiVerifyRequest, DoiVerifyResponse, LocateResponse, ManuscriptCitationsRequest,
-    ManuscriptCitationsResponse,
+    BibAuditRequest, BibAuditResponse, BibFormatEntry, BibFormatRequest, BibFormatResponse, BibRenderRequest, BibRenderResponse, DoiResponse,
+    DoiVerifyRequest, DoiVerifyResponse, LocateResponse, ManuscriptCitationsRequest, ManuscriptCitationsResponse,
+    RenderedReference,
 )
 from src.services.identity import normalize_doi
 
@@ -82,3 +83,104 @@ async def manuscript_citations(request: Request, body: ManuscriptCitationsReques
         raise Problem("VALIDATION_FAILED", "the BibTeX text has no entries",
                       errors=[{"loc": ["body", "bibtex"], "msg": "no @type{key, …} entries", "type": "value_error"}])
     return ManuscriptCitationsResponse(**result, provenance=provenance(request))
+
+
+def _project_keys(project_id: str | None) -> dict[str, str | None]:
+    if not project_id:
+        return {}
+    from sqlalchemy import select
+
+    from src.db.engine import session_scope
+    from src.db.models import CiteKey
+    with session_scope() as s:
+        return {k: d for k, d in s.execute(select(CiteKey.key, CiteKey.doi).where(CiteKey.project_id == project_id))}
+
+
+@router.post("/bib/format", response_model=BibFormatResponse, **route_doc("POST", "/bib/format"))
+async def bib_format(request: Request, body: BibFormatRequest, _=Depends(require_scope("read"))) -> BibFormatResponse:
+    from datetime import date
+
+    from src.services import bibformat
+    from src.services import doi as service
+
+    def work():
+        today = date.today()
+        prepared, keys, dois = [], [], []
+        for raw in body.dois:
+            d = normalize_doi(raw)
+            if d is None:
+                prepared.append((raw, None, [f"{raw!r} is not a DOI"]))
+                continue
+            reg = service.lookup(d)
+            meta = service.metadata(d, reg)
+            if meta is None:
+                why = "a registry did not answer; retry" if "unavailable" in reg.fetched.values() else \
+                    "no registry knows this DOI"
+                prepared.append((d, None, [why]))
+                continue
+            key, notes = bibformat.house_key(meta)
+            prepared.append((d, meta, notes))
+            keys.append(key)
+            dois.append(d)
+        resolved = iter(bibformat.disambiguate(keys, _project_keys(body.project_id), dois))
+        entries = []
+        for d, meta, notes in prepared:
+            if meta is None:
+                entries.append(BibFormatEntry(doi=d, notes=notes))
+                continue
+            key, collision = next(resolved)
+            if collision:
+                notes = notes + [f"key suffixed: the plain key is used for another work"
+                                 + (f" in {body.project_id}" if body.project_id else " in this request")]
+            entries.append(BibFormatEntry(doi=d, key=key, bibtex=bibformat.bibtex(meta, key, today),
+                                          collision=collision, notes=notes, in_corpus=service._in_corpus(d)))
+        return entries
+    try:
+        entries = await run_in_threadpool(work)
+    except Exception as exc:
+        raise _store_error(exc) from exc
+    return BibFormatResponse(entries=entries, provenance=provenance(request))
+
+
+@router.post("/bib/render", response_model=BibRenderResponse, **route_doc("POST", "/bib/render"))
+async def bib_render(request: Request, body: BibRenderRequest, _=Depends(require_scope("read"))) -> BibRenderResponse:
+    from src.services import bibformat, manuscripts
+    from src.services.bibtex import parse_bib
+    entries = {e["key"]: e["fields"] for e in parse_bib(body.bibtex)}
+    if not entries:
+        raise Problem("VALIDATION_FAILED", "the BibTeX text has no entries",
+                      errors=[{"loc": ["body", "bibtex"], "msg": "no @type{key, …} entries", "type": "value_error"}])
+    if body.keys is not None and body.manuscript is not None:
+        raise Problem("VALIDATION_FAILED", "give keys or manuscript, not both",
+                      errors=[{"loc": ["body"], "msg": "keys or manuscript", "type": "value_error"}])
+    unresolved: list[str] = []
+    if body.manuscript is not None:
+        found = await run_in_threadpool(manuscripts.find, body.manuscript, body.bibtex)
+        wanted = sorted({o["cite_key"] for o in found["occurrences"] if o["cite_key"]})
+        unresolved = sorted({o["cite_text"] for o in found["occurrences"] if o["status"] != "resolved"})
+    elif body.keys is not None:
+        wanted = list(dict.fromkeys(body.keys))
+        unresolved = [k for k in wanted if k not in entries]
+        wanted = [k for k in wanted if k in entries]
+    else:
+        wanted = list(entries)
+    ordered = sorted(wanted, key=lambda k: bibformat.sort_key(entries[k]))
+    refs = [RenderedReference(key=k, text=bibformat.render_entry(entries[k], body.style)) for k in ordered]
+    return BibRenderResponse(references=refs, unresolved_keys=unresolved,
+                             uncited_entries=sorted(set(entries) - set(wanted)) if body.manuscript is not None else [],
+                             provenance=provenance(request))
+
+
+@router.post("/bib/audit", response_model=BibAuditResponse, **route_doc("POST", "/bib/audit"))
+async def bib_audit(request: Request, body: BibAuditRequest, _=Depends(require_scope("read"))) -> BibAuditResponse:
+    from src.services import bibaudit
+    try:
+        result = await run_in_threadpool(bibaudit.audit, body.bibtex, body.project_id, body.search_missing)
+    except ValueError as exc:
+        raise Problem("PAYLOAD_TOO_LARGE", str(exc)) from exc
+    except Exception as exc:
+        raise _store_error(exc) from exc
+    if result["summary"]["entries"] == 0:
+        raise Problem("VALIDATION_FAILED", "the BibTeX text has no entries",
+                      errors=[{"loc": ["body", "bibtex"], "msg": "no @type{key, …} entries", "type": "value_error"}])
+    return BibAuditResponse(**result, provenance=provenance(request))

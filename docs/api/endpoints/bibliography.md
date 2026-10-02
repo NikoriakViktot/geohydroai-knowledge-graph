@@ -91,37 +91,55 @@ Regression fixtures:
 ---
 
 ## `POST /bib/format`
-- **Status**: planned (phase 1) · **Scope** `read` · S
+- **Status**: implemented (2026-10-02) · **Scope** `read` · S
 - **Purpose**: DOIs to BibTeX entries in the house key convention, with a verification note.
 - **Request**: `{"dois": string[] (≤ 100), "project_id": string?, "key_style": "Surname_YYYY"}`.
-- **Response 200**: `{"entries": [{"doi", "key": "Lehnigk_2026", "bibtex": "@article{Lehnigk_2026, …, note = {Crossref-verified 2026-10-02}}", "collision": false}], "provenance"}`.
+- **Response 200**: `{"entries": [{"doi", "key": "Biancamaria_2016", "bibtex": "@article{Biancamaria_2016, …, note = {Crossref/OpenAlex-verified 2026-10-02; online 2015-10-27, print 2016-03}}", "collision": false, "notes": [], "in_corpus": PaperRef?}], "provenance"}`. A DOI no registry knows comes back with `bibtex: null` and the reason in `notes`.
 - **Behaviour**:
-  - The key year follows the registry print year.
-  - Key collisions within `project_id` get suffixes `a`, `b` and are flagged.
-  - Cyrillic author names are transliterated (national standard) for keys only; the `author` field keeps the original.
+  - **Keys**: `Surname_YYYY`, or `Surname_Other_YYYY` for two authors. The key year is the registry print year (online when there is no print issue).
+  - **Collisions**: a key already used in `project_id` (`biblio.cite_key`) for another DOI, or twice in the request, gets a suffix `a`, `b` … and `collision: true`.
+  - **Cyrillic names** are transliterated for keys only (Ukrainian national standard, KMU 2010: Нікоряк → `Nikoriak`, Згурський → `Zghurskyi`). The `author` field keeps the original.
+  - **Organisation authors** are kept in braces (`{Conflict and Environment Observatory}`). Their keys use the capitals' initials and are flagged in `notes`: the house acronym (`CEOBS_2023`) must be chosen by a person. Datasets are flagged too (`ATL13_v6` style).
+  - **Fields**: type from the registry (`article`, `inproceedings`, `incollection`, `book`, `techreport`, `misc`); the title in double braces; `pages` with `--`, or `eid` for an article number. A `50-50` artefact is dropped.
 
 ---
 
 ## `POST /bib/audit`
-- **Status**: planned (phase 1) · **Scope** `read` · **J**
+- **Status**: implemented (2026-10-02; synchronous, ≤ 300 entries) · **Scope** `read` · S
 - **Purpose**: a full audit of a `.bib` file.
-- **Request**: multipart `file=@references.bib` or JSON `{"bibtex": string}`; plus `project_id`.
+- **Request**: `{"bibtex": string, "project_id": string?, "search_missing": true}`. Multipart upload and asynchronous runs for larger files are planned.
 - **Checks**:
   - DOI verification (as `/doi/verify`);
-  - missing DOIs where the registry has one;
-  - duplicate entries (same DOI, two keys);
-  - key collisions and key/year disagreement;
-  - mixed field case (`DOI=` vs `doi=`);
-  - entries with free-text status notes (`VERIFY …`).
-- **Result artifact**: `{"entries": [{"key", "status": "ok|fix|unresolved", "problems": [...], "suggested_bibtex"?}], "summary": {...}}`.
+  - **missing DOIs** where the registry has one: a Crossref bibliographic search on title, first author and year, accepted only at title similarity ≥ 0.95 with a matching year;
+  - duplicate entries (one DOI under two keys; one key twice);
+  - key/year disagreement: the last `_YYYY` part of the key that is a plausible year, so `UNOSAT_3616_2023` reads 2023;
+  - entries with free-text status notes (`VERIFY`, `TODO`, `FIXME`, "to check");
+  - mixed field-name case (`DOI=` next to `doi=`), reported as a **warning**: BibTeX ignores case.
+- **Response 200**: `{"entries": [{"key", "type", "status": "ok"|"fix"|"unresolved", "doi", "verdict", "suggested_doi", "problems": [...], "warnings": [...], "suggested_bibtex"?}], "summary": {"ok", "fix", "unresolved", "entries", "with_doi", "mixed_field_case"}, "mixed_field_names", "provenance"}`.
+  - `suggested_bibtex` is the house-format entry for the DOI (or the suggested DOI), under the entry's own key.
+  - `unresolved`: no registry knows the DOI, or an article has no DOI and none was found.
+- **Measured** on the floodstate-eo Paper 3 bib (85 entries, 13 s):
+  - 52 `ok`, 31 `fix`, 2 `unresolved` (Rikimaru 2002 and Pedregosa 2011, as the bib's own notes say);
+  - 13 missing DOIs found, e.g. Rennó 2008 → `10.1016/j.rse.2008.03.018`;
+  - 32 open `VERIFY` notes;
+  - `Efron_Tibshirani_1993` has `year = 1994`.
+- **Agent notes**: apply `suggested_bibtex` only after reading the diff. A suggested DOI is a registry match on title and year, not a proof that it is the work you cited.
 
 ---
 
 ## `POST /bib/render`
-- **Status**: planned (phase 1) · **Scope** `read` · S
+- **Status**: implemented (2026-10-02) · **Scope** `read` · S
 - **Purpose**: a formatted reference list for a manuscript, from a set of keys or from the manuscript text itself.
-- **Request**: `{"bibtex": string, "keys": string[]?, "manuscript": string?, "style": "agu" | "copernicus" | "elsevier-harvard" | "apa"}`. With `manuscript`, the keys are taken from its citations (as `/manuscripts/citations`).
-- **Response 200**: `{"references": [{"key", "text": "Lehnigk, K. E., Pavelsky, T. M., & Lang, K. A. (2026). SWOT satellite observations …"}], "unresolved_keys": string[], "uncited_entries": string[], "provenance"}`.
+- **Request**: `{"bibtex": string, "keys": string[]?, "manuscript": string?, "style": "apa" | "agu" | "copernicus" | "elsevier-harvard"}`.
+  - With `manuscript`, the keys are taken from its citations (as `/manuscripts/citations`). Give `keys` or `manuscript`, not both; with neither, every entry is rendered.
+- **Response 200**: `{"references": [{"key", "text": "Biancamaria, S., Lettenmaier, D. P., & Pavelsky, T. M. (2016). The SWOT Mission … Surveys in Geophysics, 37(2), 307–337. https://doi.org/10.1007/s10712-015-9346-y"}], "unresolved_keys": string[], "uncited_entries": string[], "provenance"}`.
+  - The list is sorted by first author, year and title.
+  - `unresolved_keys` holds requested keys that are not in the bib, or (with `manuscript`) citations that did not resolve. `uncited_entries` is filled only with `manuscript`.
+- **Styles**:
+  - `apa` and `agu`: `Family, I. I., & Family, I. (Year). Title. Journal, vol(issue), pages. https://doi.org/…`. A group author ends with a full stop.
+  - `copernicus`: `Family, I., and Family, I.: Title, Journal, vol, pages, https://doi.org/…, Year.`
+  - `elsevier-harvard`: `Family, I.I., Family, I., Year. Title. Journal vol, pages. https://doi.org/….`
+- **Agent notes**: render from a bib that `POST /doi/verify` has checked. The formatter does not fix wrong metadata.
 
 ---
 

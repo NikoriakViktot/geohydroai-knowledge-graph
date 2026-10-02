@@ -1,0 +1,56 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "bibtex": {
+      "maxLength": 5000000,
+      "minLength": 1,
+      "title": "Bibtex",
+      "type": "string"
+    },
+    "keys": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Keys"
+    },
+    "manuscript": {
+      "anyOf": [
+        {
+          "maxLength": 2000000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Manuscript"
+    },
+    "style": {
+      "default": "apa",
+      "enum": [
+        "apa",
+        "agu",
+        "copernicus",
+        "elsevier-harvard"
+      ],
+      "title": "Style",
+      "type": "string"
+    }
+  },
+  "required": [
+    "bibtex"
+  ],
+  "title": "BibRenderRequest",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/BibRenderRequest.v1.json"
+}

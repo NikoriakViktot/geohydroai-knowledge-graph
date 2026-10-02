@@ -1,0 +1,221 @@
+{
+  "$defs": {
+    "LLMUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "prompt_sha256": {
+          "title": "Prompt Sha256",
+          "type": "string"
+        },
+        "tokens_in": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokens In"
+        },
+        "tokens_out": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokens Out"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "repair_count": {
+          "default": 0,
+          "title": "Repair Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "prompt_sha256"
+      ],
+      "title": "LLMUsage",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Present in every successful response; record it with any result you use.",
+      "properties": {
+        "api_version": {
+          "title": "Api Version",
+          "type": "string"
+        },
+        "git_commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Git Commit"
+        },
+        "corpus_manifest_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corpus Manifest Id"
+        },
+        "collection": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Collection"
+        },
+        "embedding_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Embedding Model"
+        },
+        "kb_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kb Version"
+        },
+        "identity_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Identity Run Id"
+        },
+        "llm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LLMUsage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "api_version",
+        "git_commit",
+        "corpus_manifest_id",
+        "generated_at"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "RenderedReference": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "text"
+      ],
+      "title": "RenderedReference",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "references": {
+      "items": {
+        "$ref": "#/$defs/RenderedReference"
+      },
+      "title": "References",
+      "type": "array"
+    },
+    "unresolved_keys": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Unresolved Keys",
+      "type": "array"
+    },
+    "uncited_entries": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Uncited Entries",
+      "type": "array"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "references",
+    "provenance"
+  ],
+  "title": "BibRenderResponse",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/BibRenderResponse.v1.json"
+}
