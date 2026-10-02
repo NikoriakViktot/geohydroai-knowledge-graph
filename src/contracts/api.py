@@ -843,3 +843,35 @@ class BibAuditResponse(_Contract):
     summary: dict[str, int]
     mixed_field_names: list[str] = []
     provenance: Provenance
+
+
+class EntityMention(_Contract):
+    canonical_id: str
+    display_name: str | None = None
+    surface_form: str | None = None
+    role: Literal["used", "mentioned"] | None = None
+    confidence: float | None = None
+    grounded: bool | None = Field(default=None, description="the term occurs as a word in the paper's TEI text; "
+                                                            "null = not checked")
+    tei_mentions: int | None = None
+    tei_evidence: list[str] = []
+    evidence: list[str] = Field(default=[], description="the extractor's own snippets (often miss the mention)")
+    page: int | None = None
+
+
+class ExtractorLabel(_Contract):
+    label: str
+    confidence: float | None = None
+    source: str | None = None
+
+
+class PaperEntitiesResponse(_Contract):
+    paper: PaperRef
+    methods: list[EntityMention]
+    sensors: list[EntityMention]
+    metrics: list[EntityMention] = Field(description="metric mentions; values are in /metrics/facts and /metrics/extract")
+    task: ExtractorLabel | None = None
+    study_type: ExtractorLabel | None = None
+    study_area: dict
+    source_file: str
+    provenance: Provenance

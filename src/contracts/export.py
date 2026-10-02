@@ -66,6 +66,7 @@ CONTRACTS = (
     (api.BibRenderResponse, 1),
     (api.BibAuditRequest, 1),
     (api.BibAuditResponse, 1),
+    (api.PaperEntitiesResponse, 1),
     (api.ThesesValidateRequest, 1),
     (api.ThesesValidateResponse, 1),
     (research.Labeler, 1),

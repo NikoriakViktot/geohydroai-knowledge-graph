@@ -139,14 +139,22 @@ At least one of `section`, `page` and `q` is required. They combine with AND.
 ---
 
 ## `GET /papers/{paper_id}/entities`
-- **Status**: planned (phase 1) · `read` · S
-- **Purpose**: methods, sensors, DEMs, metrics, study area and task, normalised to the ontology (`canonical_id`).
+- **Status**: implemented (2026-10-02) · `read` · S
+- **Purpose**: methods, sensors and metric mentions normalised to the ontology (`canonical_id`), with the task, study type and study area the extractor assigned.
+- **Source**: the paper's normalized JSON (`core.paper_file`, kind `normalized`) through the graph loader's edge logic, plus the grounding file `data/graph_inputs/entity_grounding.parquet`. These are the same data as the graph's edges.
 
-**Response 200**: `{"methods": [{"canonical_id": "method.hand", "surface_form": "HAND", "confidence": 0.9, "evidence": "…", "role": "used"|"cited"|null}], "sensors": [...], "metrics": [MetricFact], "study_area": {"countries": [...], "rivers": [...]}, "task": "flood_mapping_satellite", "study_type": "case_study", "provenance"}`
+**Response 200**: `{"paper": PaperRef, "methods": [EntityMention], "sensors": [...], "metrics": [...], "task": {"label", "confidence", "source"}?, "study_type": {...}?, "study_area": {"primary_country", "countries": [{"name", "source", "confidence"}], "rivers": [...], "dropped_country_names": int}, "source_file", "provenance"}`
+
+- `EntityMention` = `{canonical_id, display_name, surface_form, role: used|mentioned|null, confidence, grounded, tei_mentions, tei_evidence[], evidence[], page}`. Grounded mentions come first.
+- `metrics` are mentions only. Values are in `GET /metrics/facts` (tables) and `POST /metrics/extract` (text).
+- Country names that are obviously not names are dropped and counted: URLs, "al.", anything with a digit such as "WGS84".
+
+**Errors**: `404`; `424 SOURCE_UNAVAILABLE` when the paper has no normalized entity file.
 
 **Agent notes**:
-- Entity labels come from a gazetteer plus rules and have **not** been validated against a human gold set: the `accepted` flag carries no information.
-- Treat them as search hints, not as facts about the paper. Confirm with `/text`.
+- Entity labels come from a gazetteer plus rules and have **not** been validated against a human gold set: the `accepted` flag of the old pipeline carries no information.
+- `grounded = false` means the term is not written in the paper's text as such. Treat the mention as unsupported until `/text?q=…` shows the concept.
+- `study_area.countries` mixes the study area with countries named in the literature review (`source = ner`). Use `primary_country` and read the text.
 
 ---
 

@@ -1,0 +1,473 @@
+{
+  "$defs": {
+    "EntityMention": {
+      "additionalProperties": false,
+      "properties": {
+        "canonical_id": {
+          "title": "Canonical Id",
+          "type": "string"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Display Name"
+        },
+        "surface_form": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Surface Form"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "enum": [
+                "used",
+                "mentioned"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "grounded": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the term occurs as a word in the paper's TEI text; null = not checked",
+          "title": "Grounded"
+        },
+        "tei_mentions": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tei Mentions"
+        },
+        "tei_evidence": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Tei Evidence",
+          "type": "array"
+        },
+        "evidence": {
+          "default": [],
+          "description": "the extractor's own snippets (often miss the mention)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        }
+      },
+      "required": [
+        "canonical_id"
+      ],
+      "title": "EntityMention",
+      "type": "object"
+    },
+    "ExtractorLabel": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "title": "ExtractorLabel",
+      "type": "object"
+    },
+    "LLMUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "prompt_sha256": {
+          "title": "Prompt Sha256",
+          "type": "string"
+        },
+        "tokens_in": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokens In"
+        },
+        "tokens_out": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokens Out"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "repair_count": {
+          "default": 0,
+          "title": "Repair Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "prompt_sha256"
+      ],
+      "title": "LLMUsage",
+      "type": "object"
+    },
+    "PaperRef": {
+      "additionalProperties": false,
+      "properties": {
+        "paper_id": {
+          "title": "Paper Id",
+          "type": "string"
+        },
+        "doi": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Doi"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "venue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Venue"
+        },
+        "identity_status": {
+          "enum": [
+            "ok",
+            "no_doi",
+            "title_doi_mismatch",
+            "duplicate",
+            "not_a_paper",
+            "truncated_json"
+          ],
+          "title": "Identity Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "paper_id",
+        "identity_status"
+      ],
+      "title": "PaperRef",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Present in every successful response; record it with any result you use.",
+      "properties": {
+        "api_version": {
+          "title": "Api Version",
+          "type": "string"
+        },
+        "git_commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Git Commit"
+        },
+        "corpus_manifest_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corpus Manifest Id"
+        },
+        "collection": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Collection"
+        },
+        "embedding_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Embedding Model"
+        },
+        "kb_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kb Version"
+        },
+        "identity_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Identity Run Id"
+        },
+        "llm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LLMUsage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "api_version",
+        "git_commit",
+        "corpus_manifest_id",
+        "generated_at"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "paper": {
+      "$ref": "#/$defs/PaperRef"
+    },
+    "methods": {
+      "items": {
+        "$ref": "#/$defs/EntityMention"
+      },
+      "title": "Methods",
+      "type": "array"
+    },
+    "sensors": {
+      "items": {
+        "$ref": "#/$defs/EntityMention"
+      },
+      "title": "Sensors",
+      "type": "array"
+    },
+    "metrics": {
+      "description": "metric mentions; values are in /metrics/facts and /metrics/extract",
+      "items": {
+        "$ref": "#/$defs/EntityMention"
+      },
+      "title": "Metrics",
+      "type": "array"
+    },
+    "task": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExtractorLabel"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "study_type": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExtractorLabel"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "study_area": {
+      "additionalProperties": true,
+      "title": "Study Area",
+      "type": "object"
+    },
+    "source_file": {
+      "title": "Source File",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "paper",
+    "methods",
+    "sensors",
+    "metrics",
+    "study_area",
+    "source_file",
+    "provenance"
+  ],
+  "title": "PaperEntitiesResponse",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/PaperEntitiesResponse.v1.json"
+}

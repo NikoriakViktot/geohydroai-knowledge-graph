@@ -307,3 +307,34 @@ def test_unknown_project_is_a_contract_violation(client):
 def test_quote_fragments_helper():
     assert quotes.fragments("a … b ... c") == ["a", "b", "c"]
     assert quotes.too_short("short … also short") and not quotes.too_short("x" * 25)
+
+
+def test_entities_endpoint(client, monkeypatch, tmp_path):
+    import json as _json
+
+    from src.services import entities as ent
+    norm = tmp_path / "iqbal_2023.json"
+    norm.write_text(_json.dumps({
+        "entities": {"methods": [{"name": "HAND", "role": "used", "evidence": "a HAND map", "provenance": {"page": 3}}],
+                     "task": {"label": "flood_mapping", "confidence": 0.9, "source": "rules"},
+                     "geo": {"study_type": {"label": "case_study", "confidence": 0.8, "source": "rules"},
+                             "study_geo": {"primary_country": "Bangladesh", "rivers": ["Jamuna"],
+                                           "countries": [{"name": "Bangladesh", "source": "regex", "confidence": 0.75},
+                                                         {"name": "WGS84", "source": "ner", "confidence": 0.55},
+                                                         {"name": "al.", "source": "ner", "confidence": 0.55}]}}},
+        "normalized_entities": {"methods": [{"raw_name": "HAND", "canonical_id": "method.hand", "confidence": 1.0,
+                                             "display_name": "Height Above Nearest Drainage", "source_field": "methods"}]}}),
+        encoding="utf-8")
+    monkeypatch.setattr(ent, "normalized_path", lambda pid: norm if pid == "iqbal_2023" else None)
+    monkeypatch.setattr(ent, "grounding", lambda: {("USES_METHOD", "iqbal_2023", "method.hand"):
+                                                   {"grounded": True, "tei_mentions": 2, "tei_evidence": ["The HAND method"]}})
+    r = client.get("/v1/papers/iqbal_2023/entities", headers=H)
+    body = r.json()
+    assert r.status_code == 200, body
+    m = body["methods"][0]
+    assert (m["canonical_id"], m["role"], m["page"], m["grounded"], m["tei_evidence"]) == (
+        "method.hand", "used", 3, True, ["The HAND method"])
+    assert body["task"]["label"] == "flood_mapping" and body["study_type"]["label"] == "case_study"
+    assert [c["name"] for c in body["study_area"]["countries"]] == ["Bangladesh"]
+    assert body["study_area"]["dropped_country_names"] == 2 and body["study_area"]["rivers"] == ["Jamuna"]
+    assert client.get("/v1/papers/no_tei/entities", headers=H).json()["code"] == "SOURCE_UNAVAILABLE"

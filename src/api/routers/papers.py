@@ -12,7 +12,8 @@ from src.api.documentation import route_doc
 from src.api.problems import Problem
 from src.contracts.api import (
     EvidenceSpan, PaperRef, ReferenceEntry, ReferencesResponse, ResolveBatchRequest, ResolveBatchResponse,
-    ResolveBatchResult, ResolveResponse, SectionInfo, SectionsResponse, TableEntry, TablesResponse, TextResponse,
+    PaperEntitiesResponse, ResolveBatchResult, ResolveResponse, SectionInfo, SectionsResponse, TableEntry,
+    TablesResponse, TextResponse,
 )
 from src.contracts.identity import PaperIdentity
 
@@ -199,3 +200,20 @@ async def tables(request: Request, paper_id: str, _=Depends(require_scope("read"
                       page=_page(t.coords), rows=[[str(c) for c in row] for row in (t.rows or ())])
            for k, t in enumerate(doc.tables)]
     return TablesResponse(paper=_ref(paper), tables=out, provenance=provenance(request))
+
+
+@router.get("/papers/{paper_id}/entities", response_model=PaperEntitiesResponse,
+            **route_doc("GET", "/papers/{paper_id}/entities"))
+async def entities(request: Request, paper_id: str, _=Depends(require_scope("read"))) -> PaperEntitiesResponse:
+    from src.services.entities import paper_entities
+    found = await _resolve(paper_id=paper_id, include=frozenset())
+    if found is None:
+        raise Problem("NOT_FOUND", f"no paper with paper_id {paper_id!r}")
+    try:
+        body = await run_in_threadpool(paper_entities, found.paper.paper_id)
+    except Exception as exc:
+        raise Problem("STORE_UNAVAILABLE", f"postgres or entity files: {type(exc).__name__}",
+                      headers={"Retry-After": "30"}) from exc
+    if body is None:
+        raise Problem("SOURCE_UNAVAILABLE", f"no normalized entity file for {paper_id!r}")
+    return PaperEntitiesResponse(paper=_ref(found.paper), **body, provenance=provenance(request))
