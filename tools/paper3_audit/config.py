@@ -5,6 +5,13 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BUNDLE_DIR = REPO_ROOT / "paper_unet-case-kakhovka"
+
+# The audit's run_manifest recorded n_chroma = 1,354,158: the v1 index. The global default
+# moved to flood_papers_768d_v2 on 2026-10-02; this audit stays on v1 until it is re-run on
+# purpose (set both variables to move it).
+import os as _os  # noqa: E402
+AUDIT_CHROMA_DIR = Path(_os.getenv("PAPER3_AUDIT_CHROMA_DIR", str(REPO_ROOT / ".chromadb")))
+AUDIT_COLLECTION = _os.getenv("PAPER3_AUDIT_COLLECTION", "flood_papers_768d")
 PUB_DIR = BUNDLE_DIR / "publication"
 OUT_DIR = BUNDLE_DIR / "literature_audit_paper3"
 WORK_DIR = OUT_DIR / "_work"

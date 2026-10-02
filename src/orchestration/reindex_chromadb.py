@@ -55,8 +55,8 @@ def main() -> None:
     )
     ap.add_argument(
         "--collection-name",
-        default="flood_papers_768d",
-        help="ChromaDB collection to write into (default: flood_papers_768d)",
+        default=None,
+        help="ChromaDB collection to write into (default: COLLECTION_NAME from src.config)",
     )
     ap.add_argument(
         "--batch-size",
@@ -96,6 +96,9 @@ def main() -> None:
     from src.document import LayoutAwareChunker, TEIParser
     from src.vectorstore.chroma_store import VectorStore
 
+    if args.collection_name is None:
+        from src.config import COLLECTION_NAME
+        args.collection_name = COLLECTION_NAME
     vs = VectorStore(collection_name=args.collection_name)
     log.info(
         "VectorStore ready: collection=%s  existing=%d",

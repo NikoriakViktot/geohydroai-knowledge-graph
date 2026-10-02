@@ -689,14 +689,14 @@ def get_semantic_evidence(
                 "distance":      round(float(h.get("distance", 1.0)), 4),
                 "score":         round(1.0 - float(h.get("distance", 1.0)), 4),
                 "source_layer":  "chromadb",
-                "provenance_path": ["ChromaDB:flood_papers_768d", "papers.parquet"],
+                "provenance_path": [f"ChromaDB:{COLLECTION_NAME}", "papers.parquet"],
             })
 
         return enrich_with_paper_metadata(
             raw,
             paper_id_key="paper_id",
             source_layer="chromadb",
-            provenance_path=["ChromaDB:flood_papers_768d", "papers.parquet"],
+            provenance_path=[f"ChromaDB:{COLLECTION_NAME}", "papers.parquet"],
         )
 
     except Exception as exc:

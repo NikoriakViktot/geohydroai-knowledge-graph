@@ -91,12 +91,13 @@ def cmd_retrieve(args) -> int:
         for c in selected:
             print(c.atomic_id, c.priority, len(c.queries), "queries")
         return 0
-    from src.config import COLLECTION_NAME, EMBEDDING_MODEL
+    from src.config import EMBEDDING_MODEL
     from src.embedding.embedder import Embedder
     from src.vectorstore.chroma_store import VectorStore
+    from tools.paper3_audit.config import AUDIT_CHROMA_DIR, AUDIT_COLLECTION as COLLECTION_NAME
     import time
     t0 = time.time()
-    store = VectorStore(collection_name=COLLECTION_NAME)
+    store = VectorStore(persist_dir=AUDIT_CHROMA_DIR, collection_name=COLLECTION_NAME)
     try:
         n_chroma = store.count()
     except Exception as exc:

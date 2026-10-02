@@ -23,7 +23,7 @@ API_VERSION = "1.0.0-dev"
 ROOT = Path(__file__).resolve().parents[2]
 
 #: The collection the API answers vector queries from (switched to v2 once verified).
-COLLECTION = os.getenv("COLLECTION_NAME", "flood_papers_768d")
+from src.config import COLLECTION_NAME as COLLECTION  # noqa: E402  (one source of truth)
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL_ID", "allenai/specter2_base@3447645e")
 RETRIEVAL_RULES_VERSION = "1.2.0"
 

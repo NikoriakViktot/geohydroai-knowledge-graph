@@ -1,10 +1,29 @@
 # Search — semantic, paper-level, similar, hybrid
 
 **Backing data**:
-- ChromaDB collection `flood_papers_768d_v2`. It is being rebuilt on 2026-10-02 with unique chunk ids; v1 `flood_papers_768d` had abstract chunks for only 2,462 of 4,955 papers.
-- Model `allenai/specter2_base@3447645e` (full revision `3447645e1def…`): 768-d, mean pooling, no adapter. The same encoder embeds queries and documents. The API loads it on the first search (CPU, a few seconds).
-- Filters on DOI, year, cohort and identity resolve through `core.paper` in Postgres. Chroma stores only chunk metadata, so the resulting paper set goes into Chroma as `paper_id $in`, or as the shorter `$nin` of the papers left out.
+- ChromaDB collection `flood_papers_768d_v2` in `.chromadb_v2`, the default since 2026-10-02.
+  - 1,418,382 chunks from 5,028 papers, with unique chunk ids.
+  - Abstract and caption chunks were re-embedded with the fixed TEI parser. Abstract chunks exist for 4,814 papers: every paper whose TEI has a real abstract.
+  - The v1 collection `flood_papers_768d` stays in `.chromadb` for audits pinned to it. It had abstract chunks for only 2,462 of 4,955 papers.
+- Model `allenai/specter2_base@3447645e` (full revision `3447645e1def…`): 768-d, mean pooling, **no adapter**. The same encoder embeds queries and documents. The API loads it on the first search (CPU, a few seconds).
+- Filters on DOI, year, cohort and identity resolve through `core.paper` in Postgres; Chroma stores only chunk metadata.
+  - A slice that covers ≥ 25 % of the index is searched **unfiltered with more candidates**, and the hits are filtered afterwards. A Chroma metadata filter is evaluated row by row in SQLite: a `$nin` over 218 papers took 4.5 s, the unfiltered query 0.02 s.
+  - Smaller slices go into Chroma as `paper_id $in` and `chunk_type $in`.
 - The collection is opened in-process for reading. Chroma server mode (one owner of the index) is planned (WP 1.2).
+
+**Measured on 2026-10-02** (`flood_papers_768d_v2`, API on the WSL host):
+
+| | |
+|---|---|
+| first search after start | ~16 s (loads the 5 GB HNSW index and the encoder) |
+| warm `/search/chunks`, default filters | 0.04 s |
+| warm, with `year_from = 2023` (994 papers) | ~2.3 s |
+| warm `/search/papers`, 2 queries | 0.15 s |
+| paper-level recall on 8 control queries | 4/8 expected papers in the top 10 (3/8 with abstract chunks only) |
+
+- Similarities from SPECTER2 base are compressed: almost every hit scores 0.90–0.95. A `min_score` threshold separates little.
+- SPECTER2 is meant to be used with task adapters: `adhoc_query` for queries, `proximity` for documents. Re-embedding with adapters, and the lexical channel of `/search/hybrid`, are the planned fixes.
+- Until then, use several phrasings, the method's name and distinctive terms, and confirm with `/papers/{id}/text`.
 
 **Chunk types** in the collection: `abstract`, `sentence` (95 %), `paragraph`, `section`, `figure`, `table`, `formula`.
 

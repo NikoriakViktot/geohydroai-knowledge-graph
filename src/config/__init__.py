@@ -14,7 +14,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 # ── Paths ────────────────────────────────────────────────────────────────────
 DATA_DIR    = _PROJECT_ROOT / "data" / "literature"
 OUTPUTS_DIR = _PROJECT_ROOT / "outputs"
-CHROMA_DIR  = Path(os.getenv("CHROMA_DIR", str(_PROJECT_ROOT / ".chromadb")))
+CHROMA_DIR  = Path(os.getenv("CHROMA_DIR", str(_PROJECT_ROOT / ".chromadb_v2")))  # v1 .chromadb kept for pinned audits
 
 # ── Chunking ─────────────────────────────────────────────────────────────────
 CHUNK_SIZE    = int(os.getenv("CHUNK_SIZE",    "2000"))
@@ -22,12 +22,12 @@ CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "300"))
 CHUNK_MIN     = int(os.getenv("CHUNK_MIN",     "120"))
 
 # ── Embeddings ────────────────────────────────────────────────────────────────
-EMBEDDING_MODEL      = os.getenv("EMBEDDING_MODEL", "allenai/specter2_base")  # 768-dim; matches flood_papers_768d
+EMBEDDING_MODEL      = os.getenv("EMBEDDING_MODEL", "allenai/specter2_base")  # 768-dim; matches flood_papers_768d_v2
 EMBEDDING_BATCH_SIZE = int(os.getenv("EMBEDDING_BATCH_SIZE", "64"))
 EMBEDDING_DEVICE     = os.getenv("EMBEDDING_DEVICE", "cpu")
 
 # ── ChromaDB ─────────────────────────────────────────────────────────────────
-COLLECTION_NAME = os.getenv("COLLECTION_NAME", "flood_papers_768d")
+COLLECTION_NAME = os.getenv("COLLECTION_NAME", "flood_papers_768d_v2")  # 2026-10-02: unique chunk ids, fixed TEI text
 
 # ── Retrieval ────────────────────────────────────────────────────────────────
 RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "12"))

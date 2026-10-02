@@ -16,6 +16,7 @@ import os
 import sqlite3
 import threading
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 
 DEFAULT_IDENTITY = ("ok", "no_doi", "title_doi_mismatch")
@@ -133,7 +134,39 @@ def slice_papers(filters: dict) -> set[str]:
     return allowed
 
 
+#: Below this share of the index, the slice goes into Chroma as a filter; above it, the query
+#: runs unfiltered with more candidates and the hits are filtered here. Chroma evaluates a
+#: metadata filter row by row in SQLite: a $nin over 218 papers took 4.5 s on 1.4 M chunks,
+#: the unfiltered query 0.02 s (2026-10-02).
+PREFILTER_BELOW = 0.25
+MAX_CANDIDATES = 2000
+
+
+@dataclass(frozen=True)
+class Plan:
+    where: dict | None
+    n_results: int
+    allowed: frozenset[str]
+    types: frozenset[str] | None
+    postfilter: bool
+
+
+def plan(allowed: set[str], types: list[str] | None, k: int, counts: dict[str, dict[str, int]]) -> Plan:
+    total = sum(sum(c.values()) for c in counts.values()) or 1
+    in_slice = sum(n for p in allowed if p in counts for t, n in counts[p].items() if not types or t in types)
+    share = in_slice / total
+    tset = frozenset(types) if types and set(types) != set(CHUNK_TYPES) else None
+    if share >= PREFILTER_BELOW:
+        n = min(MAX_CANDIDATES, int(k / max(share, 0.01) * 1.5) + 20)
+        return Plan(None, n, frozenset(allowed), tset, True)
+    clauses = [{"paper_id": {"$in": sorted(p for p in allowed if p in counts) or ["__none__"]}}]
+    if tset:
+        clauses.append({"chunk_type": {"$in": sorted(tset)}})
+    return Plan(clauses[0] if len(clauses) == 1 else {"$and": clauses}, k, frozenset(allowed), tset, False)
+
+
 def _where(allowed: set[str], indexed: set[str], types: list[str] | None) -> dict | None:
+    """The Chroma filter for a slice (used when the slice is small; see `plan`)."""
     clauses = []
     in_slice = allowed & indexed
     left_out = indexed - allowed
@@ -147,6 +180,18 @@ def _where(allowed: set[str], indexed: set[str], types: list[str] | None) -> dic
     if not clauses:
         return None
     return clauses[0] if len(clauses) == 1 else {"$and": clauses}
+
+
+def run_query(vector: list[float], pl: Plan) -> dict:
+    """Query Chroma by the plan; with post-filtering, drop hits outside the slice and retry with
+    the filter if too few remain."""
+    result = collection().query(query_embeddings=[vector], n_results=pl.n_results, where=pl.where,
+                                include=["documents", "metadatas", "distances"])
+    if not pl.postfilter:
+        return result
+    keep = [i for i, m in enumerate(result["metadatas"][0])
+            if (m or {}).get("paper_id") in pl.allowed and (pl.types is None or (m or {}).get("chunk_type") in pl.types)]
+    return {key: [[result[key][0][i] for i in keep]] for key in ("ids", "documents", "metadatas", "distances")}
 
 
 def coverage(allowed: set[str], types: list[str] | None, filters: dict) -> dict:
@@ -180,14 +225,16 @@ def search_chunks(query: str, k: int, filters: dict, min_score: float | None = N
     allowed = slice_papers(filters)
     types = filters.get("chunk_types")
     counts = chunk_counts()
-    where = _where(allowed, set(counts), types)
     n = k * (SECTION_OVERFETCH if filters.get("sections") else 1)
     cov = coverage(allowed, types, filters)
     if cov["papers_in_slice"] == 0:
         return {"hits": [], "coverage": cov}
-    result = collection().query(query_embeddings=[embed(query)], n_results=n, where=where,
-                                include=["documents", "metadatas", "distances"])
+    pl = plan(allowed, types, n, counts)
+    result = run_query(embed(query), pl)
     hits = _hits(result, filters.get("sections"), min_score)[:k]
+    if pl.postfilter and len(hits) < k and len(result["ids"][0]) < n:
+        result = run_query(embed(query), Plan(_where(allowed, set(counts), types), n, pl.allowed, pl.types, False))
+        hits = _hits(result, filters.get("sections"), min_score)[:k]
     if filters.get("sections"):
         cov["note"] = f"the section filter is applied after retrieving {n} candidates"
     return {"hits": hits, "coverage": cov}
@@ -196,14 +243,12 @@ def search_chunks(query: str, k: int, filters: dict, min_score: float | None = N
 def search_papers(queries: list[str], k: int, max_candidates: int, filters: dict, aggregate: str) -> dict:
     allowed = slice_papers(filters)
     types = filters.get("chunk_types")
-    where = _where(allowed, set(chunk_counts()), types)
     cov = coverage(allowed, types, filters)
     per_paper: dict[str, list[dict]] = defaultdict(list)
     if cov["papers_in_slice"]:
-        n = max(1, max_candidates // len(queries))
+        pl = plan(allowed, types, max(1, max_candidates // len(queries)), chunk_counts())
         for q in queries:
-            result = collection().query(query_embeddings=[embed(q)], n_results=n, where=where,
-                                        include=["documents", "metadatas", "distances"])
+            result = run_query(embed(q), pl)
             for h in _hits(result, filters.get("sections"), None):
                 per_paper[h["paper_id"]].append(dict(h, query=q))
     return {"papers": _aggregate(per_paper, k, aggregate), "coverage": cov}
@@ -246,12 +291,10 @@ def similar_papers(paper_id: str, k: int, filters: dict) -> dict | None:
         return None
     allowed = slice_papers(filters) - {paper_id}
     types = filters.get("chunk_types")
-    where = _where(allowed, set(chunk_counts()), types)
     cov = coverage(allowed, types, filters)
     per_paper: dict[str, list[dict]] = defaultdict(list)
     if cov["papers_in_slice"]:
-        result = collection().query(query_embeddings=[vec], n_results=min(1000, k * 25), where=where,
-                                    include=["documents", "metadatas", "distances"])
+        result = run_query(vec, plan(allowed, types, min(1000, k * 25), chunk_counts()))
         for h in _hits(result, filters.get("sections"), None):
             if h["paper_id"] != paper_id:
                 per_paper[h["paper_id"]].append(dict(h, query="seed"))

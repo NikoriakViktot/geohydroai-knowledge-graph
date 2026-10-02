@@ -43,7 +43,7 @@ GHAI_PG_USER = os.getenv("GHAI_PG_USER", "ghai")
 # ── Model names ───────────────────────────────────────────────────────────────
 EMBEDDING_MODEL = os.getenv(
     "EMBEDDING_MODEL",
-    "allenai/specter2_base",  # 768-dim; matches active collection flood_papers_768d
+    "allenai/specter2_base",  # 768-dim; matches active collection flood_papers_768d_v2
 )
 SPACY_MODEL = os.getenv("SPACY_MODEL", "en_core_web_sm")
 

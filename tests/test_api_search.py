@@ -100,8 +100,10 @@ def test_chunk_search_with_coverage_and_validity(client, fake):
     assert body["coverage"]["chunks_in_slice"] == 41 + 31 + 12 + 1
     assert body["retrieval_validity"] == "NOT_MEASURED" and "R-SCI-3" in body["validity_detail"]["reason"]
     assert body["provenance"]["collection"] and body["provenance"]["embedding_model"]
-    # the duplicate copy is left out with the short $nin list
-    assert fake.queries[-1]["where"] == {"paper_id": {"$nin": ["dup"]}}
+    # a large slice runs unfiltered (a Chroma $nin costs seconds) and is filtered afterwards:
+    # the duplicate's chunk is the closest of all and must not come back
+    assert fake.queries[-1]["where"] is None and fake.queries[-1]["n_results"] > 3
+    assert "c5" not in [h["chunk_id"] for h in body["hits"]]
 
 
 def test_filters_reach_the_index(client, fake):
@@ -111,6 +113,15 @@ def test_filters_reach_the_index(client, fake):
     assert where == {"$and": [{"paper_id": {"$in": ["p3", "p4"]}}, {"chunk_type": {"$in": ["abstract", "table"]}}]}
     assert [h["chunk_id"] for h in body["hits"]] == ["c4", "c6"]
     assert body["coverage"]["chunks_in_slice"] == 2 + 1
+
+
+def test_plan_prefilters_only_small_slices():
+    counts = {"a": {"sentence": 90}, "b": {"sentence": 5}, "c": {"abstract": 5}}
+    big = search.plan({"a", "b"}, None, 10, counts)
+    assert big.where is None and big.postfilter and big.n_results == int(10 / 0.95 * 1.5) + 20
+    small = search.plan({"b", "c"}, ["abstract"], 10, counts)
+    assert small.where == {"$and": [{"paper_id": {"$in": ["b", "c"]}}, {"chunk_type": {"$in": ["abstract"]}}]}
+    assert not small.postfilter and small.n_results == 10
 
 
 def test_section_filter_and_min_score(client, fake):
@@ -139,7 +150,8 @@ def test_paper_search_aggregates_queries(client):
 def test_similar_papers_exclude_the_seed(client, fake):
     body = client.post("/v1/search/similar", headers=H, json={"paper_id": "p1", "k": 3}).json()
     assert "p1" not in [p["paper_id"] for p in body["papers"]]
-    assert fake.queries[-1]["where"] == {"paper_id": {"$nin": ["dup", "p1"]}}
+    assert fake.queries[-1]["where"] is None                     # large slice: filtered after the query
+    assert not {"dup", "p1"} & {p["paper_id"] for p in body["papers"]}
     seedless = client.post("/v1/search/similar", headers=H, json={"paper_id": "p2"})
     assert seedless.status_code == 424 and seedless.json()["code"] == "SOURCE_UNAVAILABLE"
     assert client.post("/v1/search/similar", headers=H, json={"paper_id": "nope"}).status_code == 404

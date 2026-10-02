@@ -192,7 +192,7 @@ These rules are enforced by design — violating them breaks the pipeline:
 
 ## Known Critical Issues (as of 2026-05-20)
 
-1. **ChromaDB rebuilt as `flood_papers_768d`** ✅ — 986,832 chunks from 3,686 papers indexed at 768-dim (SPECTER2). Retrieval smoke test passed 10/10 queries. Old 384-dim `flood_papers` archived in `.chromadb_backup_20260520/`. Use `COLLECTION_NAME=flood_papers_768d` (default in both config files). **ChromaDB 1.5.9 bug**: do NOT let the re-indexer exit with items in `embeddings_queue` (max_seq_id gap corrupts HNSW on reload) — if re-running, verify `vs.count()` matches expected immediately after the run.
+1. **ChromaDB v2 is the default** ✅ (2026-10-02) — `flood_papers_768d_v2` in `.chromadb_v2`: 1,418,382 chunks from 5,028 papers with unique chunk ids, abstracts and captions embedded with the fixed TEI parser (sentences were glued before). `src/config` defaults to it; the v1 collection `flood_papers_768d` in `.chromadb` is kept for audits pinned to it (`tools/paper3_audit` uses v1 via `PAPER3_AUDIT_CHROMA_DIR`/`PAPER3_AUDIT_COLLECTION`). **ChromaDB 1.5.9 bug**: after any (re)index run, check that the vector segment's `max_seq_id` is ≥ the minimum `seq_id` left in `embeddings_queue` (no gap), and that `count()` matches the sentinel after a fresh reload.
 
 2. **Task label propagation bug fixed** ✅ — Added `paper["task"] = entities.get("task", paper.get("task", {}))` before `return paper` in both `apply_judge_verdict` and `apply_constraints` in `src/ingestion/stages/judge_stage.py`. Retroactive repair applied to 652 existing paper.json files via `src/orchestration/repair_task_labels.py`.
 

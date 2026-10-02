@@ -46,7 +46,8 @@ def check_neo4j() -> dict:
 def check_chroma() -> dict:
     """The collection is still served by a persistent directory (server mode is planned);
     report whether its catalogue is readable without loading the HNSW index."""
-    chroma_dir = Path(os.getenv("CHROMA_DIR", str(ROOT / ".chromadb")))
+    from src.config import CHROMA_DIR
+    chroma_dir = Path(os.getenv("CHROMA_DIR", str(CHROMA_DIR)))
     db = chroma_dir / "chroma.sqlite3"
     if not db.exists():
         return {"status": "down", "detail": f"{db} not found"}
