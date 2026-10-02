@@ -19,6 +19,8 @@ from typing import Iterator
 
 import pandas as pd
 
+from src.services.identity import normalize_doi
+
 log = logging.getLogger("geohydro.graph.loader")
 
 _PROJECT_ROOT    = Path(__file__).resolve().parents[2]
@@ -363,6 +365,24 @@ def load_institution_country_edges(institution_rows: list[dict]) -> list[dict]:
 
 # ── Enriched JSON loaders ─────────────────────────────────────────────────────
 
+def _flatten_enriched(doc: dict) -> dict:
+    """Return one flat view of an enriched or Stage-1 document.
+
+    data/enriched/*.json nest the paper under ``doc["paper"]`` and keep ``openalex`` /
+    ``enrichment_meta`` beside it; Stage-1 paper.json has the paper keys at the top.
+    Readers below use flat keys (``normalized_entities``, ``references``, ``openalex``),
+    which silently found nothing in the nested files before this view existed.
+    """
+    paper = doc.get("paper")
+    if not isinstance(paper, dict):
+        return doc
+    flat = dict(paper)
+    for key, value in doc.items():
+        if key != "paper":
+            flat.setdefault(key, value)
+    return flat
+
+
 def _iter_enriched(limit: int | None = None) -> Iterator[tuple[str, dict]]:
     """Yield (paper_id, doc) for every enriched-or-Stage-1 JSON.
 
@@ -389,7 +409,7 @@ def _iter_enriched(limit: int | None = None) -> Iterator[tuple[str, dict]]:
                 or doc.get("paper", {}).get("metadata", {}).get("paper_id")
                 or f.stem
             )
-            yield pid, doc
+            yield pid, _flatten_enriched(doc)
         except Exception as exc:
             log.warning("Skipping %s: %s", f.name, exc)
 
@@ -606,7 +626,9 @@ def load_cites_edges(limit: int | None = None) -> list[dict]:
     for pid, doc in _iter_enriched(limit):
         refs = doc.get("references", [])
         for ref in refs:
-            doi   = ref.get("doi") or None
+            # MERGE matches the DOI string exactly; 27 % of GROBID reference DOIs
+            # carry upper case, which would split one cited work into several stubs.
+            doi   = normalize_doi(ref.get("doi"))
             title = ref.get("title") or None
             if not doi and not title:
                 continue

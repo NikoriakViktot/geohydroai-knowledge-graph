@@ -688,7 +688,7 @@ class GraphWriter:
     def rel_counts(self) -> dict[str, int]:
         rel_types = [
             "USES_METHOD", "USES_SENSOR", "REPORTS_METRIC", "HAS_TOPIC",
-            "FROM_COUNTRY", "REFERENCES", "AUTHORED", "AFFILIATED_WITH",
+            "FROM_COUNTRY", "REFERENCES", "CITES", "AUTHORED", "AFFILIATED_WITH",
             "LOCATED_IN", "CO_OCCURS_WITH", "COMMONLY_USED_WITH", "INVESTIGATES",
             # Visual layer
             "HAS_FIGURE", "HAS_TABLE", "HAS_EQUATION",
