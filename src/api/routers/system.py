@@ -68,3 +68,14 @@ def schema(name: str) -> JSONResponse:
         available = sorted(p.stem for p in SCHEMAS_DIR.glob("*.json"))
         raise Problem("NOT_FOUND", f"no contract {name!r}; available: {', '.join(available)}")
     return JSONResponse(json.loads(path.read_text(encoding="utf-8")), media_type="application/schema+json")
+
+
+CLIENT_FILE = ROOT / "clients" / "python" / "ghai_client" / "__init__.py"
+
+
+@router.get("/client.py", **route_doc("GET", "/client.py"))
+def client_py():
+    """The single-file Python client (save it as ghai_client.py)."""
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse(CLIENT_FILE.read_text(encoding="utf-8"), media_type="text/x-python",
+                             headers={"Content-Disposition": 'attachment; filename="ghai_client.py"'})

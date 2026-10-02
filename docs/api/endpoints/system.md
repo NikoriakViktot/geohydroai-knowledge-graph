@@ -80,8 +80,17 @@ A frozen manifest (see `POST /admin/manifest/freeze`) is immutable. Answers comp
 ---
 
 ## `GET /client.py`
-- **Status**: planned (phase 1, WP 1.11) · **Scope**: none · **Mode**: S
-- **Purpose**: single-file Python client (depends only on `httpx`) for repositories without a package manager. Save it next to your scripts, then `from ghai_client import GHAI; api = GHAI.from_env()` (reads `GHAI_API_URL`, `GHAI_API_KEY`).
+- **Status**: implemented (2026-10-02) · **Scope**: none · **Mode**: S
+- **Purpose**: the single-file Python client (`clients/python/ghai_client/__init__.py`; depends only on `httpx`) for repositories without a package manager.
+  - Save it next to your scripts: `curl -s http://127.0.0.1:8090/v1/client.py -o ghai_client.py`.
+  - Then `from ghai_client import GHAI; api = GHAI.from_env()`. It reads `GHAI_API_URL` (…/v1) and `GHAI_API_KEY`.
+  - Or install it: `uv pip install "git+ssh://…/geohydroai-knowledge-graph.git#subdirectory=clients/python"`.
+- **What it does**:
+  - Methods are grouped as the endpoints are: `papers`, `quotes`, `theses`, `doi`, `graph`, `metrics`, `ontology`, plus `health()`, `stats()`, `manifest()` and `agent_rules()`.
+  - Cursor-paginated endpoints are iterators.
+  - Batches above the API limits are split and merged: 50 quotations (`verify_open_citations` packs whole items), 50 bibliography entries, 500 resolutions.
+  - problem+json answers raise `GHAIError` with `.code`, `.detail` and `.errors`.
+  - 503 and 504 are retried, honouring `Retry-After`.
 
 ---
 

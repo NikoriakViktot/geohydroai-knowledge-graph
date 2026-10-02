@@ -68,6 +68,11 @@ def tei_file(tmp_path):
 
 @pytest.fixture
 def client(monkeypatch, tei_file):
+    return make_client(monkeypatch, tei_file)
+
+
+def make_client(monkeypatch, tei_file):
+    """TestClient with identity, the TEI location and the project's theses stubbed."""
     def fake_resolve(*, doi=None, paper_id=None, file=None, openalex_id=None, title=None, year=None,
                      include=frozenset()):
         for p in (PAPER, NO_TEI):
