@@ -1,0 +1,135 @@
+{
+  "$defs": {
+    "Labeler": {
+      "additionalProperties": false,
+      "properties": {
+        "labeler_kind": {
+          "enum": [
+            "human",
+            "model",
+            "model_assisted_external",
+            "rule",
+            "import",
+            "unknown"
+          ],
+          "title": "Labeler Kind",
+          "type": "string"
+        },
+        "labeler": {
+          "description": "model id, tool name or the role of a person",
+          "minLength": 1,
+          "title": "Labeler",
+          "type": "string"
+        }
+      },
+      "required": [
+        "labeler_kind",
+        "labeler"
+      ],
+      "title": "Labeler",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {
+      "anyOf": [
+        {
+          "enum": [
+            "floodstate-eo:paper3",
+            "kakhovka-terrain:paper2",
+            "swot-dnipro:paper1",
+            "kakhovka-report:v1",
+            "article1"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Project Id"
+    },
+    "cite_key": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cite Key"
+    },
+    "doi": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Doi"
+    },
+    "verdict": {
+      "enum": [
+        "verified",
+        "verified_with_notes",
+        "mismatch",
+        "unresolved"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    },
+    "checked_against": {
+      "enum": [
+        "crossref",
+        "openalex",
+        "datacite",
+        "registry_mix",
+        "fulltext",
+        "url"
+      ],
+      "title": "Checked Against",
+      "type": "string"
+    },
+    "details": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Details",
+      "type": "object"
+    },
+    "checked_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Checked At"
+    },
+    "labeler": {
+      "$ref": "#/$defs/Labeler"
+    }
+  },
+  "required": [
+    "verdict",
+    "checked_against",
+    "labeler"
+  ],
+  "title": "BibVerification",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/BibVerification.v1.json"
+}

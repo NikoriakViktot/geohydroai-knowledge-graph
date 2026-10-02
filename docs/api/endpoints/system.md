@@ -73,7 +73,7 @@ A frozen manifest (see `POST /admin/manifest/freeze`) is immutable. Answers comp
 ## `GET /schemas/{name}`
 - **Status**: implemented (2026-10-02; files in `contracts/schemas/`) · **Scope**: none · **Mode**: S
 - **Purpose**: JSON Schema of a contract, e.g. `GET /schemas/PaperIdentity.v1`. Validate your documents locally before sending them.
-- **Path**: `name` = `<Contract>.v<major>`. Available today: `PaperIdentity.v1`, `PaperAlias.v1`, `PaperFile.v1`, `CohortMember.v1`. Planned: `Thesis.v1`, `AtomicClaim.v1`, `BibEntry.v1`, `CitationOccurrence.v1`, `GraphBundle.v1`, `QuoteItem.v1`, `ScreeningLabel.v1`.
+- **Path**: `name` = `<Contract>.v<major>`. Available today: `PaperIdentity.v1`, `PaperAlias.v1`, `PaperFile.v1`, `CohortMember.v1`, `Problem.v1`, `Provenance.v1`, `PaperRef.v1`, `ResolveResponse.v1`, `ResolveBatchRequest.v1`, `ResolveBatchResponse.v1`, `Labeler.v1`, `Thesis.v1`, `ThesisRef.v1`, `AtomicClaim.v1`, `PositiveControl.v1`, `CitationOccurrence.v1`, `ScreeningLabel.v1`, `QuoteCheck.v1`, `LiteratureNumber.v1`, `TechnicalSource.v1`, `BibVerification.v1`. Planned: `BibEntry.v1`, `GraphBundle.v1`, `QuoteItem.v1`, `ClaimCheckResult.v1`.
 - **Errors**: `404 NOT_FOUND`.
 - **Response**: the schema document itself (no `provenance` wrapper).
 

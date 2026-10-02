@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from src.contracts import api, identity
+from src.contracts import api, identity, research
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "contracts" / "schemas"
@@ -26,6 +26,17 @@ CONTRACTS = (
     (api.ResolveResponse, 1),
     (api.ResolveBatchRequest, 1),
     (api.ResolveBatchResponse, 1),
+    (research.Labeler, 1),
+    (research.Thesis, 1),
+    (research.ThesisRef, 1),
+    (research.AtomicClaim, 1),
+    (research.PositiveControl, 1),
+    (research.CitationOccurrence, 1),
+    (research.ScreeningLabel, 1),
+    (research.QuoteCheck, 1),
+    (research.LiteratureNumber, 1),
+    (research.TechnicalSource, 1),
+    (research.BibVerification, 1),
 )
 
 

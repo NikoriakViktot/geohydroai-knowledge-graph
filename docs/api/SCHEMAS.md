@@ -173,7 +173,7 @@ Contract status: planned (migration 0002): `{project_id, key, type: article|book
 ---
 
 ## Thesis / AtomicClaim
-Contract status: planned (migration 0003). These replace the three ad-hoc schemas (`theses.yaml`, `theses.json` + `atomic_claims.yaml`, `theses_v4.json`).
+Contract status: **implemented** (`src/contracts/research.py`, migration 0003, `contracts/schemas/Thesis.v1.json`, `AtomicClaim.v1.json`); 233 theses and 139 atomic claims imported 2026-10-02. The implemented relation vocabulary is wider than the sketch below: `SUPPORTED_BY, SUPPORTS, COMPARATOR, NEEDS_SOURCE, METHOD_FROM, METHOD, DATASET_DOCUMENTATION, BACKGROUND, CONTRASTS, CONTRASTS_WITH, DEFINITION, LIMITATION`; ref status `verified | to_verify | missing | unknown`; `kind` adds `report`. These replace the three ad-hoc schemas (`theses.yaml`, `theses.json` + `atomic_claims.yaml`, `theses_v4.json`).
 
 `Thesis`:
 
@@ -198,7 +198,7 @@ Contract status: planned (migration 0003). These replace the three ad-hoc schema
 - The first family of `key_terms_primary` must be the distinguishing concept, never a metric or a generic word.
 
 ## CitationOccurrence
-Contract status: planned: `{project_id, manuscript_version?, section, sentence, cite_key?, cite_text: "Lehnigk et al. (2026)", quoted: string[], work_id?, doi?}`.
+Contract status: **implemented** (`contracts/schemas/CitationOccurrence.v1.json`): `{project_id, manuscript_version?, section, sentence, cite_key?, cite_text: "Lehnigk et al. (2026)", quoted: string[], work_id?, doi?}`.
 
 ## ClaimCheckResult
 Contract status: planned (phase 4, `evidence.claim_check`).
@@ -214,7 +214,7 @@ Contract status: planned (phase 4, `evidence.claim_check`).
 | `provenance` | `Provenance` | |
 
 ## ScreeningLabel
-Contract status: planned (migration 0003): `{project_id, subject: {thesis_id?|atomic_id?|query?}, paper: PaperRef, role: SUPPORTS|CONTRASTS|METHOD_RELEVANT|ANALOGUE|BACKGROUND|NOT_RELEVANT, confidence?, quote?, quote_verified: bool, rationale?, labeler_kind: human|model|model_assisted_external|rule, labeler, prompt_sha256?, run_id}`. **There are no human labels in the corpus as of 2026-10-02.** Every imported label is `model`.
+Contract status: **implemented** (`contracts/schemas/ScreeningLabel.v1.json`; 1,419 labels imported 2026-10-02). Implemented fields: `role` from `SUPPORTS | CONTRASTS | BACKGROUND | COMPARATOR | METHOD_FROM | DATASET_DOCUMENTATION | DEFINITION | LIMITATION | NOT_RELEVANT` (older names kept in `role_raw`), a separate `relevance` (`RELEVANT | PARTIALLY_RELEVANT | NOT_RELEVANT | UNKNOWN`) and `labeler {labeler_kind, labeler}`. Original sketch: `{project_id, subject: {thesis_id?|atomic_id?|query?}, paper: PaperRef, role: SUPPORTS|CONTRASTS|METHOD_RELEVANT|ANALOGUE|BACKGROUND|NOT_RELEVANT, confidence?, quote?, quote_verified: bool, rationale?, labeler_kind: human|model|model_assisted_external|rule, labeler, prompt_sha256?, run_id}`. **There are no human labels in the corpus as of 2026-10-02.** Every imported label is `model`.
 
 ## Candidate
 Contract status: planned (phase 3): `{candidate_id, doi?, title, year?, venue?, abstract?, openalex_id?, is_oa?, oa_url?, licence?, cited_by_count?, source: openalex|crossref|arxiv|snowball|missing_reference, matched_queries: string[], score: float, embedding_similarity?: float, screening?: ScreeningLabel, corpus_status: in_corpus|stub_in_graph|new, review_status: new|screened|accepted|rejected|needs_manual|acquired|ingested|failed}`.

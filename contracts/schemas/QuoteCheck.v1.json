@@ -1,0 +1,108 @@
+{
+  "$defs": {
+    "Labeler": {
+      "additionalProperties": false,
+      "properties": {
+        "labeler_kind": {
+          "enum": [
+            "human",
+            "model",
+            "model_assisted_external",
+            "rule",
+            "import",
+            "unknown"
+          ],
+          "title": "Labeler Kind",
+          "type": "string"
+        },
+        "labeler": {
+          "description": "model id, tool name or the role of a person",
+          "minLength": 1,
+          "title": "Labeler",
+          "type": "string"
+        }
+      },
+      "required": [
+        "labeler_kind",
+        "labeler"
+      ],
+      "title": "Labeler",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {
+      "enum": [
+        "floodstate-eo:paper3",
+        "kakhovka-terrain:paper2",
+        "swot-dnipro:paper1",
+        "kakhovka-report:v1",
+        "article1"
+      ],
+      "title": "Project Id",
+      "type": "string"
+    },
+    "cite_key": {
+      "title": "Cite Key",
+      "type": "string"
+    },
+    "doi": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Doi"
+    },
+    "claim_use": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Claim Use"
+    },
+    "verdict": {
+      "enum": [
+        "VERIFIED",
+        "FIX",
+        "WORDING",
+        "OPEN"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    },
+    "finding": {
+      "title": "Finding",
+      "type": "string"
+    },
+    "checked_on": {
+      "format": "date",
+      "title": "Checked On",
+      "type": "string"
+    },
+    "labeler": {
+      "$ref": "#/$defs/Labeler"
+    }
+  },
+  "required": [
+    "project_id",
+    "cite_key",
+    "verdict",
+    "finding",
+    "checked_on",
+    "labeler"
+  ],
+  "title": "QuoteCheck",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/QuoteCheck.v1.json"
+}

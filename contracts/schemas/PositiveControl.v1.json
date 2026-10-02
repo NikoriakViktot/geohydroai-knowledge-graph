@@ -1,0 +1,98 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {
+      "enum": [
+        "floodstate-eo:paper3",
+        "kakhovka-terrain:paper2",
+        "swot-dnipro:paper1",
+        "kakhovka-report:v1",
+        "article1"
+      ],
+      "title": "Project Id",
+      "type": "string"
+    },
+    "thesis_id": {
+      "title": "Thesis Id",
+      "type": "string"
+    },
+    "doi": {
+      "title": "Doi",
+      "type": "string"
+    },
+    "relevance": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Relevance"
+    },
+    "expected_stage": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Stage"
+    },
+    "difficulty": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Difficulty"
+    },
+    "source_of_seed": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Of Seed"
+    },
+    "manually_checked": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Manually Checked"
+    },
+    "evidence": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Evidence",
+      "type": "object"
+    }
+  },
+  "required": [
+    "project_id",
+    "thesis_id",
+    "doi"
+  ],
+  "title": "PositiveControl",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/PositiveControl.v1.json"
+}

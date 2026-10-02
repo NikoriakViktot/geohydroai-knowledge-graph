@@ -7,7 +7,7 @@ import json
 import pytest
 
 from src.contracts import export as contract_export
-from src.contracts import identity
+from src.contracts import identity, research
 from src.db import models
 
 
@@ -23,7 +23,7 @@ def test_committed_schema_matches_the_model(model, major):
 
 def _check_sql(table, name: str) -> str:
     for c in table.constraints:
-        if getattr(c, "name", None) and str(c.name).endswith(name) and hasattr(c, "sqltext"):
+        if hasattr(c, "sqltext") and str(getattr(c, "name", "")) in (name, f"ck_{table.name}_{name}"):
             return str(c.sqltext)
     raise AssertionError(f"no CHECK constraint {name} on {table.fullname}")
 
@@ -35,6 +35,14 @@ def _check_sql(table, name: str) -> str:
     (models.PaperFile.__table__, "status", identity.FILE_STATUSES),
     (models.Run.__table__, "kind", identity.RUN_KINDS),
     (models.Run.__table__, "status", identity.RUN_STATUSES),
+    (models.Thesis.__table__, "kind", research.THESIS_KINDS),
+    (models.Thesis.__table__, "labeler_kind", research.LABELER_KINDS),
+    (models.ThesisRef.__table__, "relation", research.REF_RELATIONS),
+    (models.ThesisRef.__table__, "status", research.REF_STATUSES),
+    (models.ScreeningLabel.__table__, "relevance", research.RELEVANCES),
+    (models.QuoteCheck.__table__, "verdict", research.CITATION_VERDICTS),
+    (models.BibVerification.__table__, "verdict", research.BIB_VERDICTS),
+    (models.Project.__table__, "project_id", research.PROJECT_IDS),
 ])
 def test_database_checks_allow_exactly_the_contract_values(table, constraint, values):
     sql = _check_sql(table, constraint)

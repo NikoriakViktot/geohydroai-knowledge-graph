@@ -1,0 +1,58 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "minLength": 1,
+      "title": "Key",
+      "type": "string"
+    },
+    "relation": {
+      "enum": [
+        "SUPPORTED_BY",
+        "SUPPORTS",
+        "COMPARATOR",
+        "NEEDS_SOURCE",
+        "METHOD_FROM",
+        "METHOD",
+        "DATASET_DOCUMENTATION",
+        "BACKGROUND",
+        "CONTRASTS",
+        "CONTRASTS_WITH",
+        "DEFINITION",
+        "LIMITATION"
+      ],
+      "title": "Relation",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "verified",
+        "to_verify",
+        "missing",
+        "unknown"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "status_raw": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Status Raw"
+    }
+  },
+  "required": [
+    "key",
+    "relation",
+    "status"
+  ],
+  "title": "ThesisRef",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/ThesisRef.v1.json"
+}

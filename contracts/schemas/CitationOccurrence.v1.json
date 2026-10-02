@@ -1,0 +1,70 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {
+      "enum": [
+        "floodstate-eo:paper3",
+        "kakhovka-terrain:paper2",
+        "swot-dnipro:paper1",
+        "kakhovka-report:v1",
+        "article1"
+      ],
+      "title": "Project Id",
+      "type": "string"
+    },
+    "cite_key": {
+      "title": "Cite Key",
+      "type": "string"
+    },
+    "section": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Section"
+    },
+    "sentence": {
+      "title": "Sentence",
+      "type": "string"
+    },
+    "quoted": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Quoted",
+      "type": "array"
+    },
+    "doi": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Doi"
+    },
+    "extra": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Extra",
+      "type": "object"
+    }
+  },
+  "required": [
+    "project_id",
+    "cite_key",
+    "sentence"
+  ],
+  "title": "CitationOccurrence",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/CitationOccurrence.v1.json"
+}

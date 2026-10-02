@@ -1,0 +1,208 @@
+{
+  "$defs": {
+    "Labeler": {
+      "additionalProperties": false,
+      "properties": {
+        "labeler_kind": {
+          "enum": [
+            "human",
+            "model",
+            "model_assisted_external",
+            "rule",
+            "import",
+            "unknown"
+          ],
+          "title": "Labeler Kind",
+          "type": "string"
+        },
+        "labeler": {
+          "description": "model id, tool name or the role of a person",
+          "minLength": 1,
+          "title": "Labeler",
+          "type": "string"
+        }
+      },
+      "required": [
+        "labeler_kind",
+        "labeler"
+      ],
+      "title": "Labeler",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {
+      "enum": [
+        "floodstate-eo:paper3",
+        "kakhovka-terrain:paper2",
+        "swot-dnipro:paper1",
+        "kakhovka-report:v1",
+        "article1"
+      ],
+      "title": "Project Id",
+      "type": "string"
+    },
+    "subject_kind": {
+      "enum": [
+        "thesis",
+        "atomic_claim",
+        "query"
+      ],
+      "title": "Subject Kind",
+      "type": "string"
+    },
+    "subject_id": {
+      "title": "Subject Id",
+      "type": "string"
+    },
+    "paper_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Paper Id"
+    },
+    "doi": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Doi"
+    },
+    "role": {
+      "anyOf": [
+        {
+          "enum": [
+            "SUPPORTS",
+            "CONTRASTS",
+            "BACKGROUND",
+            "COMPARATOR",
+            "METHOD_FROM",
+            "DATASET_DOCUMENTATION",
+            "DEFINITION",
+            "LIMITATION",
+            "NOT_RELEVANT"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Role"
+    },
+    "role_raw": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Role Raw"
+    },
+    "relevance": {
+      "enum": [
+        "RELEVANT",
+        "PARTIALLY_RELEVANT",
+        "NOT_RELEVANT",
+        "UNKNOWN"
+      ],
+      "title": "Relevance",
+      "type": "string"
+    },
+    "confidence": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confidence"
+    },
+    "quote": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Quote"
+    },
+    "quote_verified": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Quote Verified"
+    },
+    "rationale": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rationale"
+    },
+    "prompt_sha256": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Prompt Sha256"
+    },
+    "extra": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Extra",
+      "type": "object"
+    },
+    "labeler": {
+      "$ref": "#/$defs/Labeler"
+    }
+  },
+  "required": [
+    "project_id",
+    "subject_kind",
+    "subject_id",
+    "relevance",
+    "labeler"
+  ],
+  "title": "ScreeningLabel",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/ScreeningLabel.v1.json"
+}

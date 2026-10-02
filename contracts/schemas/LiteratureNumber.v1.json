@@ -1,0 +1,176 @@
+{
+  "$defs": {
+    "Labeler": {
+      "additionalProperties": false,
+      "properties": {
+        "labeler_kind": {
+          "enum": [
+            "human",
+            "model",
+            "model_assisted_external",
+            "rule",
+            "import",
+            "unknown"
+          ],
+          "title": "Labeler Kind",
+          "type": "string"
+        },
+        "labeler": {
+          "description": "model id, tool name or the role of a person",
+          "minLength": 1,
+          "title": "Labeler",
+          "type": "string"
+        }
+      },
+      "required": [
+        "labeler_kind",
+        "labeler"
+      ],
+      "title": "Labeler",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {
+      "enum": [
+        "floodstate-eo:paper3",
+        "kakhovka-terrain:paper2",
+        "swot-dnipro:paper1",
+        "kakhovka-report:v1",
+        "article1"
+      ],
+      "title": "Project Id",
+      "type": "string"
+    },
+    "number_id": {
+      "title": "Number Id",
+      "type": "string"
+    },
+    "paper_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Paper Id"
+    },
+    "doi": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Doi"
+    },
+    "cite_key": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cite Key"
+    },
+    "quantity_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Quantity Name"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Value"
+    },
+    "value_raw": {
+      "title": "Value Raw",
+      "type": "string"
+    },
+    "unit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Unit"
+    },
+    "window_text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Window Text"
+    },
+    "page": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Page"
+    },
+    "extra": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Extra",
+      "type": "object"
+    },
+    "verified_by": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Labeler"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "project_id",
+    "number_id",
+    "value_raw"
+  ],
+  "title": "LiteratureNumber",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/LiteratureNumber.v1.json"
+}

@@ -1,0 +1,166 @@
+{
+  "$defs": {
+    "Labeler": {
+      "additionalProperties": false,
+      "properties": {
+        "labeler_kind": {
+          "enum": [
+            "human",
+            "model",
+            "model_assisted_external",
+            "rule",
+            "import",
+            "unknown"
+          ],
+          "title": "Labeler Kind",
+          "type": "string"
+        },
+        "labeler": {
+          "description": "model id, tool name or the role of a person",
+          "minLength": 1,
+          "title": "Labeler",
+          "type": "string"
+        }
+      },
+      "required": [
+        "labeler_kind",
+        "labeler"
+      ],
+      "title": "Labeler",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {
+      "enum": [
+        "floodstate-eo:paper3",
+        "kakhovka-terrain:paper2",
+        "swot-dnipro:paper1",
+        "kakhovka-report:v1",
+        "article1"
+      ],
+      "title": "Project Id",
+      "type": "string"
+    },
+    "atomic_id": {
+      "minLength": 1,
+      "title": "Atomic Id",
+      "type": "string"
+    },
+    "thesis_id": {
+      "title": "Thesis Id",
+      "type": "string"
+    },
+    "statement": {
+      "minLength": 10,
+      "title": "Statement",
+      "type": "string"
+    },
+    "required_roles": {
+      "default": [],
+      "items": {
+        "enum": [
+          "SUPPORTS",
+          "CONTRASTS",
+          "BACKGROUND",
+          "COMPARATOR",
+          "METHOD_FROM",
+          "DATASET_DOCUMENTATION",
+          "DEFINITION",
+          "LIMITATION",
+          "NOT_RELEVANT"
+        ],
+        "type": "string"
+      },
+      "title": "Required Roles",
+      "type": "array"
+    },
+    "manuscript_relevance": {
+      "anyOf": [
+        {
+          "enum": [
+            "CORE",
+            "SUPPORTING",
+            "SUPPLEMENTARY",
+            "DROP"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Manuscript Relevance"
+    },
+    "key_terms_primary": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Key Terms Primary",
+      "type": "array"
+    },
+    "key_terms_support": {
+      "default": [],
+      "items": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "title": "Key Terms Support",
+      "type": "array"
+    },
+    "negative_terms": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Negative Terms",
+      "type": "array"
+    },
+    "extra_queries": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Extra Queries",
+      "type": "array"
+    },
+    "counterevidence_queries": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Counterevidence Queries",
+      "type": "array"
+    },
+    "queries_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Queries Version"
+    },
+    "authored_by": {
+      "$ref": "#/$defs/Labeler"
+    }
+  },
+  "required": [
+    "project_id",
+    "atomic_id",
+    "thesis_id",
+    "statement",
+    "authored_by"
+  ],
+  "title": "AtomicClaim",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/AtomicClaim.v1.json"
+}

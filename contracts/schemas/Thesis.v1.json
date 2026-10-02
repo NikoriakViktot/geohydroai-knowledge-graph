@@ -1,0 +1,232 @@
+{
+  "$defs": {
+    "Labeler": {
+      "additionalProperties": false,
+      "properties": {
+        "labeler_kind": {
+          "enum": [
+            "human",
+            "model",
+            "model_assisted_external",
+            "rule",
+            "import",
+            "unknown"
+          ],
+          "title": "Labeler Kind",
+          "type": "string"
+        },
+        "labeler": {
+          "description": "model id, tool name or the role of a person",
+          "minLength": 1,
+          "title": "Labeler",
+          "type": "string"
+        }
+      },
+      "required": [
+        "labeler_kind",
+        "labeler"
+      ],
+      "title": "Labeler",
+      "type": "object"
+    },
+    "ThesisRef": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "relation": {
+          "enum": [
+            "SUPPORTED_BY",
+            "SUPPORTS",
+            "COMPARATOR",
+            "NEEDS_SOURCE",
+            "METHOD_FROM",
+            "METHOD",
+            "DATASET_DOCUMENTATION",
+            "BACKGROUND",
+            "CONTRASTS",
+            "CONTRASTS_WITH",
+            "DEFINITION",
+            "LIMITATION"
+          ],
+          "title": "Relation",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "verified",
+            "to_verify",
+            "missing",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "status_raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status Raw"
+        }
+      },
+      "required": [
+        "key",
+        "relation",
+        "status"
+      ],
+      "title": "ThesisRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {
+      "enum": [
+        "floodstate-eo:paper3",
+        "kakhovka-terrain:paper2",
+        "swot-dnipro:paper1",
+        "kakhovka-report:v1",
+        "article1"
+      ],
+      "title": "Project Id",
+      "type": "string"
+    },
+    "thesis_id": {
+      "minLength": 1,
+      "title": "Thesis Id",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "literature",
+        "report",
+        "article",
+        "novelty"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "statement": {
+      "minLength": 10,
+      "title": "Statement",
+      "type": "string"
+    },
+    "section": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Section"
+    },
+    "category": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Category"
+    },
+    "priority": {
+      "anyOf": [
+        {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Priority"
+    },
+    "quantitative": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Quantitative"
+    },
+    "tables": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Tables",
+      "type": "array"
+    },
+    "needs": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Needs"
+    },
+    "refs": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ThesisRef"
+      },
+      "title": "Refs",
+      "type": "array"
+    },
+    "search_queries": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Search Queries",
+      "type": "array"
+    },
+    "extra": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Extra",
+      "type": "object"
+    },
+    "authored_by": {
+      "$ref": "#/$defs/Labeler"
+    }
+  },
+  "required": [
+    "project_id",
+    "thesis_id",
+    "kind",
+    "statement",
+    "authored_by"
+  ],
+  "title": "Thesis",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/Thesis.v1.json"
+}

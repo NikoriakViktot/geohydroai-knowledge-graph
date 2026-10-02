@@ -1,0 +1,30 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "labeler_kind": {
+      "enum": [
+        "human",
+        "model",
+        "model_assisted_external",
+        "rule",
+        "import",
+        "unknown"
+      ],
+      "title": "Labeler Kind",
+      "type": "string"
+    },
+    "labeler": {
+      "description": "model id, tool name or the role of a person",
+      "minLength": 1,
+      "title": "Labeler",
+      "type": "string"
+    }
+  },
+  "required": [
+    "labeler_kind",
+    "labeler"
+  ],
+  "title": "Labeler",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/Labeler.v1.json"
+}
