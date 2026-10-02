@@ -71,41 +71,70 @@ curl -s -H "X-API-Key: $GHAI_API_KEY" "$GHAI_API_URL/papers/resolve?doi=10.1029/
 ---
 
 ## `GET /papers/{paper_id}/sections`
-- **Status**: planned (phase 1) · `read` · S
-- **Purpose**: the TEI structure: section titles, levels, pages, character counts. Use it to target `/text`.
+- **Status**: implemented (2026-10-02; GROBID TEI of `core.paper_file`, 5,039 papers) · `read` · S
+- **Purpose**: the TEI outline: section handles, numbers, titles, levels, pages, paragraph and character counts. Use it to target `/text`.
 
-**Response 200**: `{"sections": [{"n": "3.2", "title": "Hydraulic modelling", "level": 2, "pages": [5, 6], "chars": 4210}], "has_abstract": true, "figures": 6, "tables": 3, "formulas": 4, "provenance"}`
+**Response 200**: `{"paper": PaperRef, "sections": [{"id": "s3.s1", "n": "3.2", "title": "Hydraulic modelling", "level": 2, "pages": [5, 6], "paragraphs": 4, "chars": 4210}], "has_abstract": true, "figures": 6, "tables": 3, "formulas": 4, "provenance"}`
 
-**Errors**: `404 NOT_FOUND`; `424 SOURCE_UNAVAILABLE` if the paper has no TEI.
+- `id` is the handle used in `passage_id`s: `s<i>` for the i-th top-level section and `s<i>.s<j>` for its subsections.
+- `n` is the number printed in the paper. It is `null` when GROBID found none.
+
+**Errors**: `404 NOT_FOUND`; `424 SOURCE_UNAVAILABLE` if the paper has no TEI (`canonical` is named when the id is a duplicate); `503 STORE_UNAVAILABLE`.
 
 ---
 
 ## `GET /papers/{paper_id}/text`
-- **Status**: planned (phase 1) · `read` · S
+- **Status**: implemented (2026-10-02) · `read` · S
 - **Purpose**: verbatim text of a section, a page, or the passages around a query. This is how an agent reads a source; never quote from memory.
 
 | Query param | Type | Notes |
 |---|---|---|
-| `section` | string | section `n` or title (case-insensitive prefix) |
-| `page` | int | |
-| `q` | string | return only paragraphs containing these words (± 1 paragraph) |
+| `section` | string | section number (`3.2`), handle (`s3`), title prefix (case-insensitive), or `abstract` |
+| `page` | int | PDF page from GROBID coordinates; passages without coordinates are not matched |
+| `q` | string | paragraphs that contain every word of ≥ 3 letters, ± 1 paragraph |
 | `max_chars` | int | default 20,000; hard cap 100,000 |
 
-**Response 200**: `{"spans": [EvidenceSpan], "truncated": bool, "provenance"}`. Each span carries `section`, `page`, offsets and `coords`.
+At least one of `section`, `page` and `q` is required. They combine with AND.
 
-**Errors**: `404`; `424 SOURCE_UNAVAILABLE`; `400` when no selector is given.
+**Response 200**: `{"paper": PaperRef, "spans": [EvidenceSpan], "truncated": bool, "matched_passages": int, "provenance"}`.
+- Spans are whole passages (paragraph, abstract, figure caption or table) in document order. The last one may be cut at `max_chars`; then `char_end` < the passage length and `truncated = true`.
+- `passage_id` is stable for one TEI file, so `/quotes/verify` and `/text` refer to the same passages.
+
+**Errors**: `400` when no selector is given; `404`; `424 SOURCE_UNAVAILABLE`; `503`.
 
 **Agent notes**:
 - The API returns short evidence passages, never whole PDFs: the corpus contains non-open-access works.
 - Quote `span.text` exactly and cite `paper.doi` plus `page`.
+- `q` is a literal word filter, not semantic search. For meaning, use `POST /search/chunks`.
 
 ---
 
 ## `GET /papers/{paper_id}/references`
-- **Status**: planned (phase 1) · `read` · S
-- **Purpose**: the paper's bibliography as parsed by GROBID, each entry resolved against the corpus.
+- **Status**: implemented (2026-10-02) · `read` · S
+- **Purpose**: the paper's bibliography as parsed by GROBID, each entry resolved against the corpus, with the number of in-text citations that point at it.
 
-**Response 200**: `{"references": [{"n": 12, "raw": "Bates, P.D. (2022) Flood inundation prediction. Annu. Rev. Fluid Mech. 54…", "title", "year", "doi"?, "in_corpus": PaperRef?}], "counts": {"total": 88, "with_doi": 61, "in_corpus": 9}, "provenance"}`
+**Response 200**: `{"paper": PaperRef, "references": [ReferenceEntry], "counts": {"total": 88, "with_doi": 61, "in_corpus": 9, "cited_in_text": 85}, "provenance"}`
+
+`ReferenceEntry`:
+- `n`: position in the list, from 1;
+- `xml_id`: the target of the in-text markers, e.g. `b12`;
+- `raw`, `title`, `authors`, `year`, `venue`;
+- `doi`: normalised, as parsed by GROBID;
+- `cited_in_text`: the number of markers pointing at this entry;
+- `in_corpus: PaperRef?` and `match: "doi" | "title"`.
+
+**Matching**:
+- `doi`: the GROBID DOI equals a corpus DOI alias.
+- `title`: no DOI match, and the title equals a corpus title after normalisation (≥ 20 characters, year ± 1). It must designate exactly one paper.
+- There is no fuzzy matching: a wrong "in corpus" is worse than a missed one.
+- Duplicates resolve to their canonical paper.
+
+**Errors**: `404`; `424 SOURCE_UNAVAILABLE` (no TEI); `503`.
+
+**Agent notes**:
+- GROBID's reference parsing is imperfect: DOIs can be truncated or glued to the next field, and titles can carry the journal. Before you cite a reference, verify it with `POST /doi/verify` (planned) or the registry.
+- `in_corpus = null` means "not matched", not "not in the corpus". Try `GET /papers/resolve?title=…&year=…`, which uses fuzzy matching.
+- `cited_in_text = 0` usually means GROBID did not link the markers. It does not mean the work is uncited.
 
 ---
 
@@ -122,11 +151,17 @@ curl -s -H "X-API-Key: $GHAI_API_KEY" "$GHAI_API_URL/papers/resolve?doi=10.1029/
 ---
 
 ## `GET /papers/{paper_id}/tables`
-- **Status**: planned (phase 1) · `read` · S
-- **Purpose**: TEI tables (caption plus rows) and the numeric facts extracted from them.
+- **Status**: implemented (2026-10-02: tables, captions and cells; `facts` is planned, work package 1.8) · `read` · S
+- **Purpose**: TEI tables (caption plus rows) and, later, the numeric facts extracted from them.
 
-**Response 200**: `{"tables": [{"table_id": "tab_2", "label": "Table 2", "caption": "…", "page": 7, "rows": [["Station", "NSE", "KGE"], ["Kherson", "0.82", "0.77"]], "facts": [MetricFact]}], "provenance"}`
+**Response 200**: `{"paper": PaperRef, "tables": [{"table_id": "tab_2", "xml_id": "tab_2", "label": "2", "caption": "…", "page": 7, "rows": [["Station", "NSE", "KGE"], ["Kherson", "0.82", "0.77"]], "facts": null}], "provenance"}`
+
+- `table_id` is the passage id used by `/text` and `/quotes/verify`.
+- `facts = null` means "not computed". It does not mean "no facts".
+
+**Errors**: `404`; `424 SOURCE_UNAVAILABLE`; `503`.
 
 **Agent notes**:
-- GROBID table parsing can misalign columns. Check a value against the row and column header before you rely on it.
-- `range_verdict = suspect` marks values outside the metric's valid range.
+- GROBID table parsing can misalign columns. Check a value against the row and column header before you rely on it, or read the PDF page (`page`).
+- When `facts` arrives, `range_verdict = suspect` will mark values outside the metric's valid range.
+

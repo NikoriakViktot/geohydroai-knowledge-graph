@@ -1,0 +1,92 @@
+{
+  "$defs": {
+    "Labeler": {
+      "additionalProperties": false,
+      "properties": {
+        "labeler_kind": {
+          "enum": [
+            "human",
+            "model",
+            "model_assisted_external",
+            "rule",
+            "import",
+            "unknown"
+          ],
+          "title": "Labeler Kind",
+          "type": "string"
+        },
+        "labeler": {
+          "description": "model id, tool name or the role of a person",
+          "minLength": 1,
+          "title": "Labeler",
+          "type": "string"
+        }
+      },
+      "required": [
+        "labeler_kind",
+        "labeler"
+      ],
+      "title": "Labeler",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "enum": [
+        "theses",
+        "atomic_claims"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "project_id": {
+      "enum": [
+        "floodstate-eo:paper3",
+        "kakhovka-terrain:paper2",
+        "swot-dnipro:paper1",
+        "kakhovka-report:v1",
+        "article1"
+      ],
+      "title": "Project Id",
+      "type": "string"
+    },
+    "document": {
+      "anyOf": [
+        {
+          "items": {},
+          "type": "array"
+        },
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "description": "the parsed document, or its JSON/YAML text",
+      "title": "Document"
+    },
+    "authored_by": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Labeler"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "who wrote the document, when it does not say"
+    }
+  },
+  "required": [
+    "kind",
+    "project_id",
+    "document"
+  ],
+  "title": "ThesesValidateRequest",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/ThesesValidateRequest.v1.json"
+}

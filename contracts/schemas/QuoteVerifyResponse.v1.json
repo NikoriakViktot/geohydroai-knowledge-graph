@@ -1,0 +1,673 @@
+{
+  "$defs": {
+    "Attribution": {
+      "additionalProperties": false,
+      "properties": {
+        "cites_other_sources": {
+          "description": "the matched sentences cite other works: a possible secondary citation",
+          "title": "Cites Other Sources",
+          "type": "boolean"
+        },
+        "in_text_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "In Text Refs",
+          "type": "array"
+        },
+        "resolved_dois": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Resolved Dois",
+          "type": "array"
+        }
+      },
+      "required": [
+        "cites_other_sources"
+      ],
+      "title": "Attribution",
+      "type": "object"
+    },
+    "EvidenceSpan": {
+      "additionalProperties": false,
+      "description": "Verbatim text of a corpus paper with where it is. Quote `text` exactly; never paraphrase it.",
+      "properties": {
+        "span_id": {
+          "description": "sha256(paper_id + passage_id + text)[:16]",
+          "title": "Span Id",
+          "type": "string"
+        },
+        "paper": {
+          "$ref": "#/$defs/PaperRef"
+        },
+        "passage_id": {
+          "description": "'abstract', 's<i>[.s<j>].p<k>' (paragraph), 'fig_<k>' or 'tab_<k>'; stable for one TEI file",
+          "title": "Passage Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "abstract",
+            "paragraph",
+            "figure",
+            "table"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "section_n": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "section number as printed, e.g. '3.2'",
+          "title": "Section N"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "PDF page from GROBID coordinates; null when unknown",
+          "title": "Page"
+        },
+        "char_start": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "offset of `text` in the passage text",
+          "title": "Char Start"
+        },
+        "char_end": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Char End"
+        },
+        "chunk_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Chunk Id"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "span_id",
+        "paper",
+        "passage_id",
+        "kind",
+        "text"
+      ],
+      "title": "EvidenceSpan",
+      "type": "object"
+    },
+    "LLMUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "prompt_sha256": {
+          "title": "Prompt Sha256",
+          "type": "string"
+        },
+        "tokens_in": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokens In"
+        },
+        "tokens_out": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokens Out"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "repair_count": {
+          "default": 0,
+          "title": "Repair Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "prompt_sha256"
+      ],
+      "title": "LLMUsage",
+      "type": "object"
+    },
+    "NotChecked": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Key"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "quote",
+        "reason"
+      ],
+      "title": "NotChecked",
+      "type": "object"
+    },
+    "NumberCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "found": {
+          "description": "found in the passage that holds the quotation",
+          "title": "Found",
+          "type": "boolean"
+        },
+        "distance_chars": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "characters from the quotation; 0 = inside it",
+          "title": "Distance Chars"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context"
+        },
+        "elsewhere": {
+          "default": [],
+          "description": "other passage_ids that contain the number (max 5)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Elsewhere",
+          "type": "array"
+        }
+      },
+      "required": [
+        "value",
+        "found"
+      ],
+      "title": "NumberCheck",
+      "type": "object"
+    },
+    "PaperRef": {
+      "additionalProperties": false,
+      "properties": {
+        "paper_id": {
+          "title": "Paper Id",
+          "type": "string"
+        },
+        "doi": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Doi"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "venue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Venue"
+        },
+        "identity_status": {
+          "enum": [
+            "ok",
+            "no_doi",
+            "title_doi_mismatch",
+            "duplicate",
+            "not_a_paper",
+            "truncated_json"
+          ],
+          "title": "Identity Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "paper_id",
+        "identity_status"
+      ],
+      "title": "PaperRef",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Present in every successful response; record it with any result you use.",
+      "properties": {
+        "api_version": {
+          "title": "Api Version",
+          "type": "string"
+        },
+        "git_commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Git Commit"
+        },
+        "corpus_manifest_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corpus Manifest Id"
+        },
+        "collection": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Collection"
+        },
+        "embedding_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Embedding Model"
+        },
+        "kb_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kb Version"
+        },
+        "identity_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Identity Run Id"
+        },
+        "llm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LLMUsage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "api_version",
+        "git_commit",
+        "corpus_manifest_id",
+        "generated_at"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "QuoteResult": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Key"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "FOUND_EXACT",
+            "FOUND_NORMALIZED",
+            "FOUND_FUZZY",
+            "NOT_FOUND",
+            "SOURCE_UNAVAILABLE"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "1.0 for exact matches; similarity for FOUND_FUZZY",
+          "title": "Score"
+        },
+        "paper": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PaperRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "span": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvidenceSpan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "numbers": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/NumberCheck"
+          },
+          "title": "Numbers",
+          "type": "array"
+        },
+        "attribution": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Attribution"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "text_source": {
+          "enum": [
+            "corpus_tei",
+            "oa_fetch",
+            "none"
+          ],
+          "title": "Text Source",
+          "type": "string"
+        },
+        "searched": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Searched"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "found_in": {
+          "default": [],
+          "description": "keys of other items of this request that quote the same words for the same manuscript sentence and were found",
+          "items": {
+            "type": "string"
+          },
+          "title": "Found In",
+          "type": "array"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        }
+      },
+      "required": [
+        "source",
+        "quote",
+        "status",
+        "text_source"
+      ],
+      "title": "QuoteResult",
+      "type": "object"
+    },
+    "Searched": {
+      "additionalProperties": false,
+      "properties": {
+        "sections": {
+          "title": "Sections",
+          "type": "integer"
+        },
+        "passages": {
+          "title": "Passages",
+          "type": "integer"
+        },
+        "chars": {
+          "title": "Chars",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sections",
+        "passages",
+        "chars"
+      ],
+      "title": "Searched",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "items": {
+      "items": {
+        "$ref": "#/$defs/QuoteResult"
+      },
+      "title": "Items",
+      "type": "array"
+    },
+    "not_checked": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/NotChecked"
+      },
+      "title": "Not Checked",
+      "type": "array"
+    },
+    "summary": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Summary",
+      "type": "object"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "items",
+    "summary",
+    "provenance"
+  ],
+  "title": "QuoteVerifyResponse",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/QuoteVerifyResponse.v1.json"
+}

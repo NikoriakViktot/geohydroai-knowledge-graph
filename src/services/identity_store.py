@@ -153,3 +153,68 @@ def corpus_manifest(collection: str, embedding_model: str, rules_version: str) -
     return {"corpus_manifest_id": h.hexdigest(), "frozen": False, "papers": len(ids),
             "collection": collection, "embedding_model": embedding_model,
             "retrieval_rules_version": rules_version, "identity_run_id": run_id, "created_at": finished}
+
+
+# ── references of a paper → corpus papers (GET /papers/{id}/references) ─────────
+
+_TITLE_INDEX: tuple[float, dict[str, list[tuple[str, int | None]]]] | None = None
+_TITLE_INDEX_TTL = 600.0
+_TITLE_MIN_CHARS = 20
+
+
+def _title_index(session) -> dict[str, list[tuple[str, int | None]]]:
+    """norm_title → [(canonical paper_id, year)], rebuilt every 10 minutes."""
+    import time
+    global _TITLE_INDEX
+    if _TITLE_INDEX and time.monotonic() - _TITLE_INDEX[0] < _TITLE_INDEX_TTL:
+        return _TITLE_INDEX[1]
+    index: dict[str, list[tuple[str, int | None]]] = {}
+    rows = session.execute(select(Paper.paper_id, Paper.title, Paper.year, Paper.duplicate_of)
+                           .where(Paper.title.is_not(None), Paper.identity_status != "not_a_paper"))
+    for pid, title, year, dup in rows:
+        key = norm_title(title)
+        if len(key) >= _TITLE_MIN_CHARS:
+            entry = (dup or pid, year)
+            if entry[0] not in {e[0] for e in index.get(key, [])}:
+                index.setdefault(key, []).append(entry)
+    _TITLE_INDEX = (time.monotonic(), index)
+    return index
+
+
+def match_references(refs: list[tuple[str | None, str | None, int | None]]) -> list[tuple[PaperIdentity | None, str | None]]:
+    """For each (doi, title, year) of a bibliography: the corpus paper it designates and how.
+
+    DOIs are looked up in one query. Without a DOI match, the title must equal a corpus
+    title after normalisation (≥ 20 characters, year ± 1 when both are known) and designate
+    exactly one paper. Duplicates resolve to their canonical paper. No fuzzy matching: a
+    wrong "in corpus" is worse than a missed one.
+    """
+    dois = {d for d in (normalize_doi(r[0]) for r in refs if r[0]) if d}
+    with session_scope() as s:
+        by_doi: dict[str, str] = {}
+        if dois:
+            for alias, pid in s.execute(select(PaperAlias.alias, PaperAlias.paper_id)
+                                        .where(PaperAlias.alias_type == "doi", PaperAlias.alias.in_(dois))):
+                by_doi[alias] = pid
+        titles = _title_index(s)
+        chosen: list[tuple[str | None, str | None]] = []
+        for doi, title, year in refs:
+            d = normalize_doi(doi) if doi else None
+            if d and d in by_doi:
+                chosen.append((by_doi[d], "doi"))
+                continue
+            cands = [pid for pid, y in titles.get(norm_title(title), []) if not (year and y and abs(y - year) > 1)] \
+                if title else []
+            chosen.append((cands[0], "title") if len(cands) == 1 else (None, None))
+        ids = {pid for pid, _ in chosen if pid}
+        rows = {p.paper_id: p for p in s.scalars(select(Paper).where(Paper.paper_id.in_(ids)))} if ids else {}
+        canon_ids = {p.duplicate_of for p in rows.values() if p.duplicate_of} - set(rows)
+        if canon_ids:
+            rows.update({p.paper_id: p for p in s.scalars(select(Paper).where(Paper.paper_id.in_(canon_ids)))})
+        out = []
+        for pid, how in chosen:
+            row = rows.get(pid) if pid else None
+            if row is not None and row.duplicate_of and row.duplicate_of in rows:
+                row = rows[row.duplicate_of]
+            out.append((_identity(s, row, frozenset()) if row is not None else None, how if row is not None else None))
+        return out

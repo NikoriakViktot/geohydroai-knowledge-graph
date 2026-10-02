@@ -1,0 +1,147 @@
+{
+  "$defs": {
+    "OpenCitationsQuote": {
+      "additionalProperties": false,
+      "properties": {
+        "open_citations_item": {
+          "additionalProperties": true,
+          "description": "one item of an open_citations.json file; each of its citations[].quotations becomes one QuoteItem",
+          "title": "Open Citations Item",
+          "type": "object"
+        }
+      },
+      "required": [
+        "open_citations_item"
+      ],
+      "title": "OpenCitationsQuote",
+      "type": "object"
+    },
+    "QuoteItem": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "echoed back, e.g. the cite key",
+          "title": "Key"
+        },
+        "source": {
+          "description": "DOI, paper_id, or a cite key of `project_id`",
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "quote": {
+          "description": "the words claimed to be in the source; '…' or '...' marks an omission",
+          "maxLength": 5000,
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "expected_numbers": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Expected Numbers",
+          "type": "array"
+        },
+        "manuscript_sentence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manuscript Sentence"
+        },
+        "project_id": {
+          "anyOf": [
+            {
+              "enum": [
+                "floodstate-eo:paper3",
+                "kakhovka-terrain:paper2",
+                "swot-dnipro:paper1",
+                "kakhovka-report:v1",
+                "article1"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Project Id"
+        }
+      },
+      "required": [
+        "source",
+        "quote"
+      ],
+      "title": "QuoteItem",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "items": {
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/QuoteItem"
+          },
+          {
+            "$ref": "#/$defs/OpenCitationsQuote"
+          }
+        ]
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "title": "Items",
+      "type": "array"
+    },
+    "project_id": {
+      "anyOf": [
+        {
+          "enum": [
+            "floodstate-eo:paper3",
+            "kakhovka-terrain:paper2",
+            "swot-dnipro:paper1",
+            "kakhovka-report:v1",
+            "article1"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "default project for cite-key sources",
+      "title": "Project Id"
+    },
+    "acquire_missing": {
+      "default": false,
+      "title": "Acquire Missing",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "title": "QuoteVerifyRequest",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/QuoteVerifyRequest.v1.json"
+}

@@ -85,18 +85,21 @@ Contract status: planned. Compact form used inside hits and lists: `{paper_id, d
 `{page: int, x: float, y: float, w: float, h: float}`. PDF points, from GROBID coordinates; Nougat never supplies coordinates.
 
 ## EvidenceSpan
-Contract status: planned (migration 0003, `evidence.span`).
+Contract status: **implemented** (`src/contracts/api.py`, [`contracts/schemas/EvidenceSpan.v1.json`](../../contracts/schemas/EvidenceSpan.v1.json)). Returned by `/papers/{paper_id}/text` and inside `QuoteResult`.
 
 | Field | Type | Notes |
 |---|---|---|
-| `span_id` | string | sha256(paper_id + text)[:16] |
+| `span_id` | string | sha256(paper_id + passage_id + text)[:16] |
 | `paper` | `PaperRef` | |
-| `chunk_id` | string? | Chroma chunk |
-| `section` | string? | TEI section title |
-| `page` | int? | |
-| `char_start` / `char_end` | int? | offsets in the section text |
+| `passage_id` | string | `abstract`, `s<i>[.s<j>].p<k>` (paragraph k of section s<i>), `fig_<k>`, `tab_<k>`; stable for one TEI file |
+| `kind` | `abstract \| paragraph \| figure \| table` | |
+| `section` / `section_n` | string? | TEI section title and printed number |
+| `page` | int? | PDF page from GROBID coordinates; `null` when unknown (abstracts usually) |
+| `char_start` / `char_end` | int? | offsets of `text` in the passage text |
+| `chunk_id` | string? | Chroma chunk (planned: filled by search hits) |
 | `text` | string | verbatim source text, never paraphrased |
-| `coords` | `BBox[]?` | |
+
+Planned: `coords: BBox[]`.
 
 ## ChunkHit
 Contract status: planned (phase 1): `{chunk_id, paper: PaperRef, chunk_type: abstract|sentence|paragraph|section|figure|table|formula, section?, page?, bbox?, text, score: float}`. `score` is 1 − cosine distance.
@@ -127,29 +130,34 @@ Contract status: planned (phase 2, `ops.job`).
 ---
 
 ## QuoteItem / QuoteResult
-Contract status: planned (phase 1, `evidence.quote_check`).
+Contract status: **implemented** (`contracts/schemas/QuoteVerifyRequest.v1.json`, `QuoteVerifyResponse.v1.json`; endpoint `POST /quotes/verify`). Results are not stored.
 
 `QuoteItem`:
 
 | Field | Type | Notes |
 |---|---|---|
-| `source` | string | DOI or `paper_id` of the cited work |
+| `key` | string? | echoed back |
+| `source` | string | DOI, `paper_id` (or a historical file stem), or a cite key of `project_id` |
 | `quote` | string | the words claimed to be in the source; `…` (or `...`) marks an omission and the fragments are matched in order |
-| `expected_numbers` | string[] | numbers to find near the quote, e.g. `["5.7", "0.8"]`; Unicode minus accepted |
-| `manuscript_sentence` | string? | the citing sentence (stored for audit) |
-| `project_id` | string? | |
+| `expected_numbers` | string[] | numbers to find near the quote, e.g. `["5.7", "-0.8"]`; the sign must agree; Unicode minus and decimal comma accepted |
+| `manuscript_sentence` | string? | the citing sentence (echo only) |
+| `project_id` | `ProjectId?` | needed for cite-key sources; defaults to the request's `project_id` |
 
 `QuoteResult`:
 
 | Field | Type | Notes |
 |---|---|---|
+| `key`, `source`, `quote` | | echoed |
 | `status` | `FOUND_EXACT \| FOUND_NORMALIZED \| FOUND_FUZZY \| NOT_FOUND \| SOURCE_UNAVAILABLE` | normalisation = NFKC, ligatures, quotes, dashes, soft hyphens, whitespace |
-| `score` | float? | similarity for `FOUND_FUZZY` (≥ 0.92 accepted) |
-| `span` | `EvidenceSpan?` | where it was found; `text` is the **source's** wording |
-| `numbers` | `NumberCheck[]` | `{value, found: bool, context?: string, distance_chars?: int}` |
-| `attribution` | `Attribution?` | `{cites_other_sources: bool, in_text_refs: string[], resolved_dois: string[]}`. `true` means the matched sentence itself cites others, i.e. possibly a **secondary citation** |
-| `text_source` | `corpus_tei \| oa_fetch \| none` | |
-| `searched` | `{sections: int, chars: int}` | what was searched, for `NOT_FOUND` |
+| `score` | float? | 1.0 for exact and normalised matches; the similarity for `FOUND_FUZZY` (≥ 0.92 accepted) |
+| `paper` | `PaperRef?` | the resolved source |
+| `span` | `EvidenceSpan?` | the source's own sentences around the match |
+| `numbers` | `NumberCheck[]` | `{value, found: bool, distance_chars?: int, context?: string, elsewhere: string[]}`. `found` refers to the matched passage; `elsewhere` lists other passage ids that contain the number |
+| `attribution` | `Attribution?` | `{cites_other_sources: bool, in_text_refs: string[], resolved_dois: string[]}`. `true` means the matched sentences themselves cite others, i.e. possibly a **secondary citation** |
+| `text_source` | `corpus_tei \| oa_fetch \| none` | `oa_fetch` is planned (phase 2) |
+| `searched` | `{sections: int, passages: int, chars: int}?` | what was searched |
+| `found_in` | string[] | for `NOT_FOUND`: keys of other items of the request that quote the same words for the same manuscript sentence and were found |
+| `detail` | string? | why, for `NOT_FOUND`, `SOURCE_UNAVAILABLE` and `FOUND_FUZZY` |
 
 ## DoiMetadata / DoiVerifyResult
 Contract status: planned (phase 1, migration 0002 `biblio`).
