@@ -230,7 +230,9 @@ def test_dedup_keeps_a_genuinely_new_paper(monkeypatch):
 
 def test_slug_convention_matches_recover_missing():
     """Both modules must derive the same stem or files are fetched twice."""
-    from src.paper_audit.recover_missing import doi_to_slug as audit_slug
+    # src/paper_audit is git-ignored, so a fresh clone has nothing to compare against.
+    recover_missing = pytest.importorskip("src.paper_audit.recover_missing")
+    audit_slug = recover_missing.doi_to_slug
     from src.paper_3._utils import doi_to_slug as paper3_slug
     for doi in ("10.1029/2025GL119771", "https://doi.org/10.1016/j.rse.2016.12.029",
                 "DOI:10.1038/s41597-023-02215-X"):

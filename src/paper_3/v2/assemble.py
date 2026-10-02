@@ -435,7 +435,7 @@ def to_docx(md_path: Path, out_path: Path | None = None) -> Path:
     """Render the assembled markdown with the Article-1 docx builder (headings,
     inline bold/italic, GitHub tables, block quotes as literal text)."""
     from docx import Document
-    from src.paper_audit.article_1_final.build_docx import convert_markdown
+    from src.services.markdown_docx import convert_markdown
     doc = Document()
     convert_markdown(doc, md_path)
     target = out_path or md_path.with_suffix(".docx")
