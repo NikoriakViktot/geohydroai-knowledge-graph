@@ -25,3 +25,8 @@ duckdb
 pyarrow
 pytest
 pydantic
+
+# ── PostgreSQL layer of truth (API_PLAN_v1/11) ─────────────────────────────────
+sqlalchemy>=2.0,<2.1
+psycopg[binary]>=3.2,<3.3
+alembic>=1.13,<1.17

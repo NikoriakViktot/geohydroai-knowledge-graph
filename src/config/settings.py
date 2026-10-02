@@ -33,6 +33,13 @@ def require_env(name: str) -> str:
 NEO4J_URI  = os.getenv("NEO4J_URI",  "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 
+# ── PostgreSQL layer of truth (API_PLAN_v1/11_POSTGRES_TRUTH_LAYER.md) ─────────
+# Password only via require_env("GHAI_PG_PASSWORD"), like Neo4j.
+GHAI_PG_HOST = os.getenv("GHAI_PG_HOST", "127.0.0.1")
+GHAI_PG_PORT = int(os.getenv("GHAI_PG_PORT", "5433"))
+GHAI_PG_DB   = os.getenv("GHAI_PG_DB",   "ghai")
+GHAI_PG_USER = os.getenv("GHAI_PG_USER", "ghai")
+
 # ── Model names ───────────────────────────────────────────────────────────────
 EMBEDDING_MODEL = os.getenv(
     "EMBEDDING_MODEL",

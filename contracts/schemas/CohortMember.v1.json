@@ -1,0 +1,27 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "cohort": {
+      "minLength": 1,
+      "title": "Cohort",
+      "type": "string"
+    },
+    "paper_id": {
+      "minLength": 1,
+      "title": "Paper Id",
+      "type": "string"
+    },
+    "source": {
+      "title": "Source",
+      "type": "string"
+    }
+  },
+  "required": [
+    "cohort",
+    "paper_id",
+    "source"
+  ],
+  "title": "CohortMember",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/CohortMember.v1.json"
+}

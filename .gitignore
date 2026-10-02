@@ -81,4 +81,5 @@ neo4j_schema.cypher
 =23.0
 .chromadb
 .chromadb_backup_20260520
+.chromadb_v2
 .claude

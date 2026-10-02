@@ -1,0 +1,35 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "alias_type": {
+      "enum": [
+        "doi",
+        "doi_slug",
+        "doi_slug_colon",
+        "file_stem",
+        "openalex_id",
+        "pdf_sha256"
+      ],
+      "title": "Alias Type",
+      "type": "string"
+    },
+    "alias": {
+      "minLength": 1,
+      "title": "Alias",
+      "type": "string"
+    },
+    "source": {
+      "description": "where the alias was observed, e.g. 'paper_json.metadata.doi'",
+      "title": "Source",
+      "type": "string"
+    }
+  },
+  "required": [
+    "alias_type",
+    "alias",
+    "source"
+  ],
+  "title": "PaperAlias",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/PaperAlias.v1.json"
+}

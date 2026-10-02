@@ -1,0 +1,66 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "enum": [
+        "pdf",
+        "tei",
+        "paper_json",
+        "normalized",
+        "enriched",
+        "sodb",
+        "nougat_regions"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "path": {
+      "description": "path relative to the repository root",
+      "title": "Path",
+      "type": "string"
+    },
+    "sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sha256"
+    },
+    "size_bytes": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Size Bytes"
+    },
+    "status": {
+      "default": "ok",
+      "enum": [
+        "ok",
+        "truncated",
+        "duplicate_copy"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "kind",
+    "path"
+  ],
+  "title": "PaperFile",
+  "type": "object",
+  "$id": "https://github.com/NikoriakViktot/geohydroai-knowledge-graph/contracts/PaperFile.v1.json"
+}

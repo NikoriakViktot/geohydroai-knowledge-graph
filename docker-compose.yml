@@ -1,21 +1,46 @@
-
-version: "3.9"
+# Secrets and versions come from .env (see .env.example); nothing secret is written here.
+# Every port is bound to 127.0.0.1: the stores are reached only from this machine
+# (the sibling WSL distro shares that loopback) and, later, only through the API.
 
 services:
 
   # ─────────────────────────────────────────
-  # Neo4j — графова БД
+  # PostgreSQL — layer of truth (API_PLAN_v1/11_POSTGRES_TRUTH_LAYER.md)
+  # ─────────────────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: ghai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${GHAI_PG_DB:-ghai}
+      POSTGRES_USER: ${GHAI_PG_USER:-ghai}
+      POSTGRES_PASSWORD: ${GHAI_PG_PASSWORD:?set GHAI_PG_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${GHAI_PG_PORT:-5433}:5432"
+    volumes:
+      # bind mount: a backup or a server migration is a copy of this directory
+      - ./data/postgres/pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ─────────────────────────────────────────
+  # Neo4j — graph projection (rebuilt from the layer of truth + files)
   # ─────────────────────────────────────────
   neo4j:
-    image: neo4j:5
+    # 5.26.19 Community, pinned by digest: a floating "neo4j:5" tag could pull a
+    # minor version that cannot open the existing store or its dumps.
+    image: neo4j:5@sha256:0e5d68ed655a64fe57296cc8e1b928f48456462dbf2c46d50a25c47b93ea938b
     container_name: course-neo4j
     restart: unless-stopped
     environment:
-      NEO4J_AUTH: neo4j/python2024
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?set NEO4J_PASSWORD in .env}
     ports:
-      - "7474:7474"    # Neo4j Browser (HTTP веб-інтерфейс)
-      - "7473:7473"    # Neo4j Browser (HTTPS)
-      - "7687:7687"    # Bolt protocol (драйвер Python)
+      - "127.0.0.1:7474:7474"    # Neo4j Browser (HTTP)
+      - "127.0.0.1:7473:7473"    # Neo4j Browser (HTTPS)
+      - "127.0.0.1:7687:7687"    # Bolt (Python driver)
     volumes:
       - neo4jdata:/data
 
@@ -27,7 +52,7 @@ services:
     container_name: grobid
     restart: unless-stopped
     ports:
-      - "8070:8070"
+      - "127.0.0.1:8070:8070"
     deploy:
       resources:
         reservations:
@@ -35,4 +60,9 @@ services:
             - capabilities: [gpu]
 
 volumes:
+  # The graph lives in the pre-existing volume "neo4jdata" (used by the course-neo4j
+  # container started with `docker run`). Without `external`, compose would create and
+  # mount an empty "knoweledg_graf_neo4jdata" instead (API_PLAN_v1 О-43).
   neo4jdata:
+    external: true
+    name: neo4jdata
