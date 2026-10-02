@@ -1,0 +1,241 @@
+# Review rules of floodstate-eo Paper 3 (case_studies/kakhovka_2023/review_rules.yaml in that repository).
+# Checks A–H of the 2026-09-28 literature audit (tools/paper3_audit/checks.py), as data for the
+# GeoHydroAI workbench review engine (src/workbench/review/engine.py). Paths are repository-relative.
+schema: ghai.review_rules/v1
+files:
+  manuscript: {path: case_studies/kakhovka_2023/publication/manuscript.md, label: manuscript.md}
+  captions: {path: case_studies/kakhovka_2023/publication/captions.md, label: captions.md}
+  claims: {path: case_studies/kakhovka_2023/publication/claims.md, label: claims.md}
+  tables_readme: {path: case_studies/kakhovka_2023/publication/tables/README.md, label: tables/README.md}
+  evidence_matrix: {path: case_studies/kakhovka_2023/publication/evidence_matrix.csv, label: evidence_matrix.csv}
+  theses_md: {path: case_studies/kakhovka_2023/publication/literature/theses.md, label: literature/theses.md}
+tables:
+  T12: {path: case_studies/kakhovka_2023/publication/tables/T12.csv, label: tables/T12.csv}
+  T16: {path: case_studies/kakhovka_2023/publication/tables/T16.csv, label: tables/T16.csv}
+
+rules:
+  # ── A: deterministic vs Monte-Carlo ──────────────────────────────────────────
+  - id: A
+    type: table_interval
+    table: T12
+    row:
+      - {columns: [date, day], contains: "2023-06-07"}
+      - {column: region, contains: CORRIDOR}
+    missing_row:
+      severity: INFO
+      observed: no DNIPRO_CORRIDOR 2023-06-07 row found
+      expected: the row that carries the headline values
+      fix: check T12 column names
+    location: tables/T12.csv (2023-06-07)
+    quantities:
+      - {name: A_new, unit: "km²", columns: ["a_"], quote_severity: MAJOR}
+      - {name: W_total, unit: "km²", columns: ["w_total"], quote_severity: MINOR}
+      - {name: V_new, unit: "hm³", columns: ["v_"], quote_severity: MINOR}
+    outside:
+      severity: MAJOR
+      tags: reporting
+      observed: "{name}: deterministic {central:.0f} vs MC p05/p50/p95 {p05:.0f}/{p50:.0f}/{p95:.0f} {unit} — the nominal run lies OUTSIDE its own interval"
+      expected: "TERMINOLOGY.md: intervals 'reported next to the central value rather than centred on it'; C07 explains the displacement (correlated DEM noise adds depth and connections)"
+      fix: "Report 'MC median [p05–p95]' as the uncertainty-based estimate and name the deterministic value separately as the nominal run; wherever the nominal value is quoted with the interval, state the MC median and that the interval is not centred on the nominal run (reviewer note)."
+    quoted_in: manuscript
+    quote:
+      window: 300
+      interval: ["p05"]
+      median: ["median", "not centred", "displaced"]
+      tags: reporting
+      observed: "'{match}' quoted with its p05–p95 but without the MC median ({p50:.0f}) or the statement that the interval is not centred on it"
+      expected: "TERMINOLOGY.md L54 / C07: value + p05–p95 + MC median"
+      fix: "'{central:.0f} {unit} (nominal run; MC median {p50:.0f}, p05–p95 {p05:.0f}–{p95:.0f} {unit})'"
+
+  # ── B: volumes always with p05–p95 and the MC median ─────────────────────────
+  - id: B
+    type: near
+    in: [manuscript, captions]
+    pattern: '\b(\d{2,4})\s*hm³'
+    skip_if_before: '[–-]\s*$'
+    window: 220
+    tags: volume
+    expected: "TERMINOLOGY.md L54: volumes always with p05–p95 and MC median"
+    cases:
+      - missing: ["p05", "interval", "pool"]
+        severity: MINOR
+        observed: "volume '{match}' without any p05–p95"
+        fix: add the T12/T21 interval or state explicitly that the quantity is outside the MC budget
+      - present: ["p05"]
+        missing: ["median"]
+        severity: MINOR
+        severity_in_section: {abstract: MAJOR}
+        observed: "volume '{match}' with p05–p95 but without the MC median"
+        expected: "TERMINOLOGY.md L54: volumes always with p05–p95 AND MC median"
+        fix: "add 'Monte-Carlo median 566 hm³' (T12) next to the interval"
+
+  # ── C: forbidden phrases, whitespace-tolerant ────────────────────────────────
+  - id: C
+    type: forbidden
+    in: [manuscript, captions, claims, tables_readme, evidence_matrix, theses_md]
+    major_in: [manuscript, captions, claims]
+    severity: MINOR
+    phrases_from: {path: tests/test_terminology_freeze.py, variable: FORBIDDEN}
+    phrases: ["physical reconstruction", "false SAR water", "false radar water", "peak breach discharge",
+              "breach discharge was", "breach discharge of", "peak breach outflow", "implied breach outflow",
+              "passed to the liman", "went to the liman", "without loss of recall", "without a detectable loss",
+              "without a detectable recall loss", "daily observed", "flooded area = "]
+    split_note: " (split across a line break — the bundle's test misses it)"
+    tags: terminology
+    observed: "forbidden phrase '{phrase}'"
+    expected: TERMINOLOGY.md forbidden list
+    fix: "replace with the frozen term (e.g. 'S1-only detections topographically unsupported by the reconstructed connected water surface')"
+
+  # ── D: causal attribution of S1-only detections ──────────────────────────────
+  - id: D
+    type: pattern
+    in: manuscript
+    pattern: 'dark-water rule, not the flood'
+    severity: MAJOR
+    tags: attribution
+    observed: "categorical attribution: '{match}'"
+    expected: "brief CHECK D: no categorical cause unless event-specific evidence establishes it"
+    fix: "'…is not supported as connected breach-induced inundation by the available terrain/WSE constraints and is consistent with known C-band look-alike behaviour on wet fields and sand; whether it is non-water is not tested here'"
+
+  # ── E: the reconstructed maximum ─────────────────────────────────────────────
+  - id: E
+    type: near
+    in: manuscript
+    pattern: '7 June'
+    window: 160
+    all_cases: true
+    tags: wording
+    cases:
+      - present: ['maximum|peak']
+        missing: ['reconstruct|between the sentinel|between them|no scene|not an observation']
+        severity: MAJOR
+        observed: "7 June maximum mentioned without 'reconstructed' / 'between acquisitions' in the sentence"
+        expected: "brief CHECK E: the 7 June maximum is a property of the reconstructed series"
+        fix: "write 'the daily reconstruction places the reconstructed areal maximum on 7 June'"
+      - present: ['observed (on|the) 7 june|peaked on 7 june|flood extent peaked']
+        severity: CRITICAL
+        observed: 7 June maximum stated as observed
+        expected: "never observed: no S1 scene covers it"
+        fix: rephrase as reconstructed
+  - id: E
+    type: pattern
+    in: manuscript
+    pattern: '\bthe peak\b(?!\s+(stage|stages|day|date|dates|flood|discharge|outflow|breach|storage|floodplain))'
+    after_chars: 18
+    severity: MINOR
+    tags: wording
+    observed: "bare noun '{match_plus}…'"
+    expected: "TERMINOLOGY.md L12: never 'peak' without a noun (areal maximum ≠ peak stage)"
+    fix: "'the reconstructed areal maximum' / 'the peak stage'"
+
+  # ── F: ICESat-2 is a consistency check ───────────────────────────────────────
+  - id: F
+    type: near
+    in: manuscript
+    pattern: 'ICESat-2'
+    window: 150
+    present: ['\bvalidat|\bprove|\bproof']
+    missing: ['not a validation|does not validate|without proving|no evidence|not validation|consistency check']
+    severity: MAJOR
+    tags: wording
+    observed: "ICESat-2 within 150 chars of 'validat/prove'"
+    expected: "TERMINOLOGY.md: 'altimetric consistency check'; never proves / validates the map"
+    fix: "if this refers to Paper 2's DEM validation, say 'Paper 2 assessed the DEM against night ICESat-2'; for this paper keep 'altimetric consistency check'"
+  - id: F
+    type: co_occurrence
+    all:
+      - {in: manuscript, contains: few decimetres}
+      - {in: claims, contains: few centimetres}
+    location: manuscript.md (Abstract) vs claims.md C06
+    severity: MINOR
+    tags: consistency
+    observed: "Abstract/Fig08: 'within a few decimetres'; C06: 'to a few centimetres (median)'"
+    expected: "one consistent statement: median +0.02/+0.03 m, p10–p90 −0.31…+0.64 m (T15)"
+    fix: "'median agreement of a few centimetres with a p10–p90 spread of a few decimetres'"
+
+  # ── G: reservoir balance ─────────────────────────────────────────────────────
+  - id: G
+    type: near
+    in: [manuscript, claims]
+    combine: true
+    label: (manuscript|claims)
+    pattern: '40\s?057|4\s?[x×]\s?10[⁴4]|4e4'
+    window: 300
+    missing: ['effective release']
+    severity: MAJOR
+    tags: c14
+    observed: "the ~4×10⁴ m³/s figure without 'daily-mean effective release' nearby"
+    expected: TERMINOLOGY.md L60
+    fix: "name the quantity 'daily-mean effective release (−dV/dt + Q_in)'"
+  - id: G
+    type: near
+    in: manuscript
+    pattern: 'breach discharge|breach outflow|breach flow'
+    window: {before: 60, after: 0}
+    missing: ['not an instantaneous|instantaneous|initial|different physical|published']
+    severity: MAJOR
+    tags: c14
+    observed: "'{match}' used affirmatively"
+    expected: "only in negation / as a comparator's quantity"
+    fix: "keep 'daily-mean effective release'"
+  - id: G
+    type: variants
+    in: [manuscript, claims, captions, tables_readme]
+    pattern: '[-−–]?\s?(?:1[0-9]|[5-9]|20)\s?[–-]\s?(?:1[0-9]|20|25)\s?%|[-−–]\s?(?:9|14|20)\s?%'
+    more_than: 3
+    location: manuscript §4.1 / C14 / FigS07 caption / tables/README T22
+    severity: MINOR
+    tags: consistency
+    observed: "hypsometry gap stated in several forms: {variants}"
+    expected: one canonical statement of the gap per level from T22
+    fix: "quote T22 values once (−9 % at 17.5 m, −14 % at 13 m, −20 % at 11 m) and reuse them"
+
+  # ── H: operational areas ─────────────────────────────────────────────────────
+  - id: H
+    type: requirements
+    in: manuscript
+    values: ["620", "180", "410", "420", "823", "520"]
+    pattern: '[~≈]?\s?{value}\s*km²'
+    window: 320
+    require:
+      - {name: temporal semantics, any: 'cumulative|snapshot|persisten|scenario|on \d{1,2} june|over \d'}
+      - {name: land-vs-total definition, any: 'flooded \*?land|flooded land|land|model_extent|scenario|extent'}
+      - {name: reference-water treatment, any: 'reference water|pre-existing water|reference', only_values: ["620", "180"]}
+    severity: MINOR
+    tags: comparator
+    observed: "external figure '{match}' without: {missing}"
+    expected: "brief CHECK H: AOI, dates, snapshot/cumulative, reference water, sensor, land-vs-total"
+    fix: attach the T16 semantics in the sentence
+  - id: H
+    type: table_rows
+    table: T16
+    where: [{column: area_semantics, contains: literature}]
+    required: verify
+    location: tables/T16.csv
+    severity: MINOR
+    tags: comparator
+    observed: "literature row '{row[quantity]}' without a verify note"
+    expected: every literature row carries its verification state
+    fix: fill `verify`
+  - id: H
+    type: table_text
+    table: T12
+    column: definition_note
+    rows: first
+    contains: comparable with operational
+    location: tables/T12.csv definition_note
+    severity: MAJOR
+    tags: consistency
+    observed: "W_total described as 'the quantity comparable with operational flooded area products'"
+    expected: "TERMINOLOGY.md L26–27 and T16: operational flooded LAND is closer in kind to A_new, never validation"
+    fix: regenerate T12 note in floodstate-eo (p96_paper_tables.py) — table not edited here
+  - id: H
+    type: absent
+    in: manuscript
+    none_of: ["410", "420"]
+    location: manuscript.md
+    severity: INFO
+    tags: comparator
+    observed: NASA Harvest 410–420 km² (TH-INT-02) and Monti 2024 are not in the manuscript or T16
+    expected: "brief §9A: every published area with its quantity"
+    fix: add as literature_reported rows only if the source can be verified

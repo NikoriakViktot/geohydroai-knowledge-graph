@@ -31,6 +31,7 @@ SEED: dict[str, dict] = {
             "reviews": "case_studies/kakhovka_2023/reviews/",
             "passport": "case_studies/kakhovka_2023/publication/PASSPORT.md",
             "literature_audit": "case_studies/kakhovka_2023/literature_audit/",
+            "review_rules": "case_studies/kakhovka_2023/review_rules.yaml",
         },
     },
     "article1": {

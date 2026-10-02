@@ -4,13 +4,19 @@
     python -m src.workbench <project_id> status               # where the paper stands
     python -m src.workbench <project_id> init     [--dry-run] # manifest, .mcp.json, CLAUDE.md section; register
     python -m src.workbench <project_id> pull                 # declared inputs -> data/workbench/<project>/in/
+    python -m src.workbench <project_id> theses               # contract v1 check of theses + atomic claims
+    python -m src.workbench <project_id> citations            # W1: citations -> quotes verified in the sources
+    python -m src.workbench <project_id> bibliography         # W2: .bib audit + rendered reference list
+    python -m src.workbench <project_id> review               # the paper's rules + markers + the steps above
     python -m src.workbench <project_id> deliver  [--from-inventory] [--dry-run] [--force]
+
+Checking steps stage their reports in data/workbench/<project>/out/<reviews>/workbench/; deliver sends them.
 
 Every step that writes into a paper repository plans first, refuses to overwrite work that is not
 committed (unless --force) and verifies what it wrote; the human commits there. ``--to DIR`` runs a
 step against a scratch directory instead of the repository (nothing is recorded).
-The steps that build a paper (passport, theses, literature, citations, bibliography, analysis,
-figures, tables, assemble, translate, review) follow in docs/api/PAPER_WORKFLOW.md.
+The building steps (passport, literature, analysis, figures, tables, assemble, translate) follow;
+the whole sequence is docs/api/PAPER_WORKFLOW.md.
 """
 
 from __future__ import annotations
@@ -18,7 +24,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-STEPS = ("status", "init", "pull", "deliver")
+STEPS = ("status", "init", "pull", "theses", "citations", "bibliography", "review", "deliver")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -52,6 +58,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.step == "pull":
         from src.workbench.steps import pull
         return pull.run(ctx)
+    if args.step in ("theses", "citations", "bibliography", "review"):
+        import importlib
+        return importlib.import_module(f"src.workbench.steps.{args.step}").run(ctx)
     from src.workbench.steps import deliver
     return deliver.run(ctx, from_inventory=args.from_inventory, dry_run=args.dry_run, force=args.force)
 

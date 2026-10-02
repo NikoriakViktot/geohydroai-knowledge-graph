@@ -255,6 +255,9 @@ RULES: tuple[Rule, ...] = (
     R("src/paper_3/**", "archive", KR1, note="kakhovka-report:v1 machinery; git history keeps it"),
 
     # The Paper 3 literature audit tool becomes the workbench literature and review steps.
+    R("tools/paper3_audit/checks.py", "here", None, "src/workbench/review/engine.py",
+      note="checks A–H: the engine here, the rules as data in floodstate-eo review_rules.yaml"),
+    R("tools/paper3_audit/revise.py", "here", None, "src/workbench/review/revise.py"),
     R("tools/paper3_audit/**", "here", None, "src/workbench/literature/"),
     R("tools/paper3_literature_audit.py", "here", None, "src/workbench/__main__.py"),
 )

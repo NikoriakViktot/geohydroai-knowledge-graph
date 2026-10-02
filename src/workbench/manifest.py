@@ -62,6 +62,7 @@ class Paths(_Model):
     reviews: str | None = None
     passport: str | None = None
     literature_audit: str | None = Field(default=None, description="directory of the literature evidence run")
+    review_rules: str | None = Field(default=None, description="the paper's review rules (ghai.review_rules/v1)")
 
     @field_validator("*")
     @classmethod
