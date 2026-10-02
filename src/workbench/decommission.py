@@ -77,12 +77,22 @@ DISPOSITIONS = {
     "retire": "code removed; the freeze and git history keep it",
     "unclassified": "no rule matched: blocks the gate until a rule is written",
 }
+STATUSES = {
+    "frozen": "copied into the freeze, sha256 recorded",
+    "present": "the paper repository already holds identical bytes",
+    "delivered": "written into the paper repository and verified there by sha256",
+    "superseded": "the paper repository holds a newer committed version; the freeze keeps ours",
+    "differs": "mirror: the repository's copy differs and is not newer; needs a decision",
+    "missing": "mirror: the repository lacks the file; needs a decision",
+    "accepted": "a person decided the difference is fine (column decision)",
+    "moved": "generic code now lives in this repository at its destination",
+}
 # disposition -> statuses that let the original be deleted
 DONE = {
-    "deliver": {"present", "delivered"},
-    "private": {"present", "delivered"},
-    "code": {"present", "delivered"},
-    "mirror": {"present", "accepted"},
+    "deliver": {"present", "delivered", "superseded"},
+    "private": {"present", "delivered", "superseded"},
+    "code": {"present", "delivered", "superseded"},
+    "mirror": {"present", "superseded", "accepted"},
     "here": {"moved"},
     "archive": {"frozen"},
     "retire": {"frozen"},
@@ -545,6 +555,25 @@ def build_inventory(dest: Path, root: Path = ROOT, imported: set[str] | None = N
 
 def _now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def update_rows(dest: Path, updates: dict[str, dict]) -> int:
+    """Set fields (status, checked_at, decision, note) of INVENTORY rows by path; returns rows changed."""
+    rows = read_inventory(dest)
+    n = 0
+    for r in rows:
+        u = updates.get(r["path"])
+        if u:
+            r.update({k: v for k, v in u.items() if k in COLUMNS and k not in ("path", "sha256", "bytes")})
+            n += 1
+    if n:
+        write_inventory(dest, rows)
+    return n
+
+
+def frozen_commit(dest: Path) -> str:
+    m = re.search(r"repository commit `([0-9a-f]{7,40})`", (dest / README).read_text(encoding="utf-8"))
+    return m.group(1) if m else ""
 
 
 # ── verify and gate ────────────────────────────────────────────────────────────
