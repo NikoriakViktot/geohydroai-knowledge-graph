@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import random
 import time
 from pathlib import Path
@@ -52,8 +53,21 @@ GROBID_READY           = f"{GROBID_BASE}/api/health"
 # Preserving coordinates for figures/tables/formulas/refs/sentences/authors
 # is mandatory for layout-aware KG downstream.
 
+#: Header consolidation asks an external service (CrossRef, or biblio-glutton when
+#: one is configured) to correct the header metadata. When that service is
+#: unreachable from the container, GROBID does not fail — it blocks until its own
+#: internal timeout, turning a 19-second parse into one that outlives any client
+#: timeout and dies as a broken pipe. Measured 2026-09-17: 18.9 s with
+#: consolidation off against >600 s with it on, for the same PDF.
+#:
+#: It stays on by default, because the existing corpus was built with it and it
+#: genuinely improves headers. Set GROBID_CONSOLIDATE_HEADER=0 when the service is
+#: unreachable, or when the metadata already comes from elsewhere — as it does for
+#: harvested papers, whose header is known from OpenAlex before the PDF is fetched.
+CONSOLIDATE_HEADER = os.getenv("GROBID_CONSOLIDATE_HEADER", "1")
+
 GROBID_FORM_PARAMS: list[tuple[str, str]] = [
-    ("consolidateHeader",    "1"),   # CrossRef lookup for header metadata
+    ("consolidateHeader",    CONSOLIDATE_HEADER),
     ("consolidateCitations", "0"),   # skip — too slow for batch ingestion
     ("includeRawCitations",  "1"),   # raw ref strings for citation graph
     ("includeRawAffiliations", "1"), # raw affiliation strings

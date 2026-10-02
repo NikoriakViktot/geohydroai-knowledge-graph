@@ -96,6 +96,67 @@ def extract_pages_text(pdf_path: Path) -> tuple[int, list[tuple[int, str]]]:
         raise PdfIOError(f"cannot read {pdf_path.name}: {exc}") from exc
 
 
+def extract_page_text(pdf_path: Path, page_num: int) -> str:
+    """Сирий текст однієї сторінки (1-indexed). Raises PdfIOError."""
+    try:
+        with fitz.open(str(pdf_path)) as pdf:
+            return pdf.load_page(page_num - 1).get_text("text")
+    except Exception as exc:
+        raise PdfIOError(f"cannot read page {page_num} of {pdf_path.name}: {exc}") from exc
+
+
+# ── Page geometry: words and ruled tables ─────────────────────────────────────
+#
+# Потрібно для таблиць без ліній (гідрометеорологічні щорічники): find_tables
+# повертає лише шапку, а тіло відновлюється зі слів за x-межами колонок шапки.
+# Обидві функції повертають лише прості кортежі/словники — жодного fitz-об'єкта
+# не виходить за межі фасаду.
+
+Word = tuple[float, float, float, float, str]   # x0, y0, x1, y1, text
+
+
+def extract_page_words(pdf_path: Path, page_num: int) -> list[Word]:
+    """Слова сторінки (1-indexed) з bbox у pt, у порядку читання. Raises PdfIOError."""
+    try:
+        with fitz.open(str(pdf_path)) as pdf:
+            page = pdf.load_page(page_num - 1)
+            return [(float(w[0]), float(w[1]), float(w[2]), float(w[3]), str(w[4]))
+                    for w in page.get_text("words")]
+    except Exception as exc:
+        raise PdfIOError(f"cannot read words on page {page_num} of "
+                         f"{pdf_path.name}: {exc}") from exc
+
+
+def extract_page_tables(pdf_path: Path, page_num: int,
+                        strategy: str = "lines") -> list[dict]:
+    """Таблиці, знайдені PyMuPDF на сторінці (1-indexed).
+
+    Кожна: {"bbox": (x0,y0,x1,y1), "rows": [[str|None, ...], ...],
+            "cells": [(x0,y0,x1,y1) | None, ...]  (row-major, як у fitz),
+            "row_count": int, "col_count": int}.
+    `strategy` — "lines" (лише лінійовані) або "text" (за вирівнюванням тексту).
+    Raises PdfIOError.
+    """
+    try:
+        with fitz.open(str(pdf_path)) as pdf:
+            page = pdf.load_page(page_num - 1)
+            found = page.find_tables(strategy=strategy)
+            out: list[dict] = []
+            for t in found.tables:
+                out.append({
+                    "bbox": tuple(float(v) for v in t.bbox),
+                    "rows": t.extract(),
+                    "cells": [tuple(float(v) for v in c) if c is not None else None
+                              for c in t.cells],
+                    "row_count": int(t.row_count),
+                    "col_count": int(t.col_count),
+                })
+            return out
+    except Exception as exc:
+        raise PdfIOError(f"cannot find tables on page {page_num} of "
+                         f"{pdf_path.name}: {exc}") from exc
+
+
 # ── Region / page rendering (Nougat crops) ────────────────────────────────────
 
 def render_region_image(

@@ -241,7 +241,7 @@ class NougatParser:
         encoding = self._processor(
             img,
             return_tensors="pt",
-            do_crop_margin=False,
+            **self._image_kwargs(),
         )
         pixel_values = encoding.pixel_values.to(device)
 
@@ -361,6 +361,48 @@ class NougatParser:
         }
 
 
+    #: Preprocessing settings read back off the loaded image processor. Every one
+    #: of these must be supplied together — see `_image_kwargs`.
+    _IMAGE_KWARG_FIELDS = (
+        "do_crop_margin", "do_thumbnail", "do_align_long_axis",
+        "do_resize", "size", "resample",
+        "do_rescale", "rescale_factor",
+        "do_normalize", "image_mean", "image_std",
+        "do_pad",
+    )
+
+    def _image_kwargs(self) -> dict:
+        """The complete preprocessing kwarg set, taken from the processor itself.
+
+        transformers 5.x validates the *call* kwargs against a TypedDict whose
+        defaults are all None, and does not fall back to the image processor's
+        attributes while doing so. Passing one flag (`do_crop_margin=False`) and
+        letting the rest default therefore fails with "Field 'do_thumbnail'
+        expected bool, got NoneType" — and passing none of them fails the same way
+        on `do_crop_margin`. Each flag also drags in its companions: `do_rescale`
+        needs `rescale_factor`, `do_normalize` needs `image_mean`/`image_std`,
+        `do_resize` needs `size` and `resample`.
+
+        So the set is rebuilt from the processor's own configuration, which keeps
+        the model's values rather than inventing any, with two adjustments:
+        margin cropping stays off (crops are already tight), and `size` is
+        converted from SizeDict to a plain dict, which is what the validator
+        accepts.
+        """
+        ip = self._processor.image_processor
+        kwargs = {}
+        for field in self._IMAGE_KWARG_FIELDS:
+            value = getattr(ip, field, None)
+            if value is not None:
+                kwargs[field] = value
+
+        kwargs["do_crop_margin"] = False
+
+        size = kwargs.get("size")
+        if size is not None and not isinstance(size, dict):
+            kwargs["size"] = {k: v for k, v in dict(size).items() if v is not None}
+        return kwargs
+
     def parse_image(
             self,
             image,
@@ -402,7 +444,7 @@ class NougatParser:
         pixel_values = self._processor(
             images=image,
             return_tensors="pt",
-            do_crop_margin=False,
+            **self._image_kwargs(),
         ).pixel_values
 
         pixel_values = pixel_values.to(self._model.device)
