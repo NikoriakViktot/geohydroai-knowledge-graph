@@ -125,3 +125,36 @@ def test_region_text_handles_pandas_nan():
     assert usable_text({"nougat_status": "accepted", "nougat_latex": math.nan,
                         "nougat_text": "0.82"}) == "0.82"
     assert usable_text({"nougat_text": "0.82"}) is None     # ungated row
+
+
+def test_short_formula_is_not_a_repetition_loop():
+    v = assess_region(r"\[A_{i,j} = A_{i,0} + \delta A_{i,0}\]", "FORMULA_REGION", BOX,
+                      layer("A i,j = A i,0 + δA i,0"))
+    assert "REPETITION_LOOP" not in v.flags
+
+
+def test_loop_start_keeps_the_prefix():
+    from src.document.nougat_parser import loop_start
+    assert loop_start(list(range(100)) + [7] * 80) == 100
+    assert loop_start(list(range(40)) + [1, 2, 3, 4, 5] * 20) == 40
+    assert loop_start(list(range(300))) is None
+
+
+def test_ligatures_in_the_text_layer_are_folded():
+    words, _ = text_tokens("PANGEA ﬁle and ﬂow")
+    assert "file" in words and "flow" in words
+
+
+def test_paragraph_from_a_table_crop_is_not_a_table():
+    para = "can be derived between the performances of streamflow and TWSAs."
+    lay = layer("can be derived between the performances of streamflow and TWSAs.")
+    v = assess_region(para, "TABLE_REGION", BOX, lay)
+    assert v.status == "rejected" and "NOT_A_TABLE" in v.flags
+    w = assess_region(para, "FORMULA_REGION", BOX, lay)
+    assert w.status == "rejected" and "NOT_A_FORMULA" in w.flags
+
+
+def test_prose_with_inline_math_is_not_a_formula():
+    prose = r"In the upper part of the canopy, for \(0.85<z/h<1\), the drag \(C_{D}a\) is 4.2 m-1."
+    lay = layer("In the upper part of the canopy, for 0.85 < z/h < 1, the drag CDa is 4.2 m-1.")
+    assert "NOT_A_FORMULA" in assess_region(prose, "FORMULA_REGION", BOX, lay).flags

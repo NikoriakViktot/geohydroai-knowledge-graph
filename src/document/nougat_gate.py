@@ -31,6 +31,7 @@ Only ``accepted`` text may be consumed downstream (see ``usable_text``).
 from __future__ import annotations
 
 import re
+import unicodedata
 import zlib
 from collections import Counter
 from dataclasses import dataclass, field
@@ -60,6 +61,10 @@ GROUNDING_RULES = {           # (min word share, min number share)
 }
 
 _LATEX_CMD = re.compile(r"\\[A-Za-z]+")
+_TABLE_SHAPE = re.compile(r"\\begin\{tabular\}")
+# a formula region must yield display math; inline \( \) inside prose means the crop
+# (or GROBID's box) held a paragraph, not the equation
+_MATH_SHAPE  = re.compile(r"\\\[|\\begin\{(?:equation|align|eqnarray|gather|multline)")
 _WORD      = re.compile(r"[A-Za-z]{3,}")
 _NUMBER    = re.compile(r"(?<![\w.])-?\d+(?:[.,]\d+)?(?![\w])")
 _MINUS     = str.maketrans({"−": "-", "–": "-", "﹣": "-", "－": "-"})
@@ -143,8 +148,9 @@ _MARKUP_WORDS = frozenset({
 
 
 def text_tokens(text: str) -> tuple[list[str], list[str]]:
-    """(words, numbers) of a Nougat output, LaTeX commands and markup removed."""
-    clean = _LATEX_ENV.sub(" ", text.translate(_MINUS))
+    """(words, numbers) of a Nougat output or a PDF text layer, LaTeX commands and
+    markup removed. NFKC folds ligatures ("ﬁle" → "file") that PDFs store as one glyph."""
+    clean = _LATEX_ENV.sub(" ", unicodedata.normalize("NFKC", text).translate(_MINUS))
     clean = _LATEX_CMD.sub(" ", clean)
     clean = re.sub(r"[{}_^$&|\\]", " ", clean)
     words = [w.lower() for w in _WORD.findall(clean) if w.lower() not in _MARKUP_WORDS]
@@ -171,7 +177,7 @@ def crop_layer(words: list[Word], bbox: tuple[float, float, float, float]
             cut_rows.add(round(cy))
         if inside_x and y0 <= cy <= y1:
             n += 1
-            tt = t.translate(_MINUS)
+            tt = unicodedata.normalize("NFKC", t).translate(_MINUS)
             wset.update(w.lower() for w in _WORD.findall(tt))
             nset.update(_norm_number(m) for m in _NUMBER.findall(tt))
             raw.append(tt)
@@ -213,7 +219,12 @@ def assess_region(text: str | None, region_type: str,
         return RegionVerdict("failed", 0.0, ["EMPTY"])
 
     q = score_nougat_output(text, region_type)
-    flags = list(q.flags) + loop_flags(text)
+    # nougat_quality's single-5-gram and entropy tests fire on short LaTeX
+    # ("A_{i,j} = A_{i,0} + \\delta A_{i,0}" has a 5-gram ratio of 0.5); a decoder
+    # loop is long, so for short outputs only this module's own checks apply.
+    short = len(text.split()) < 60
+    flags = [f for f in q.flags if not (short and f in ("REPETITION_LOOP", "LOW_ENTROPY"))]
+    flags += loop_flags(text)
     score = q.score
 
     v = RegionVerdict("accepted", score, flags)
@@ -221,6 +232,13 @@ def assess_region(text: str | None, region_type: str,
         v.status = "rejected"
         v.flags.append("UNKNOWN_REGION_TYPE")
         return v
+
+    # the output must be the kind of object the region is: a crop of a table that
+    # yields the paragraph under it is grounded text, but not the table
+    if region_type == "TABLE_REGION" and not _TABLE_SHAPE.search(text) and text.count("&") < 4:
+        v.flags.append("NOT_A_TABLE")
+    if region_type == "FORMULA_REGION" and not _MATH_SHAPE.search(text):
+        v.flags.append("NOT_A_FORMULA")
 
     if bbox is not None:
         area = max((bbox[2] - bbox[0]) * (bbox[3] - bbox[1]), 1.0)
@@ -252,8 +270,9 @@ def assess_region(text: str | None, region_type: str,
 
     hard = {"LOW_COMPRESSION", "NEAR_DUPLICATE_WINDOWS", "LOW_UNIQUE_TOKENS",
             "TEXT_DENSITY", "UNGROUNDED_WORDS", "UNGROUNDED_NUMBERS",
+            "NOT_A_TABLE", "NOT_A_FORMULA",
             "REPETITION_LOOP", "LOW_ENTROPY", "HALLUCINATION", "EMPTY", "TOO_SHORT"}
-    if q.rejected or any(f in hard for f in v.flags):
+    if any(f in hard for f in v.flags):
         v.status = "rejected"
         v.score = min(v.score, 0.2)
     return v

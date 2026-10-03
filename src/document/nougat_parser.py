@@ -54,16 +54,49 @@ _MAX_NEW_TOKENS  = int(os.getenv("NOUGAT_MAX_NEW_TOKENS", "4096"))
 # soon as the tail repeats, and the caller is told so the output can be rejected.
 # The version is part of the L1 cache key: outputs cached before the guard existed
 # must not be served again.
-REGION_GUARD_VERSION = "guard1"
-_LOOP_TAIL    = 24      # tokens compared
-_LOOP_SPAN    = 600     # look-back window
-_LOOP_HITS    = 3       # tail seen this many times → loop
-_LOOP_EVERY   = 16      # check every N generated tokens
+REGION_GUARD_VERSION = "guard3"
+_LOOP_MIN_SPAN   = 60     # tokens the repeated run must cover
+_LOOP_MAX_PERIOD = 200    # longest repeated unit looked for
+_LOOP_REPEATS    = 3      # identical consecutive units → loop
+_LOOP_EVERY      = 16     # check every N generated tokens
+
+
+def loop_start(seq: list[int]) -> int | None:
+    """Index where the trailing run of identical units begins (keep seq[:index]),
+    or None when the sequence does not end in a loop. Like the Nougat authors'
+    own inference, the prefix before the collapse is kept and the loop dropped."""
+    n = len(seq)
+    for period in range(1, min(_LOOP_MAX_PERIOD, n // _LOOP_REPEATS) + 1):
+        reps = max(_LOOP_REPEATS, -(-_LOOP_MIN_SPAN // period))
+        if period * reps > n:
+            continue
+        unit = seq[n - period:]
+        if all(seq[n - (k + 1) * period: n - k * period] == unit for k in range(1, reps)):
+            k = reps
+            while n - (k + 1) * period >= 0 and seq[n - (k + 1) * period: n - k * period] == unit:
+                k += 1
+            return n - k * period
+    return None
+
+
+def _is_looping(seq: list[int]) -> bool:
+    """True when the sequence ends in ≥ _LOOP_REPEATS identical consecutive units
+    covering ≥ _LOOP_MIN_SPAN tokens. guard1 counted a tail anywhere in the window
+    and stopped legitimate pages on a LaTeX term written three times."""
+    n = len(seq)
+    for period in range(1, min(_LOOP_MAX_PERIOD, n // _LOOP_REPEATS) + 1):
+        reps = max(_LOOP_REPEATS, -(-_LOOP_MIN_SPAN // period))
+        if period * reps > n:
+            continue
+        unit = seq[n - period:]
+        if all(seq[n - (k + 1) * period: n - k * period] == unit for k in range(1, reps)):
+            return True
+    return False
 
 
 class _LoopStop:
-    """transformers StoppingCriteria: stop when the last _LOOP_TAIL tokens already
-    occurred _LOOP_HITS times in the last _LOOP_SPAN tokens."""
+    """transformers StoppingCriteria: stop when generation ends in a run of identical
+    consecutive units (see _is_looping)."""
 
     def __init__(self, prompt_len: int) -> None:
         self.prompt_len = prompt_len
@@ -72,14 +105,13 @@ class _LoopStop:
     def __call__(self, input_ids, scores=None, **kwargs):
         import torch
         n = input_ids.shape[1] - self.prompt_len
-        if not self.tripped and n >= _LOOP_TAIL * _LOOP_HITS and n % _LOOP_EVERY == 0:
-            seq = input_ids[0, -_LOOP_SPAN:].tolist()
-            tail = seq[-_LOOP_TAIL:]
-            hits = sum(1 for i in range(len(seq) - _LOOP_TAIL + 1)
-                       if seq[i:i + _LOOP_TAIL] == tail)
-            self.tripped = hits >= _LOOP_HITS
+        if not self.tripped and n >= _LOOP_MIN_SPAN and n % _LOOP_EVERY == 0:
+            span = _LOOP_MAX_PERIOD * _LOOP_REPEATS
+            self.tripped = _is_looping(input_ids[0, -span:].tolist())
         return torch.full((input_ids.shape[0],), self.tripped, dtype=torch.bool,
                           device=input_ids.device)
+
+
 _DEVICE_PREF     = os.getenv("NOUGAT_DEVICE",          "auto")
 _ENABLED         = os.getenv("NOUGAT_ENABLED",          "true").lower() not in {"0", "false", "no"}
 
@@ -497,7 +529,11 @@ class NougatParser:
                 stopping_criteria=StoppingCriteriaList([guard]),
             )
         self.last_guard_tripped = guard.tripped
-        self.last_hit_budget = (outputs.shape[1] - 1) >= budget
+        self.last_hit_budget = (outputs.shape[1] - 1) >= budget and not guard.tripped
+        if guard.tripped:
+            cut = loop_start(outputs[0].tolist())
+            if cut is not None:
+                outputs = outputs[:, :cut]
 
         decoded = self._processor.batch_decode(
             outputs,

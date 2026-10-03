@@ -62,6 +62,15 @@ from src.document.nougat_gate import FIGURE_FAMILY, assess_region, snap_bbox, to
 # still rendered for a later figure/VLM layer. NOUGAT_FIGURES=1 restores inference.
 NOUGAT_FIGURES = os.getenv("NOUGAT_FIGURES", "0") == "1"
 
+# Page mode (default): Nougat infers whole pages, as it was trained; regions take
+# their block from the page markdown (src/document/nougat_page_mapper.py).
+# NOUGAT_MODE=crop restores the old per-region crop inference.
+NOUGAT_MODE = os.getenv("NOUGAT_MODE", "page")
+PAGE_DPI    = int(os.getenv("NOUGAT_PAGE_DPI", "150"))
+# Off by default: on the 2026-10-03 test papers every crop fallback for a table
+# returned the paragraph next to it and every formula fallback returned prose.
+NOUGAT_CROP_FALLBACK = os.getenv("NOUGAT_CROP_FALLBACK", "0") == "1"
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PDF_DIR      = PROJECT_ROOT / "data/literature/pdf"
 TEI_DIR      = PROJECT_ROOT / "data/literature/grobid_xml"
@@ -808,11 +817,192 @@ class NougatRegionPipeline:
         # Stable hash identifying this model + pipeline version.
         # Changes whenever the model or code version changes, which causes
         # SODBManifest to mark cached stages as stale.
-        _hash_src = f"{info.get('model_name', '')}:{info.get('model_version', '')}".encode()
+        # mode and guard version are part of the hash: results of the old crop mode
+        # must not count as done for page mode
+        from src.document.nougat_parser import REGION_GUARD_VERSION
+        _hash_src = (f"{info.get('model_name', '')}:{info.get('model_version', '')}:"
+                     f"{NOUGAT_MODE}:{REGION_GUARD_VERSION}").encode()
         self.pipeline_hash = "sha256:" + hashlib.sha256(_hash_src).hexdigest()[:16]
         log.info("[PIPELINE_HASH] %s", self.pipeline_hash)
 
     def process_pdf(self, pdf_path: Path, tei_path: Path) -> dict:
+        if NOUGAT_MODE == "page":
+            return self.process_pdf_pages(pdf_path, tei_path)
+        return self.process_pdf_crops(pdf_path, tei_path)
+
+    # ── page mode ─────────────────────────────────────────────────────────────
+
+    def process_pdf_pages(self, pdf_path: Path, tei_path: Path) -> dict:
+        """Infer each page holding a table or formula once, then give every region
+        its block of the page markdown, grounded in the PDF text layer."""
+        from src.document.nougat_gate import loop_flags
+        from src.document.nougat_page_mapper import assign_regions
+
+        paper_id  = pdf_path.stem
+        out_dir   = OUTPUT_DIR / paper_id
+        crops_dir = out_dir / "crops"
+        pages_dir = out_dir / "pages"
+        for d in (crops_dir, pages_dir):
+            d.mkdir(parents=True, exist_ok=True)
+        log.info("[PDF] %s  (page mode)", pdf_path.name)
+
+        blocks, page_dims = extract_semantic_blocks(tei_path)
+        regions = RegionBuilder(paper_id, page_dims).build(blocks)
+        log.info("[REGIONS] %d scientific regions constructed from %d blocks",
+                 len(regions), len(blocks))
+
+        # crops are kept for human verification and a later figure/VLM layer
+        crop_of: dict[str, str] = {}
+        for region in regions:
+            crop_path = crops_dir / f"{region.region_id}.png"
+            try:
+                render_region(pdf_path, region).save(crop_path)
+                crop_of[region.region_id] = str(crop_path)
+            except Exception:
+                log.warning("[crop] %s: render failed", region.region_id)
+
+        by_page: dict[int, list[ScientificRegion]] = {}
+        for region in regions:
+            if region.region_type not in FIGURE_FAMILY:
+                by_page.setdefault(region.page, []).append(region)
+
+        futures = {}
+        for page in sorted(by_page):
+            try:
+                image = pdf_io.render_page_image(pdf_path, page, dpi=PAGE_DPI)
+                futures[page] = self.actor.parse_image.remote(image, f"{paper_id}_p{page}")
+            except Exception as exc:
+                log.warning("[page] %s p%d: render failed: %s", paper_id, page, exc)
+
+        results: list[dict] = []
+        actor_failures = 0
+        for region in regions:
+            if region.region_type in FIGURE_FAMILY:
+                region.crop_strategy = "not_inferred"
+                results.append({"region": region.to_json_dict(),
+                                "crop_path": crop_of.get(region.region_id),
+                                "gate": assess_region(None, region.region_type).as_row()})
+
+        for page, page_regions in sorted(by_page.items()):
+            fut = futures.get(page)
+            parsed, page_md, page_flags = {}, "", []
+            if fut is None:
+                page_flags.append("RENDER_FAILURE")
+            else:
+                try:
+                    parsed = ray.get(fut)
+                    page_md = parsed.get("markdown_text") or ""
+                except Exception:
+                    actor_failures += 1
+                    log.exception("[PAGE FAILED nougat] %s p%d", paper_id, page)
+                    page_flags.append("ACTOR_FAILURE")
+            (pages_dir / f"p{page:03d}.md").write_text(page_md, encoding="utf-8")
+            # A collapse is cut off by the parser (the prefix is kept, as in Nougat's
+            # own inference); regions after the cut stay unmatched. Only a loop that
+            # survives in the text, or an exhausted budget, rejects the page.
+            note = ["PAGE_TRUNCATED_AT_LOOP"] if parsed.get("guard_stopped") else []
+            if parsed.get("hit_token_budget"):
+                page_flags.append("PAGE_TOKEN_BUDGET_EXHAUSTED")
+            if page_md and loop_flags(page_md):
+                page_flags.append("PAGE_LOOP")
+
+            words = None
+            try:
+                words = pdf_io.extract_page_words(pdf_path, page)
+            except Exception:
+                pass
+            assigned = assign_regions(
+                page_md,
+                [{"region_id": r.region_id, "region_type": r.region_type,
+                  "bbox": (r.bbox.x0, r.bbox.y0, r.bbox.x1, r.bbox.y1),
+                  "formula_text": r.formula_text} for r in page_regions],
+                words,
+            ) if page_md and not page_flags else {}
+
+            for region in page_regions:
+                region.crop_strategy = "page_inference"
+                a = assigned.get(region.region_id)
+                text = a.text if a else None
+                if not text and not page_flags:
+                    fb = self._crop_fallback(pdf_path, region, words)
+                    if fb is not None:
+                        fb["crop_path"] = crop_of.get(region.region_id)
+                        results.append(fb)
+                        continue
+                if page_flags:
+                    gate = {"nougat_status": "failed" if "ACTOR_FAILURE" in page_flags
+                            or "RENDER_FAILURE" in page_flags else "rejected",
+                            "nougat_flags": ",".join(page_flags)}
+                elif not text:
+                    gate = {"nougat_status": "failed",
+                            "nougat_flags": ",".join(note + [f"UNMATCHED_ON_PAGE:{a.method if a else 'unmatched'}"])}
+                else:
+                    v = assess_region(text, region.region_type, (0.0, 0.0, 1e5, 1e5), words)
+                    v.flags += note + [f"MATCH:{a.method}:{a.score:.2f}"]
+                    gate = v.as_row()
+                results.append({
+                    "region":        region.to_json_dict(),
+                    "crop_path":     crop_of.get(region.region_id),
+                    "nougat_result": {"markdown_text": text, "visual_text": text,
+                                      "page_markdown": f"pages/p{page:03d}.md"},
+                    "gate":          gate,
+                })
+
+        final = {"paper_id": paper_id, "pdf_path": str(pdf_path), "tei_path": str(tei_path),
+                 "blocks_extracted": len(blocks), "regions_count": len(regions),
+                 "pages_inferred": len(by_page), "mode": "page", "regions": results}
+        with open(out_dir / "regions.json", "w", encoding="utf-8") as f:
+            json.dump(final, f, indent=2, ensure_ascii=False)
+        _write_regions_parquet(results, paper_id, self.pipeline_hash)
+
+        if actor_failures:
+            log.error("[INCOMPLETE] %s: %d page(s) failed in the Nougat actor; "
+                      "region_extract is NOT marked done", paper_id, actor_failures)
+            final["actor_failures"] = actor_failures
+            return final
+        try:
+            from src.document.sodb_manifest import SODBManifest
+            SODBManifest(paper_id, self.pipeline_hash, SODB_DIR).mark_done("region_extract")
+        except Exception as _exc:
+            log.debug("[manifest] region_extract mark failed: %s", _exc)
+        n_acc = sum(1 for r in results if (r.get("gate") or {}).get("nougat_status") == "accepted")
+        log.info("[PAGES] %s: %d pages inferred, %d regions accepted", paper_id, len(by_page), n_acc)
+        return final
+
+    def _crop_fallback(self, pdf_path: Path, region: "ScientificRegion",
+                       words: list | None) -> dict | None:
+        """A table or formula the page inference did not produce (Nougat skipped the
+        table, or collapsed before reaching it) is inferred once more from its crop.
+        Crops are out of distribution, so the result goes through the same gate with
+        grounding against the crop's own text layer, and is marked CROP_FALLBACK."""
+        if NOUGAT_CROP_FALLBACK is False or not words:
+            return None
+        pad = _PADDING.get(region.region_type, _DEFAULT_PADDING)
+        b = region.bbox
+        nb = snap_bbox((b.x0, b.y0, b.x1, b.y1), words,
+                       (pad["top"], pad["bottom"], pad["left"], pad["right"]))
+        region.bbox = Bbox4(*nb)
+        region.crop_strategy = "crop_fallback"
+        try:
+            image = render_region(pdf_path, region)
+            parsed = ray.get(self.actor.parse_image.remote(image, region.region_id,
+                                                            token_budget(nb)))
+        except Exception as exc:
+            log.warning("[fallback] %s: %s", region.region_id, exc)
+            return None
+        text = parsed.get("markdown_text") or parsed.get("visual_text") or ""
+        v = assess_region(text, region.region_type, nb, words)
+        v.flags.append("CROP_FALLBACK")
+        if parsed.get("guard_stopped") or parsed.get("hit_token_budget"):
+            v.flags.append("GENERATION_LOOP_STOPPED")
+            v.status = "rejected"
+        return {"region": region.to_json_dict(), "crop_path": None,
+                "nougat_result": {"markdown_text": text, "visual_text": text},
+                "gate": v.as_row()}
+
+    # ── crop mode (legacy) ────────────────────────────────────────────────────
+
+    def process_pdf_crops(self, pdf_path: Path, tei_path: Path) -> dict:
         paper_id  = pdf_path.stem
         out_dir   = OUTPUT_DIR / paper_id
         crops_dir = out_dir / "crops"
