@@ -11,6 +11,7 @@ Data sources (read-only — never re-parses XML or calls APIs):
 from __future__ import annotations
 
 import json
+import re
 import logging
 from collections import Counter, defaultdict
 from functools import lru_cache
@@ -171,6 +172,35 @@ def _duckdb_query(sql: str) -> pd.DataFrame:
     return query(sql)
 
 
+def _clean_str(value) -> str | None:
+    """A string property, or None for missing values.
+
+    The parquet layer hands pandas NaN for empty titles and journals; `x or None`
+    keeps NaN (it is truthy), and 211 titles / 1,262 journals reached Neo4j as a
+    float NaN before 2026-10-03.
+    """
+    if value is None:
+        return None
+    if isinstance(value, float):
+        return None                      # NaN or a number where text was expected
+    text = str(value).strip()
+    return text if text and text.lower() not in ("nan", "none", "null") else None
+
+
+def title_key(title) -> str | None:
+    """Normalised title used to merge reference stubs: case-, punctuation- and
+    whitespace-insensitive, ASCII-folded. None for titles too short to identify a
+    work ("Introduction", "Report") — those references are not written as stubs."""
+    import unicodedata
+    text = _clean_str(title)
+    if not text:
+        return None
+    text = re.sub(r"[^\w]+", " ", text)                     # dashes, quotes, colons → space
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+    key = re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+    return key if len(key) >= 20 else None
+
+
 def load_paper_nodes() -> list[dict]:
     df = _duckdb_query("""
         SELECT paper_id, title, doi, year, cited_by_count,
@@ -183,16 +213,18 @@ def load_paper_nodes() -> list[dict]:
         if r.year and str(r.year).isdigit():
             y = int(r.year)
             year = y if 1900 <= y <= 2030 else None
+        title = _clean_str(r.title)
         rows.append({
             "paper_id":       str(r.paper_id),
-            "title":          r.title or None,
-            "doi":            r.doi or None,
+            "title":          title,
+            "title_key":      title_key(title),
+            "doi":            _clean_str(r.doi),
             "year":           year,
             "cited_by_count": int(r.cited_by_count) if pd.notna(r.cited_by_count) else None,
-            "openalex_id":    r.openalex_id or None,
-            "journal":        r.journal or None,
-            "study_type":     r.study_type or None,
-            "primary_country":r.primary_country or None,
+            "openalex_id":    _clean_str(r.openalex_id),
+            "journal":        _clean_str(r.journal),
+            "study_type":     _clean_str(r.study_type),
+            "primary_country":_clean_str(r.primary_country),
         })
     return rows
 
@@ -754,14 +786,21 @@ def load_cites_edges(limit: int | None = None) -> list[dict]:
             # MERGE matches the DOI string exactly; 27 % of GROBID reference DOIs
             # carry upper case, which would split one cited work into several stubs.
             doi   = normalize_doi(ref.get("doi"))
-            title = ref.get("title") or None
-            if not doi and not title:
+            title = _clean_str(ref.get("title"))
+            key   = title_key(title)
+            if not doi and not key:
                 continue
+            year = ref.get("year")
+            try:
+                year = int(year) if year is not None and 1800 <= int(year) <= 2026 else None
+            except (TypeError, ValueError):
+                year = None
             rows.append({
-                "source_paper_id": pid,
-                "target_doi":      doi,
-                "target_title":    title,
-                "target_year":     ref.get("year"),
+                "source_paper_id":  pid,
+                "target_doi":       doi,
+                "target_title":     title,
+                "target_title_key": key,
+                "target_year":      year,
             })
     log.info("  CITES edge candidates: %d", len(rows))
     return rows

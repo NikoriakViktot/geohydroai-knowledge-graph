@@ -73,6 +73,19 @@ def load_numeric_facts(
         log.warning("No TEI XML files found in %s", grobid_dir)
         return {"files_processed": 0, "facts_extracted": 0, "facts_written": 0}
 
+    # Facts belong to papers of the graph. grobid_xml also holds TEI of duplicates,
+    # non-papers and truncated papers that have no Paper node; loading them produced
+    # 1,659 orphan facts (65 papers) before 2026-10-03.
+    own_writer = writer is None and not dry_run
+    if own_writer:
+        writer = GraphWriter()
+    if writer is not None:
+        known = writer.paper_ids()
+        before = len(tei_files)
+        tei_files = [f for f in tei_files if f.stem.removesuffix(".tei") in known]
+        log.info("  %d of %d TEI files belong to a Paper node; the rest are skipped",
+                 len(tei_files), before)
+
     all_facts: list[NumericFact] = []
     for tei_path in tei_files:
         paper_id = tei_path.stem.removesuffix(".tei")
@@ -87,6 +100,8 @@ def load_numeric_facts(
 
     if dry_run or not all_facts:
         _log_stats(all_facts)
+        if own_writer:
+            writer.close()
         return {
             "files_processed": len(tei_files),
             "facts_extracted": total_extracted,
@@ -94,9 +109,6 @@ def load_numeric_facts(
         }
 
     # Write to Neo4j
-    own_writer = writer is None
-    if own_writer:
-        writer = GraphWriter()
 
     try:
         fact_rows  = [
@@ -106,7 +118,8 @@ def load_numeric_facts(
         ]
         paper_rows = [{"paper_id": f.paper_id, "fact_id": f.fact_id} for f in all_facts]
         meas_rows  = [{"fact_id": f.fact_id, "canonical_id": f.canonical_id,
-                       "node_label": f.node_label, "confidence": f.confidence}
+                       "node_label": f.node_label, "confidence": f.confidence,
+                       "display_name": f.metric}
                       for f in all_facts]
 
         writer.write_numeric_facts(fact_rows)

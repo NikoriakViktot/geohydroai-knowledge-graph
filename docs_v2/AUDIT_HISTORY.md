@@ -343,3 +343,9 @@
 **Nougat pipeline — острів**: `nougat_region_pipeline.py` пройшов 180 papers, але ні Legacy pipeline, ні Neo4j, ні ChromaDB не читають results.parquet. 180 papers × повне visual analysis = **дані є**, але **ніхто не читає**.
 
 Виправлення: SODB design (AUDIT_v1/SODB_DESIGN.md) — regions.parquet як handoff contract між Nougat і extraction pipeline. Поки не реалізовано.
+
+---
+
+## Аудит графу Neo4j і NumericFact (2026-10-03)
+
+14 проблем у шарах Paper, CITES, USES_METHOD, INVESTIGATES і NumericFact; 13 виправлено в коді та даних, лишився 1 (порожній візуальний шар). Подробиці, причини, збої під час виправлення і список залишку: [GRAPH_AUDIT_20261003.md](GRAPH_AUDIT_20261003.md).

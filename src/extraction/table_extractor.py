@@ -43,7 +43,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from src.extraction.numbers import parse_number
+from src.extraction.numbers import normalize_minus, parse_number, to_ratio
 
 log = logging.getLogger("geohydro.extraction.table_extractor")
 
@@ -240,6 +240,45 @@ def _map_column(header: str) -> tuple[str, str, str | None] | None:
     return None
 
 
+_DECIMAL_RE = re.compile(r"(?<![\w.])[-−]?\d+\.\d+(?![\w.])")
+
+
+def _map_all(header: str) -> list[tuple[str, str, str | None]]:
+    """Every metric named in one header cell, in order of appearance.
+
+    GROBID writes a header that spans two columns as one cell ("MAE RMSE (%)"),
+    and the data rows below carry both numbers in one cell ("6605 10 569").
+    The first pattern used to win, so every value became an RMSE.
+    """
+    h = header.strip()
+    found: list[tuple[int, str, str, str | None]] = []
+    for pat, cid, label, unit_hint in _COLUMN_PATTERNS:
+        m = pat.search(h)
+        if m and all(cid != f[1] for f in found):
+            found.append((m.start(), cid, label, unit_hint))
+    if len(found) > 1 and _DECIMAL_RE.search(h):
+        # "RMSE PBIAS POD FAR CSI -27.18 0.80 0.08": GROBID glued a data row into a
+        # multi-column header, so values cannot be paired with their metric.
+        # A single metric with a stray number ("RMSE (mm/h) 26.92") is still that metric.
+        return []
+    found.sort()
+    return [(cid, label, unit_hint) for _, cid, label, unit_hint in found]
+
+
+def _map_header_cells(cells: list[str], merged: str) -> list[tuple[str, str, str | None]]:
+    """Metrics of a column from its header chain, most specific (lowest) row first.
+
+    A group header above a metric row ("Accuracy metrics" over "Kappa") must not add a
+    second metric to the column, so each header cell is read on its own, bottom-up,
+    and the merged header string is only a fallback.
+    """
+    for cell in reversed(cells):
+        mapped = _map_all(cell)
+        if mapped:
+            return mapped
+    return _map_all(merged)
+
+
 # ── Cell / header utilities ───────────────────────────────────────────────────
 
 _UNIT_RE = re.compile(r"\(([^)]{1,25})\)\s*$")
@@ -265,6 +304,62 @@ def _parse_float(text: str | None) -> float | None:
 
 def _is_numeric(text: str | None) -> bool:
     return _parse_float(text) is not None
+
+
+_PLAIN_NUMBER_RE = re.compile(r"-?\d+(?:[.,]\d+)?%?")
+_THOUSANDS_RE    = re.compile(r"\d{1,3}(?: \d{3})+(?:[.,]\d+)?")
+
+
+def _cell_values(raw: str | None, n_expected: int = 1) -> list[float] | None:
+    """The numbers one table cell carries, or None when the cell cannot be read
+    without guessing.
+
+    `parse_number` drops thin spaces (a thousands separator), but an ASCII space
+    between two numbers is not one: "0 1" is two values, not 1, and "34 18 19 25"
+    is not 34,181,925 (108 such facts in 24 papers before 2026-10-03).
+
+      * one token                        → one number
+      * tokens that are not numbers on their own ("0 .0 0 0136") → digits broken
+        by GROBID; one number when the joined text has at most one decimal point
+      * as many numbers as metrics in the header → one value per metric
+      * "10 569", "1 234 567"            → thousands grouping, one number
+      * anything else                    → None (ambiguous)
+    """
+    if raw is None:
+        return None
+    text = normalize_minus(str(raw)).strip()
+    if not text:
+        return None
+    tokens = text.split()
+    if len(tokens) == 1:
+        v = _parse_float(text)
+        return [v] if v is not None else None
+    if not all(_PLAIN_NUMBER_RE.fullmatch(t) for t in tokens):
+        joined = text.replace(" ", "")
+        if joined.count(".") + joined.count(",") <= 1:
+            v = _parse_float(joined)
+            return [v] if v is not None else None
+        return None
+    if n_expected == len(tokens):
+        vals = [_parse_float(t) for t in tokens]
+        return vals if all(v is not None for v in vals) else None
+    if n_expected == 1 and _THOUSANDS_RE.fullmatch(text):
+        v = _parse_float(text.replace(" ", ""))
+        return [v] if v is not None else None
+    return None
+
+
+def _percent_hint(raw_cell: str, header: str, unit: str | None) -> bool:
+    return unit == "%" or "%" in raw_cell or "%" in header
+
+
+def _scaled(cid: str, value: float, percent: bool) -> float:
+    """Read "94.2" under "Accuracy (%)" as 0.942; without a percent sign the bounds
+    check decides, so no value is rescaled on a guess."""
+    if not percent:
+        return value
+    lo, hi = _VALUE_BOUNDS.get(cid, (float("-inf"), float("inf")))
+    return to_ratio(value, lo, hi)
 
 
 def _cells_of(row_elem) -> list[str | None]:
@@ -414,16 +509,13 @@ def _extract_column_labeled(
     col_contexts = _build_column_contexts(header_rows, n_cols)
     merged_headers: list[str] = [" ".join(ctx) for ctx in col_contexts]
 
-    # Map each column to an ontology entry
-    col_mappings: list[tuple[str, str, str | None] | None] = []
-    for h in merged_headers:
+    # Map each column to the ontology entries named in its header
+    col_mappings: list[list[tuple[str, str, str | None]]] = []
+    for ctx, h in zip(col_contexts, merged_headers):
         clean_h, unit_from_header = _split_unit(h)
-        m = _map_column(clean_h)
-        if m:
-            cid, label, unit_hint = m
-            col_mappings.append((cid, label, unit_from_header or unit_hint))
-        else:
-            col_mappings.append(None)
+        mapped = _map_header_cells([_split_unit(c)[0] for c in ctx], clean_h)
+        col_mappings.append([(cid, label, unit_from_header or unit_hint)
+                             for cid, label, unit_hint in mapped])
 
     if not any(col_mappings):
         return []
@@ -432,32 +524,35 @@ def _extract_column_labeled(
     facts: list[NumericFact] = []
     seq = 0
     for row in all_rows[header_depth:]:
-        for ci, mapping in enumerate(col_mappings):
-            if mapping is None or ci >= len(row):
+        for ci, mappings in enumerate(col_mappings):
+            if not mappings or ci >= len(row):
                 continue
-            cid, label, unit = mapping
             raw_cell = (row[ci] or "").strip()
-            v = _parse_float(raw_cell)
-            if v is None or not _value_plausible(cid, v):
-                continue
-            facts.append(NumericFact(
-                fact_id        = _make_fact_id(table_id, cid, v, seq),
-                paper_id       = paper_id,
-                table_id       = table_id,
-                table_label    = table_label,
-                page           = page,
-                column_context = col_contexts[ci],
-                col_header     = merged_headers[ci],
-                row_context    = _row_labels_left_of(row, ci),
-                raw_cell       = raw_cell,
-                metric         = _canonical_metric(cid),
-                canonical_id   = cid,
-                node_label     = label,
-                value          = v,
-                unit           = unit,
-                confidence     = 0.85,
-            ))
-            seq += 1
+            values = _cell_values(raw_cell, len(mappings))
+            if values is None or len(values) != len(mappings):
+                continue            # ambiguous cell: no fact rather than a guess
+            for (cid, label, unit), v in zip(mappings, values):
+                v = _scaled(cid, v, _percent_hint(raw_cell, merged_headers[ci], unit))
+                if not _value_plausible(cid, v):
+                    continue
+                facts.append(NumericFact(
+                    fact_id        = _make_fact_id(table_id, cid, v, seq),
+                    paper_id       = paper_id,
+                    table_id       = table_id,
+                    table_label    = table_label,
+                    page           = page,
+                    column_context = col_contexts[ci],
+                    col_header     = merged_headers[ci],
+                    row_context    = _row_labels_left_of(row, ci),
+                    raw_cell       = raw_cell,
+                    metric         = _canonical_metric(cid),
+                    canonical_id   = cid,
+                    node_label     = label,
+                    value          = v,
+                    unit           = unit,
+                    confidence     = 0.85,
+                ))
+                seq += 1
     return facts
 
 
@@ -489,22 +584,19 @@ def _extract_row_labeled(
         if not row:
             continue
 
-        # Scan left-to-right for the first cell that matches a metric keyword
+        # Scan left-to-right for the first cell that names a metric
         match_idx: int | None = None
-        mapping: tuple[str, str, str | None] | None = None
+        mappings: list[tuple[str, str, str | None]] = []
         for idx, cell in enumerate(row):
-            m = _map_column(cell or "")
-            if m is not None:
+            mappings = _map_all(_split_unit(cell or "")[0])
+            if mappings:
                 match_idx = idx
-                mapping = m
                 break
-        if mapping is None or match_idx is None:
+        if not mappings or match_idx is None:
             continue
 
-        cid, label, unit_hint = mapping
         label_text = (row[match_idx] or "").strip()
         _, unit_from_cell = _split_unit(label_text)
-        unit = unit_from_cell or unit_hint
 
         # Cells BEFORE the label are hierarchical group headers (column context)
         pre_label_ctx = [
@@ -515,27 +607,32 @@ def _extract_row_labeled(
 
         for cell in row[match_idx + 1 :]:
             raw_cell = (cell or "").strip()
-            v = _parse_float(raw_cell)
-            if v is None or not _value_plausible(cid, v):
+            values = _cell_values(raw_cell, len(mappings))
+            if values is None or len(values) != len(mappings):
                 continue
-            facts.append(NumericFact(
-                fact_id        = _make_fact_id(table_id, cid, v, seq),
-                paper_id       = paper_id,
-                table_id       = table_id,
-                table_label    = table_label,
-                page           = page,
-                column_context = pre_label_ctx + [label_text],
-                col_header     = label_text,
-                row_context    = [],
-                raw_cell       = raw_cell,
-                metric         = _canonical_metric(cid),
-                canonical_id   = cid,
-                node_label     = label,
-                value          = v,
-                unit           = unit,
-                confidence     = 0.80,
-            ))
-            seq += 1
+            for (cid, label, unit_hint), v in zip(mappings, values):
+                unit = unit_from_cell or unit_hint
+                v = _scaled(cid, v, _percent_hint(raw_cell, label_text, unit))
+                if not _value_plausible(cid, v):
+                    continue
+                facts.append(NumericFact(
+                    fact_id        = _make_fact_id(table_id, cid, v, seq),
+                    paper_id       = paper_id,
+                    table_id       = table_id,
+                    table_label    = table_label,
+                    page           = page,
+                    column_context = pre_label_ctx + [label_text],
+                    col_header     = label_text,
+                    row_context    = [],
+                    raw_cell       = raw_cell,
+                    metric         = _canonical_metric(cid),
+                    canonical_id   = cid,
+                    node_label     = label,
+                    value          = v,
+                    unit           = unit,
+                    confidence     = 0.80,
+                ))
+                seq += 1
     return facts
 
 
@@ -620,11 +717,23 @@ def extract_numeric_facts(tei_path: str | Path, paper_id: str) -> list[NumericFa
             )
         facts.extend(tbl_facts)
 
+    # A fact identical in every stored attribute carries no information twice
+    # (1,166 such duplicates in the graph on 2026-10-03).
+    seen: set[tuple] = set()
+    unique: list[NumericFact] = []
+    for f in facts:
+        key = (f.table_id, f.canonical_id, f.value, f.col_header,
+               tuple(f.row_context), tuple(f.column_context))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(f)
+
     log.info(
         "extract_numeric_facts: paper=%-20s  tables=%d  facts=%d",
-        paper_id, table_idx, len(facts),
+        paper_id, table_idx, len(unique),
     )
-    return facts
+    return unique
 
 
 # ── Period-type detection (shared with process_paper and table_kg_loader) ────

@@ -38,6 +38,7 @@ INDEXES: list[str] = [
     # Title-only CITES stubs MERGE on title; without a range index each row scans
     # every Paper node (the full-text index below is not used by MERGE).
     "CREATE INDEX paper_title       IF NOT EXISTS FOR (n:Paper)   ON (n.title)",
+    "CREATE INDEX paper_title_key   IF NOT EXISTS FOR (n:Paper)   ON (n.title_key)",
     "CREATE INDEX paper_doi         IF NOT EXISTS FOR (n:Paper)   ON (n.doi)",
     "CREATE INDEX paper_citations   IF NOT EXISTS FOR (n:Paper)   ON (n.cited_by_count)",
     "CREATE INDEX paper_country     IF NOT EXISTS FOR (n:Paper)   ON (n.primary_country)",

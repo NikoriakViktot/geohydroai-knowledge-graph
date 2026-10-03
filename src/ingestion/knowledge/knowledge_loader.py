@@ -88,13 +88,13 @@ PATTERN_OVERRIDES: dict[str, str] = {
     # Hydro models
     "HEC-RAS":      r"\bhec[\s\-]?ras\b",
     "HEC-HMS":      r"\bhec[\s\-]?hms\b",
-    "SWAT":         r"\bswat\+?\b|soil and water assessment tool",
+    "SWAT":         r"(?-i:\bSWAT\+?\b)|soil and water assessment tool",   # Swat is also a river
     "LISFLOOD":     r"\blisflood\b",
     # Methods
     "SAR":          r"\bsar\b|synthetic aperture radar",
     "INSAR":        r"\binsar\b|\bifsar\b|interferometric synthetic aperture",
     "LIDAR":        r"\blidar\b|light detection and ranging",
-    "HAND":         r"\bhand\b|height above nearest drainage|height above nearest stream",
+    "HAND":         r"(?-i:\bHAND\b)|height above nearest drainage|height above nearest stream",
     "TWI":          r"\btwi\b|topographic wetness index",
     "U-NET":        r"\bu[\-\s]?net\b|unet",
     "CNN":          r"\bcnn\b|convolutional neural network",
@@ -103,6 +103,8 @@ PATTERN_OVERRIDES: dict[str, str] = {
     "GEE":          r"\bgoogle earth engine\b|\bgee\b",
     # Disambiguation: MAP as a proper-noun method needs full phrase, not bare acronym
     "MAP":          r"\bmaximum[\s\-]?a[\s\-]?posteriori\b",
+    # "TRANSFORM" is an English verb; only the full phrase names the method
+    "TRANSFORM":    r"\bimage[\s\-]?transform(?:ation)?s?\b",
     # Metrics
     "RMSE":         r"\brmse\b",
     "MAE":          r"\bmae\b|mean absolute error",
@@ -460,6 +462,35 @@ class KnowledgeBase:
             rec.is_metric = True
 
 
+def _acronym_alt(acronym: str) -> str:
+    """Regex alternative for an acronym or model name.
+
+    Patterns are searched with re.IGNORECASE (the full-name alternatives need it), but
+    an acronym must keep its case: "HAND" is a method, "hand" is an English word, "ET"
+    is evapotranspiration while "et al." is not. Names with upper-case letters are
+    therefore matched inside a (?-i:...) group when they are short (≤ 5 characters),
+    as written or fully capitalised ("iRIC"/"IRIC"), and never as a substring
+    ("iric" inside "empirical" produced 835 false iRIC papers before 2026-10-03).
+    """
+    esc = re.escape(acronym)
+    short = len(acronym) <= 5 and acronym.isalnum()
+    if not short or not any(ch.isupper() for ch in acronym):
+        # Long names (ICESAT, LANDSAT, TERRASAR) collide with no English word and
+        # are typeset in several cases ("ICESat-2"); only short acronyms need case.
+        return fr"\b{esc}\b"
+    alts = [fr"\b{esc}\b"]
+    if acronym != acronym.upper():
+        alts.append(fr"\b{re.escape(acronym.upper())}\b")
+    return "(?-i:" + "|".join(alts) + ")"
+
+
+def _name_alt(name: str) -> str:
+    """Word-bounded, case-insensitive alternative for a multi-word name; the plural
+    ("artificial neural networks") still matches."""
+    esc = re.sub(r"\\ ", r"[\\s\\-]?", re.escape(name.lower()))   # "one-dimensional" too
+    return fr"\b{esc}(?:e?s)?\b"
+
+
 def _build_pattern(acronym: str, full_name: str) -> str:
     """Auto-generate a regex pattern from acronym + full_name."""
     for key, pat in PATTERN_OVERRIDES.items():
@@ -468,10 +499,7 @@ def _build_pattern(acronym: str, full_name: str) -> str:
         if full_name and key.lower() == full_name.lower():
             return pat
 
-    parts: list[str] = []
-
-    acr_esc = re.escape(acronym)
-    parts.append(fr"\b{acr_esc}\b")
+    parts: list[str] = [_acronym_alt(acronym)]
 
     if full_name and len(full_name) > 4:
         fn = full_name.lower()
@@ -548,10 +576,10 @@ def _load_ontology_methods(kb: KnowledgeBase, path: Path):
                     related     = m.get("related_methods", m.get("related", [])),
                     source_kb   = "ontology",
                 )
-                parts = [fr"\b{re.escape(aliases[0])}\b"] if aliases else []
+                parts = [_acronym_alt(aliases[0])] if aliases else []
                 nm = rec.method_name.replace("_", " ")
                 if len(nm) > 3:
-                    parts.append(re.escape(nm.lower()))
+                    parts.append(_name_alt(nm))
                 rec.pattern = "|".join(parts) if parts else None
                 kb.methods.append(rec)
             continue
@@ -705,9 +733,9 @@ def _load_v2_ontology(kb: KnowledgeBase, path: Path):
         name_str = mrec.method_name.replace("_", " ")
         parts: list[str] = []
         if aliases:
-            parts.append(fr"\b{re.escape(aliases[0])}\b")
+            parts.append(_acronym_alt(aliases[0]))
         if len(name_str) > 3:
-            parts.append(re.escape(name_str.lower()))
+            parts.append(_name_alt(name_str))
         mrec.pattern = "|".join(parts) if parts else None
 
         kb.v2_models[mid] = mrec

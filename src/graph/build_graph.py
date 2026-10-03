@@ -247,9 +247,11 @@ def build(args: argparse.Namespace) -> None:
         # ── 8. Paper↔FloodEvent edges ─────────────────────────────────────────
         _phase("FLOOD EVENT EDGES")
 
-        flood_paper_rows = loader.load_paper_flood_event_edges(paper_rows)
-        gw.write_paper_flood_event_edges(flood_paper_rows)
-        log.info("  %d Paper→FloodEvent edges", len(flood_paper_rows))
+        # Paper→FloodEvent INVESTIGATES edges are no longer written: the loader linked
+        # every paper of a country to every event of that country (±3 years), so all
+        # 276 Ukrainian papers "investigated" the Tisza floods. An edge needs a mention
+        # of the event in the paper; until that extraction exists there is no edge.
+        log.info("  Paper→FloodEvent edges: skipped (country/year heuristic removed 2026-10-03)")
 
         # ── 9. Bibliography CITES edges (stubs for unprocessed references) ────
         _phase("CITES EDGES")

@@ -82,6 +82,7 @@ class GraphWriter:
         UNWIND $rows AS r
         MERGE (p:Paper {paper_id: r.paper_id})
         SET p.title           = r.title,
+            p.title_key       = r.title_key,
             p.doi             = r.doi,
             p.year            = r.year,
             p.cited_by_count  = r.cited_by_count,
@@ -235,7 +236,8 @@ class GraphWriter:
         cypher = """
         UNWIND $rows AS r
         MATCH (p:Paper  {paper_id:     r.paper_id})
-        MATCH (m:Metric {canonical_id: r.canonical_id})
+        MERGE (m:Metric {canonical_id: r.canonical_id})
+        ON CREATE SET m.display_name = coalesce(r.display_name, r.surface_form, r.canonical_id)
         MERGE (p)-[e:REPORTS_METRIC]->(m)
         SET e.confidence        = r.confidence,
             e.extraction_score  = r.extraction_score,
@@ -319,27 +321,36 @@ class GraphWriter:
         Build CITES edges from a paper to its bibliography references.
 
         Each row must contain:
-          source_paper_id: str  — the citing paper's paper_id
-          target_doi:      str | None
-          target_title:    str | None
-          target_year:     int | None
+          source_paper_id:  str  — the citing paper's paper_id
+          target_doi:       str | None  (normalised, lower case)
+          target_title:     str | None
+          target_title_key: str | None  (graph_loader.title_key of target_title)
+          target_year:      int | None
 
         Strategy:
           1. DOI-keyed: MERGE a Paper node on doi; creates a stub if not yet ingested.
-          2. Title-keyed (no doi): MERGE on normalised title as last resort.
+          2. Title-keyed (no doi): MERGE on the normalised title key, so that the same
+             work cited as "Flood Mapping..." and "flood mapping ..." is one node and a
+             title-only reference meets the corpus paper that carries that title.
+             Rows without a title key (titles too short to identify a work) are skipped.
+
+        A paper never cites itself: GROBID copies the header DOI into some reference
+        lists, which produced 119 self-loops before 2026-10-03.
 
         Stub nodes carry is_reference_stub=true so they can be distinguished from
         fully-ingested papers in graph queries.
         """
         doi_rows   = [r for r in rows if r.get("target_doi")]
-        nodoi_rows = [r for r in rows if not r.get("target_doi") and r.get("target_title")]
+        nodoi_rows = [r for r in rows if not r.get("target_doi") and r.get("target_title_key")]
 
         if doi_rows:
             cypher = """
             UNWIND $rows AS r
             MATCH  (src:Paper {paper_id: r.source_paper_id})
+            WHERE  src.doi IS NULL OR src.doi <> r.target_doi
             MERGE  (tgt:Paper {doi: r.target_doi})
             ON CREATE SET tgt.title            = r.target_title,
+                          tgt.title_key        = r.target_title_key,
                           tgt.year             = r.target_year,
                           tgt.is_reference_stub = true
             MERGE (src)-[:CITES]->(tgt)
@@ -350,8 +361,10 @@ class GraphWriter:
             cypher = """
             UNWIND $rows AS r
             MATCH  (src:Paper {paper_id: r.source_paper_id})
-            MERGE  (tgt:Paper {title: r.target_title})
-            ON CREATE SET tgt.year             = r.target_year,
+            WHERE  src.title_key IS NULL OR src.title_key <> r.target_title_key
+            MERGE  (tgt:Paper {title_key: r.target_title_key})
+            ON CREATE SET tgt.title            = r.target_title,
+                          tgt.year             = r.target_year,
                           tgt.is_reference_stub = true
             MERGE (src)-[:CITES]->(tgt)
             """
@@ -579,7 +592,12 @@ class GraphWriter:
         self._batch_write("Paper→NumericFact HAS_NUMERIC_FACT", cypher, rows)
 
     def write_numeric_fact_measures_edges(self, rows: list[dict]) -> None:
-        """NumericFact -[:MEASURES]-> Metric | Method."""
+        """NumericFact -[:MEASURES]-> Metric | Method.
+
+        The target is MERGEd: with MATCH, facts for a metric that had no node yet
+        (r, POD, MSE, FAR, CSI, MAPE, RSR, AUC, R², precision, ...) were silently
+        written without any MEASURES edge — 6,329 of 25,049 facts on 2026-10-03.
+        """
         for label in ("Metric", "Method"):
             subset = [r for r in rows if r["node_label"] == label]
             if not subset:
@@ -587,7 +605,8 @@ class GraphWriter:
             cypher = f"""
             UNWIND $rows AS r
             MATCH (f:NumericFact {{fact_id:      r.fact_id}})
-            MATCH (t:{label}     {{canonical_id: r.canonical_id}})
+            MERGE (t:{label}     {{canonical_id: r.canonical_id}})
+            ON CREATE SET t.display_name = coalesce(r.display_name, r.canonical_id)
             MERGE (f)-[rel:MEASURES]->(t)
             SET rel.confidence = r.confidence
             """
@@ -699,6 +718,12 @@ class GraphWriter:
         except Exception as exc:
             log.error("Neo4j connection failed: %s", exc)
             return False
+
+    def paper_ids(self) -> set[str]:
+        """paper_id of every fully ingested Paper node (reference stubs have none)."""
+        with self._driver.session() as session:
+            return {r["pid"] for r in session.run(
+                "MATCH (p:Paper) WHERE p.paper_id IS NOT NULL RETURN p.paper_id AS pid")}
 
     def node_counts(self) -> dict[str, int]:
         labels = [
