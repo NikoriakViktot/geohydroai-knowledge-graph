@@ -24,6 +24,11 @@ pages = {
         st.Page("views/graph.py", title="Граф знань", icon="🕸️"),
         st.Page("views/metrics.py", title="Метрики", icon="📊"),
         st.Page("views/theses.py", title="Тези", icon="🧾"),
+        st.Page("views/map.py", title="Карта досліджень", icon="🗺️"),
+    ],
+    "Перевірка": [
+        st.Page("views/paper.py", title="Стаття: парсинг", icon="🔬"),
+        st.Page("views/truth.py", title="Шар правди", icon="🛡️"),
     ],
 }
 sidebar()

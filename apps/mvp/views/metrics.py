@@ -5,7 +5,7 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from common import api, call, provenance
+from common import GHAIError, api, call, check_badge, current_checks, provenance, verify_widget, with_links
 
 st.title("📊 Метрики")
 st.caption("Значення береться лише тоді, коли назва метрики стоїть перед ним у тому ж реченні; нерівності "
@@ -58,21 +58,53 @@ with tab2:
             except Exception as exc:
                 st.error(str(exc))
                 rows = None
-        if rows is not None:
-            df = pd.DataFrame([{"значення": r["value"], "стаття": (r.get("paper") or {}).get("paper_id"),
-                                "рік": (r.get("paper") or {}).get("year"), "таблиця": r["evidence"].get("table_label"),
-                                "стовпець": r["evidence"].get("col_header"),
-                                "рядок": " / ".join(r["evidence"].get("row_context") or []), "стор.": r["evidence"].get("page")}
-                               for r in rows])
-            c = st.columns(3)
-            c[0].metric("Фактів", len(df))
-            c[1].metric("Статей", df["стаття"].nunique() if not df.empty else 0)
-            c[2].metric("Медіана", round(float(df["значення"].median()), 3) if not df.empty else "—")
-            if not df.empty:
-                hist = pd.cut(df["значення"], bins=20).value_counts().sort_index()
-                st.bar_chart(pd.Series(hist.values, index=[f"{i.left:.2f}" for i in hist.index], name="фактів"))
-                st.dataframe(df, hide_index=True, width="stretch")
-            st.caption("Лише таблиці GROBID (990 статей). Відсутність тут — не відсутність у корпусі.")
+        st.session_state["facts_rows"] = rows
+    rows = st.session_state.get("facts_rows")
+    if rows is not None:
+        fchecks = current_checks("metric_fact", tuple(r["fact_id"] for r in rows if r.get("fact_id")))
+        df = pd.DataFrame([{"моя перевірка": check_badge(fchecks.get((r.get("fact_id"), "value"))),
+                            "значення": r["value"], "paper_id": (r.get("paper") or {}).get("paper_id"),
+                            "рік": (r.get("paper") or {}).get("year"), "таблиця": r["evidence"].get("table_label"),
+                            "стовпець": r["evidence"].get("col_header"),
+                            "рядок": " / ".join(r["evidence"].get("row_context") or []), "стор.": r["evidence"].get("page"),
+                            "джерело": r.get("source"), "діапазон": r.get("range_verdict")}
+                           for r in rows])
+        c = st.columns(3)
+        c[0].metric("Фактів", len(df))
+        c[1].metric("Статей", df["paper_id"].nunique() if not df.empty else 0)
+        c[2].metric("Медіана", round(float(df["значення"].median()), 3) if not df.empty else "—")
+        if not df.empty:
+            hist = pd.cut(df["значення"], bins=20).value_counts().sort_index()
+            st.bar_chart(pd.Series(hist.values, index=[f"{i.left:.2f}" for i in hist.index], name="фактів"))
+            df, cfg = with_links(df, "paper_id", "стор.")
+            sel = st.dataframe(df, hide_index=True, width="stretch", column_config=cfg, on_select="rerun",
+                               selection_mode="single-row", key="facts_table")
+            st.caption("📄 відкриває PDF у новій вкладці на сторінці таблиці. Виберіть рядок — побачите кроп таблиці "
+                       "(Nougat) і зможете позначити значення.")
+            for i in sel.selection.rows:
+                r = rows[i]
+                pid = (r.get("paper") or {}).get("paper_id")
+                with st.container(border=True):
+                    st.markdown(f"**{r['value']}** · {r['evidence'].get('table_label')} · "
+                                f"{r['evidence'].get('col_header')} · {' / '.join(r['evidence'].get('row_context') or [])}")
+                    try:
+                        reg = api().papers.regions(pid)["regions"] if pid else []
+                    except GHAIError:
+                        reg = []
+                    pg = r["evidence"].get("page")
+                    crops = [x for x in reg if x.get("page") == pg and x["region_type"] == "TABLE_REGION" and x.get("crop_url")]
+                    if crops:
+                        for x in crops[:3]:
+                            st.image(x["crop_url"], caption=f"таблиця на стор. {pg} (Nougat)")
+                    else:
+                        st.caption("Кропу таблиці немає (Nougat не запускався або регіон не знайдено) — відкрийте PDF.")
+                    if pid:
+                        st.page_link("views/paper.py", label="Відкрити парсинг статті", icon="🔬",
+                                     query_params={"paper": pid})
+                    verify_widget("metric_fact", r["fact_id"], paper_id=pid, field="value",
+                                  shown={"metric": r["metric"], "value": r["value"], "unit": r.get("unit"),
+                                         "table": r["evidence"].get("table_label"), "page": pg}, key=f"mf{i}")
+        st.caption("Факти з таблиць і тексту, витягнуті автоматично. Відсутність тут — не відсутність у корпусі.")
 
 with tab3:
     if onto:

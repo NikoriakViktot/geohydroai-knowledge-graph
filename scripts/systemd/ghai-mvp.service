@@ -1,0 +1,14 @@
+[Unit]
+Description=GeoHydroAI MVP app (Streamlit) on 127.0.0.1:8502
+After=ghai-api.service
+Wants=ghai-api.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/niko/projects/knoweledg_graf
+ExecStart=/home/niko/projects/knoweledg_graf/scripts/mvp.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
