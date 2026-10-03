@@ -37,6 +37,7 @@ ROOT = Path(__file__).resolve().parents[2]
 FILE_SOURCES: tuple[tuple[str, str, str], ...] = (
     ("pdf", "data/literature/pdf", ".pdf"),
     ("pdf", "data/literature/pdf_missing", ".pdf"),
+    ("pdf", "data/literature/pdf_oa", ".pdf"),          # open-access acquisitions (scripts/acquire_oa_missing.py)
     ("tei", "data/literature/grobid_xml", ".tei.xml"),
     ("paper_json", "data/literature/paper_json", ".tei.paper.json"),
     ("normalized", "data/normalized", ".json"),
