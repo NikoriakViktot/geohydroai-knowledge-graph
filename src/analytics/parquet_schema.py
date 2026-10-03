@@ -157,7 +157,10 @@ REGIONS_SCHEMA = pa.schema([
     pa.field("nougat_flags",      pa.string(),          nullable=True),   # comma-separated gate flags
     pa.field("grounding_words",   pa.float32(),         nullable=True),   # share of output words on the crop's PDF text layer
     pa.field("grounding_numbers", pa.float32(),         nullable=True),   # same for numbers
-    pa.field("crop_strategy",     pa.string(),          nullable=True),   # expanded_context|full_page
+    pa.field("crop_strategy",     pa.string(),          nullable=True),   # expanded_context|full_page|page_inference
+    # formula regions: JSON list of {symbol, symbol_tex, description, unit, value, source}
+    # taken from the definition clause around the equation (src/document/formula_parameters.py)
+    pa.field("formula_parameters", pa.string(),         nullable=True),
 ])
 
 FORMULAS_SCHEMA = pa.schema([

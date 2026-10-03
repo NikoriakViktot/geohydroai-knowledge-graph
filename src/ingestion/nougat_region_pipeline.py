@@ -41,6 +41,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -719,6 +720,118 @@ def get_render_image(pdf_path: Path, region: ScientificRegion) -> Image.Image:
     return render_region(pdf_path, region)
 
 
+# ── page mode: page markdown → region results (no GPU) ───────────────────────
+
+def build_page_results(pipeline, pdf_path: Path, regions: list["ScientificRegion"],
+                       page_md: dict[int, str], page_meta: dict[int, dict],
+                       crop_of: dict[str, str]) -> list[dict]:
+    """Assign page markdown to regions, gate it and attach formula parameters.
+    `pipeline` is only needed for the optional crop fallback (None in remap mode)."""
+    import json as _json
+    from src.document.formula_parameters import formula_parameters, render_parameters
+    from src.document.nougat_gate import loop_flags, text_tokens
+    from src.document.nougat_page_mapper import assign_regions, split_blocks
+
+    results: list[dict] = []
+    for region in regions:
+        if region.region_type in FIGURE_FAMILY:
+            region.crop_strategy = "not_inferred"
+            results.append({"region": region.to_json_dict(),
+                            "crop_path": crop_of.get(region.region_id),
+                            "gate": assess_region(None, region.region_type).as_row()})
+
+    by_page: dict[int, list] = {}
+    for region in regions:
+        if region.region_type not in FIGURE_FAMILY:
+            by_page.setdefault(region.page, []).append(region)
+
+    for page, page_regions in sorted(by_page.items()):
+        md, meta = page_md.get(page, ""), page_meta.get(page, {})
+        page_flags = [f for f, k in (("RENDER_FAILURE", "render_failure"),
+                                     ("ACTOR_FAILURE", "actor_failure"),
+                                     ("PAGE_TOKEN_BUDGET_EXHAUSTED", "hit_token_budget")) if meta.get(k)]
+        note = ["PAGE_TRUNCATED_AT_LOOP"] if meta.get("guard_stopped") else []
+        if md and loop_flags(md):
+            page_flags.append("PAGE_LOOP")
+        try:
+            words = pdf_io.extract_page_words(pdf_path, page)
+        except Exception:
+            words = None
+        blocks = split_blocks(md) if md else []
+        assigned = assign_regions(
+            md, [{"region_id": r.region_id, "region_type": r.region_type,
+                  "bbox": (r.bbox.x0, r.bbox.y0, r.bbox.x1, r.bbox.y1),
+                  "formula_text": r.formula_text} for r in page_regions],
+            words) if md and not page_flags else {}
+        # line-end hyphenation in the text layer ("evapora- tion") is joined back
+        page_text = re.sub(r"(\w)-\s+(\w)", r"\1\2", " ".join(w[4] for w in words or []))
+        page_vocab = set(text_tokens(page_text)[0])
+
+        for region in page_regions:
+            region.crop_strategy = "page_inference"
+            a = assigned.get(region.region_id)
+            text = a.text if a else None
+            params: list[dict] = []
+            if not text and not page_flags and pipeline is not None:
+                fb = pipeline._crop_fallback(pdf_path, region, words)
+                if fb is not None:
+                    fb["crop_path"] = crop_of.get(region.region_id)
+                    results.append(fb)
+                    continue
+            if page_flags:
+                gate = {"nougat_status": "failed" if {"ACTOR_FAILURE", "RENDER_FAILURE"} & set(page_flags)
+                        else "rejected", "nougat_flags": ",".join(page_flags)}
+            elif not text:
+                gate = {"nougat_status": "failed",
+                        "nougat_flags": ",".join(note + [f"UNMATCHED_ON_PAGE:{a.method if a else 'unmatched'}"])}
+            else:
+                v = assess_region(text, region.region_type, (0.0, 0.0, 1e5, 1e5), words)
+                v.flags += note + [f"MATCH:{a.method}:{a.score:.2f}"]
+                gate = v.as_row()
+                if region.region_type == "FORMULA_REGION":
+                    for i in a.blocks:
+                        b = blocks[i]
+                        s0 = md.find(b.text, b.start)
+                        for prm in formula_parameters(md, s0, s0 + len(b.text), b.text):
+                            # a definition whose words are not printed on the page is not kept
+                            dw = text_tokens(prm["description"])[0]
+                            if dw and sum(w in page_vocab for w in dw) / len(dw) < 0.8:
+                                continue
+                            if all(prm["symbol"] != q["symbol"] for q in params):
+                                params.append(prm)
+            nougat_text = text
+            if text and params:
+                nougat_text = text + "\n\n" + render_parameters(params)
+            results.append({
+                "region":        region.to_json_dict(),
+                "crop_path":     crop_of.get(region.region_id),
+                "nougat_result": {"markdown_text": text, "visual_text": nougat_text,
+                                  "page_markdown": f"pages/p{page:03d}.md"},
+                "gate":          gate,
+                "formula_parameters": _json.dumps(params, ensure_ascii=False) if params else None,
+            })
+    return results
+
+
+def remap_from_pages(paper_id: str, pdf_path: Path, tei_path: Path, pipeline_hash: str) -> dict:
+    """Rebuild regions.parquet from saved page markdown (data/nougat_regions/<id>/pages)
+    without the model: for changes to the mapper, gate or parameter extraction."""
+    out_dir = OUTPUT_DIR / paper_id
+    pages_dir = out_dir / "pages"
+    blocks, page_dims = extract_semantic_blocks(tei_path)
+    regions = RegionBuilder(paper_id, page_dims).build(blocks)
+    page_md, page_meta = {}, {}
+    for f in sorted(pages_dir.glob("p*.md")):
+        n = int(f.stem[1:])
+        page_md[n] = f.read_text(encoding="utf-8")
+        mf = f.with_suffix(".json")
+        page_meta[n] = json.loads(mf.read_text()) if mf.exists() else {}
+    crop_of = {r.region_id: str(out_dir / "crops" / f"{r.region_id}.png") for r in regions}
+    results = build_page_results(None, pdf_path, regions, page_md, page_meta, crop_of)
+    _write_regions_parquet(results, paper_id, pipeline_hash)
+    return {"paper_id": paper_id, "regions": len(results)}
+
+
 # ── SODB regions.parquet writer ───────────────────────────────────────────────
 
 def _write_regions_parquet(
@@ -791,6 +904,7 @@ def _write_regions_parquet(
             "grounding_words":   gate.get("grounding_words"),
             "grounding_numbers": gate.get("grounding_numbers"),
             "crop_strategy":     region.get("crop_strategy"),
+            "formula_parameters": item.get("formula_parameters"),
         })
 
     table   = pa.Table.from_pylist(rows, schema=REGIONS_SCHEMA)
@@ -874,79 +988,30 @@ class NougatRegionPipeline:
             except Exception as exc:
                 log.warning("[page] %s p%d: render failed: %s", paper_id, page, exc)
 
-        results: list[dict] = []
+        page_md: dict[int, str] = {}
+        page_meta: dict[int, dict] = {}
         actor_failures = 0
-        for region in regions:
-            if region.region_type in FIGURE_FAMILY:
-                region.crop_strategy = "not_inferred"
-                results.append({"region": region.to_json_dict(),
-                                "crop_path": crop_of.get(region.region_id),
-                                "gate": assess_region(None, region.region_type).as_row()})
-
-        for page, page_regions in sorted(by_page.items()):
+        for page in sorted(by_page):
             fut = futures.get(page)
-            parsed, page_md, page_flags = {}, "", []
+            meta: dict = {}
+            md = ""
             if fut is None:
-                page_flags.append("RENDER_FAILURE")
+                meta["render_failure"] = True
             else:
                 try:
                     parsed = ray.get(fut)
-                    page_md = parsed.get("markdown_text") or ""
+                    md = parsed.get("markdown_text") or ""
+                    meta["guard_stopped"] = bool(parsed.get("guard_stopped"))
+                    meta["hit_token_budget"] = bool(parsed.get("hit_token_budget"))
                 except Exception:
                     actor_failures += 1
                     log.exception("[PAGE FAILED nougat] %s p%d", paper_id, page)
-                    page_flags.append("ACTOR_FAILURE")
-            (pages_dir / f"p{page:03d}.md").write_text(page_md, encoding="utf-8")
-            # A collapse is cut off by the parser (the prefix is kept, as in Nougat's
-            # own inference); regions after the cut stay unmatched. Only a loop that
-            # survives in the text, or an exhausted budget, rejects the page.
-            note = ["PAGE_TRUNCATED_AT_LOOP"] if parsed.get("guard_stopped") else []
-            if parsed.get("hit_token_budget"):
-                page_flags.append("PAGE_TOKEN_BUDGET_EXHAUSTED")
-            if page_md and loop_flags(page_md):
-                page_flags.append("PAGE_LOOP")
+                    meta["actor_failure"] = True
+            (pages_dir / f"p{page:03d}.md").write_text(md, encoding="utf-8")
+            (pages_dir / f"p{page:03d}.json").write_text(json.dumps(meta), encoding="utf-8")
+            page_md[page], page_meta[page] = md, meta
 
-            words = None
-            try:
-                words = pdf_io.extract_page_words(pdf_path, page)
-            except Exception:
-                pass
-            assigned = assign_regions(
-                page_md,
-                [{"region_id": r.region_id, "region_type": r.region_type,
-                  "bbox": (r.bbox.x0, r.bbox.y0, r.bbox.x1, r.bbox.y1),
-                  "formula_text": r.formula_text} for r in page_regions],
-                words,
-            ) if page_md and not page_flags else {}
-
-            for region in page_regions:
-                region.crop_strategy = "page_inference"
-                a = assigned.get(region.region_id)
-                text = a.text if a else None
-                if not text and not page_flags:
-                    fb = self._crop_fallback(pdf_path, region, words)
-                    if fb is not None:
-                        fb["crop_path"] = crop_of.get(region.region_id)
-                        results.append(fb)
-                        continue
-                if page_flags:
-                    gate = {"nougat_status": "failed" if "ACTOR_FAILURE" in page_flags
-                            or "RENDER_FAILURE" in page_flags else "rejected",
-                            "nougat_flags": ",".join(page_flags)}
-                elif not text:
-                    gate = {"nougat_status": "failed",
-                            "nougat_flags": ",".join(note + [f"UNMATCHED_ON_PAGE:{a.method if a else 'unmatched'}"])}
-                else:
-                    v = assess_region(text, region.region_type, (0.0, 0.0, 1e5, 1e5), words)
-                    v.flags += note + [f"MATCH:{a.method}:{a.score:.2f}"]
-                    gate = v.as_row()
-                results.append({
-                    "region":        region.to_json_dict(),
-                    "crop_path":     crop_of.get(region.region_id),
-                    "nougat_result": {"markdown_text": text, "visual_text": text,
-                                      "page_markdown": f"pages/p{page:03d}.md"},
-                    "gate":          gate,
-                })
+        results = build_page_results(self, pdf_path, regions, page_md, page_meta, crop_of)
 
         final = {"paper_id": paper_id, "pdf_path": str(pdf_path), "tei_path": str(tei_path),
                  "blocks_extracted": len(blocks), "regions_count": len(regions),
@@ -1317,7 +1382,29 @@ def main() -> None:
         help="File with one paper_id per line: (re)process exactly these papers, "
              "looking for the PDF in pdf/, pdf_oa/ and pdf_missing/ (implies --overwrite)",
     )
+    parser.add_argument(
+        "--remap-only", action="store_true", default=False,
+        help="With --paper-list: rebuild regions.parquet from saved page markdown "
+             "(no model, no GPU) after changes to mapping, gate or formula parameters",
+    )
     args = parser.parse_args()
+
+    if args.remap_only:
+        if not args.paper_list:
+            parser.error("--remap-only needs --paper-list")
+        import pandas as pd
+        from src.document.nougat_parser import REGION_GUARD_VERSION
+        for pdf, tei in iter_listed_pairs(args.paper_list):
+            pq_path = SODB_DIR / pdf.stem / "regions.parquet"
+            try:
+                h = str(pd.read_parquet(pq_path, columns=["pipeline_hash"]).iloc[0, 0])
+            except Exception:
+                h = f"remap:{NOUGAT_MODE}:{REGION_GUARD_VERSION}"
+            if not (OUTPUT_DIR / pdf.stem / "pages").exists():
+                log.warning("[REMAP] %s: no saved pages — run page mode first", pdf.stem)
+                continue
+            log.info("[REMAP] %s", remap_from_pages(pdf.stem, pdf, tei, h))
+        return
 
     # Override module-level constants if flags given
     if args.pdf_dir != PDF_DIR:
