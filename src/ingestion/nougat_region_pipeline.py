@@ -851,6 +851,7 @@ class NougatRegionPipeline:
                 region_meta.append((region, str(crop_path)))
 
         # 4. Collect results
+        actor_failures = 0      # ray.get raised: the actor died (OOM kill, restart), not a bad crop
         for idx, (region, crop_path) in enumerate(region_meta):
             future = futures[idx]
             if future is None:
@@ -870,6 +871,7 @@ class NougatRegionPipeline:
                              region.region_id,
                              len(parsed.get("markdown_text") or ""))
             except Exception as exc:
+                actor_failures += 1
                 log.exception("[REGION FAILED nougat] %s", region.region_id)
                 results.append({
                     "region":    region.to_json_dict(),
@@ -894,7 +896,16 @@ class NougatRegionPipeline:
 
         _write_regions_parquet(results, paper_id, self.pipeline_hash)
 
-        # Mark region_extract done in SODB manifest for idempotency
+        # Mark region_extract done in SODB manifest for idempotency — but not when the
+        # actor failed under some regions: on 2026-10-03 Ray killed NougatActor (node
+        # memory > 95 %), 12 papers were written with empty regions and marked done, and
+        # the next run skipped them. Without the mark the next run redoes the paper.
+        if actor_failures:
+            log.error("[INCOMPLETE] %s: %d of %d regions failed in the Nougat actor; "
+                      "region_extract is NOT marked done, rerun to redo this paper",
+                      paper_id, actor_failures, len(region_meta))
+            final["actor_failures"] = actor_failures
+            return final
         try:
             from src.document.sodb_manifest import SODBManifest
             SODBManifest(paper_id, self.pipeline_hash, SODB_DIR).mark_done("region_extract")
