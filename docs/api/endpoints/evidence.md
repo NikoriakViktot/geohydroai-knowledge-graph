@@ -191,6 +191,10 @@ This group turns "the paper says X" into a checked, stored and citable statement
 ---
 
 ## `GET /theses/sets/{project_id}`
-- **Status**: planned (phase 2) · **Scope** `read` · S
-- **Purpose**: the stored theses of a project with their current statuses and verdicts.
-- **Response 200**: `{"project_id", "theses": [Thesis + {"status": "VERIFIED_SUPPORTED|PARTIAL|CONTRADICTED|UNRESOLVED", "atomic_claims": [...]}], "gate": {"passed": bool, "recall": float?, "snapshot_id"}, "provenance"}`.
+- **Status**: implemented (2026-10-03: theses, references, atomic claims and evidence rows from `project.*` / `evidence.claim_evidence`; the gate summary is planned) · **Scope** `read` · S
+- **Purpose**: the stored theses of a project with the literature evidence of each.
+- **Response 200**: `{"project_id", "theses": [{"thesis_id", "kind", "statement", "section", "category", "priority", "quantitative", "tables", "needs", "labeler_kind", "labeler", "refs": [{"key", "relation", "status"}], "atomic_claims": [{"atomic_id", "statement", "required_roles", "manuscript_relevance", "labeler_kind"}], "evidence": [{"evidence_id": "ce:<id>", "thesis_id", "atomic_id", "role", "status", "paper_id", "cite_key", "doi", "section", "page", "chunk_id", "quote_verified", "evidence_quote", "status_rule"}]}], "unattached_evidence": [...], "counts", "status_source", "provenance"}`.
+- **Errors**: `422 UNKNOWN_PROJECT`; `503`.
+
+**Agent notes**:
+- Evidence `status` values (`VERIFIED_SUPPORTED`, `VERIFIED_PARTIAL`, …) were assigned by the literature run's models. They are model-assessed (R-SCI-6); a person's judgement of a row is in `GET /verifications?target_kind=claim_evidence&target_id=ce:<id>`.

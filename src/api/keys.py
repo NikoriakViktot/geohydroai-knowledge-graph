@@ -19,7 +19,7 @@ from src.api.deps import hash_key
 from src.db.engine import session_scope
 from src.db.models import ApiKey
 
-SCOPES = ("read", "llm", "write", "admin")
+SCOPES = ("read", "llm", "write", "admin", "verify")
 
 
 def create(consumer: str, scopes: list[str], note: str | None = None) -> tuple[str, str]:
@@ -40,11 +40,14 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("create")
     c.add_argument("--consumer", required=True)
-    c.add_argument("--scopes", required=True, help="comma list of read,llm,write,admin")
+    c.add_argument("--scopes", required=True, help="comma list of read,llm,write,admin,verify")
     c.add_argument("--note")
     sub.add_parser("list")
     r = sub.add_parser("revoke")
     r.add_argument("--key-id", required=True)
+    g = sub.add_parser("grant", help="add a scope to an active key ('verify' is for people only)")
+    g.add_argument("--key-id", required=True)
+    g.add_argument("--scope", required=True, choices=SCOPES)
     args = ap.parse_args(argv)
 
     if args.cmd == "create":
@@ -55,6 +58,14 @@ def main(argv: list[str] | None = None) -> int:
             for k in s.scalars(select(ApiKey).order_by(ApiKey.created_at)):
                 state = "revoked" if k.revoked_at else "active"
                 print(f"{k.key_id}  {k.consumer:20s} {','.join(k.scopes):24s} {state:8s} {k.created_at:%Y-%m-%d}  {k.note or ''}")
+    elif args.cmd == "grant":
+        with session_scope() as s:
+            k = s.scalar(select(ApiKey).where(ApiKey.key_id == args.key_id, ApiKey.revoked_at.is_(None)))
+            if k is None:
+                print("no active key with that id")
+                return 1
+            k.scopes = sorted(set(k.scopes) | {args.scope})
+            print(f"{k.consumer}: {','.join(k.scopes)}")
     else:
         with session_scope() as s:
             n = s.execute(update(ApiKey).where(ApiKey.key_id == args.key_id, ApiKey.revoked_at.is_(None))

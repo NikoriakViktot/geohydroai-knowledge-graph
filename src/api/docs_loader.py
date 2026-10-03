@@ -18,7 +18,7 @@ DOCS_DIR = ROOT / "docs" / "api"
 
 _HEADING = re.compile(r"^## `(GET|POST|PUT|PATCH|DELETE) ([^`]+)`\s*$", re.M)
 _RULE_ID = re.compile(r"\bR-[A-Z]{2,4}-\d+\b")
-_SCOPES = ("read", "llm", "write", "admin")
+_SCOPES = ("read", "llm", "write", "admin", "verify")
 
 
 @dataclass(frozen=True)

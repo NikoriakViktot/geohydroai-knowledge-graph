@@ -397,6 +397,12 @@ RETURN m.canonical_id AS method, s.canonical_id AS sensor, papers ORDER BY paper
 MATCH (p:Paper)-[:FROM_COUNTRY]->(:Country {{name: $country}})
 WHERE p.is_reference_stub IS NULL AND {_YEAR_FILTER}
 RETURN p.paper_id AS paper_id, p.doi AS doi, p.title AS title, p.year AS year ORDER BY coalesce(year, 0) DESC, paper_id"""),
+    NamedQuery("papers_per_country", "Corpus papers per study-area country, with the country's coordinates (for a map).",
+               {**_YEARS}, ("country", "lat", "lon", "papers"),
+               f"""// papers_per_country
+MATCH (p:Paper)-[:FROM_COUNTRY]->(c:Country)
+WHERE p.is_reference_stub IS NULL AND {_YEAR_FILTER}
+RETURN c.name AS country, c.lat AS lat, c.lon AS lon, count(DISTINCT p) AS papers ORDER BY papers DESC, country"""),
     NamedQuery("citation_lineage", "Works cited by (out) or citing (in) the corpus papers that use a method, 1–3 hops.",
                {"canonical_id": Param(str, required=True, description="e.g. method.hand"),
                 "hops": Param(int, 1, min=1, max=3), "direction": Param(str, "out", choices=("out", "in")), **_ROLE},

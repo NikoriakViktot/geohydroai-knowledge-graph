@@ -173,3 +173,34 @@ At least one of `section`, `page` and `q` is required. They combine with AND.
 - GROBID table parsing can misalign columns. Check a value against the row and column header before you rely on it, or read the PDF page (`page`).
 - When `facts` arrives, `range_verdict = suspect` will mark values outside the metric's valid range.
 
+
+## `GET /papers/{paper_id}/regions`
+- **Status**: implemented (2026-10-03; `data/sodb/<paper_id>/regions.parquet` of NougatRegionPipeline) · `read` · S
+- **Purpose**: the visual regions of a paper — figures, tables, formulas, diagrams — with the text and LaTeX Nougat read from them and a link to each PNG crop, so a person can compare the parse with the page.
+
+**Response 200**: `{"paper_id", "regions": [{"region_id": "…_p11_for_006", "page": 11, "region_type": "FORMULA_REGION", "bbox": [x0, y0, x1, y1], "text": "…", "latex": "\\[Q = …\\]", "source_parser": "nougat", "crop_url": "http://127.0.0.1:8090/v1/files/<token>"}], "counts": {"FORMULA_REGION": 12, "TABLE_REGION": 3}, "pdf_url": "…/v1/files/<token>", "provenance"}`
+
+- `crop_url` and `pdf_url` are signed links for a browser (12 h).
+- `latex` comes only from formula regions. A formula region can also hold surrounding prose: Nougat's region is wider than the equation.
+
+**Errors**: `424 SOURCE_UNAVAILABLE` when Nougat has not run on the paper.
+
+**Agent notes**:
+- Nougat reads images, not PDF geometry. Its text is OCR-like: check numbers against `/papers/{paper_id}/tables` or `/text` before citing them (R-SCI-2).
+- `crop_url` and `pdf_url` are for people. You **MUST NOT** fetch them (R-DATA-3).
+- Nougat cannot read Cyrillic: for Ukrainian or Russian papers its text is transliterated noise; use `/text`.
+
+---
+
+## `POST /papers/links`
+- **Status**: implemented (2026-10-03) · `read` · S
+- **Purpose**: browser links for many papers at once — the PDF in the corpus and the DOI page — for tables in a user interface.
+
+**Request**: `{"paper_ids": ["10.1029_2025gl120832", "…"]}` (≤ 500).
+
+**Response 200**: `{"links": [{"paper_id", "pdf_url": "…/v1/files/<token>" | null, "doi_url": "https://doi.org/…" | null}], "provenance"}`
+
+- `pdf_url` is null when the corpus has no PDF file for that id. Open it at a page with `#page=N`.
+
+**Agent notes**:
+- The links are for people. You **MUST NOT** fetch them (R-DATA-3).

@@ -104,6 +104,7 @@ All endpoints: **Scope** `read` (except `/graph/cypher`: `admin`) · **Mode** S.
 | `top_methods` / `top_sensors` | `year_from`, `year_to`, `role`, `grounded` | `canonical_id, display_name, family, papers` |
 | `method_sensor_pairs` | `min_papers` (5), years, `role`, `grounded` | `method, sensor, papers` |
 | `papers_by_country` | `country`*, years | `paper_id, doi, title, year` |
+| `papers_per_country` | years | `country, lat, lon, papers` |
 | `citation_lineage` | `canonical_id`*, `hops` 1–3, `direction` out/in, `role`, `grounded` | `seed, paper_id, doi, title, year, is_reference_stub, hops` |
 | `coauthor_network` | `orcid` or `name` | `coauthor, orcid, shared_papers` |
 | `metric_ranges_by_method` | `metric`*, `min_facts` (3), `role`, `grounded` | `method, papers, facts, min, median, max` |

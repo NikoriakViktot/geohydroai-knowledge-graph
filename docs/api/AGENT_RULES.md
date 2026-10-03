@@ -33,6 +33,7 @@
 | R-ACC-4 | On `429` / `503` you **MUST** wait `Retry-After`. Retry `5xx` at most 3 times with exponential backoff. You **MUST NOT** retry other `4xx` unchanged | shared quota and shared GPU |
 | R-ACC-5 | Work that takes longer than a few seconds **MUST** go through jobs. Poll at most every 5 s, or use the event stream. Send an `Idempotency-Key` so a retry does not start a second job | one worker, serialised GPU and GROBID |
 | R-ACC-6 | You **SHOULD** batch: `resolve-batch`, `quotes/verify` with up to 50 items, `doi/verify` with up to 50 entries | 50 single calls cost 50× the overhead |
+| R-ACC-7 | The `verify` scope and `POST /verifications` belong to people. You **MUST NOT** write human verification records, ask for the `verify` scope, or present your own judgement as a human check | the human checks are the only human labels in the corpus; a model verdict written as human would poison the layer of truth |
 
 ## 2. Scientific integrity (R-SCI)
 
@@ -151,6 +152,7 @@ The API attaches these rules to every endpoint in its OpenAPI description (`x-ag
 | jobs | R-ACC-5 |
 | bundles | R-SCI-9, R-DATA-1, R-DATA-2, R-DATA-4, R-DATA-5 |
 | admin | R-DATA-5 |
+| verify | R-ACC-7, R-SCI-6, R-DATA-5 |
 
 ## 10. Checklist before you hand results to a human
 

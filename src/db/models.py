@@ -24,6 +24,7 @@ from src.contracts.research import (
     BIB_VERDICTS, CITATION_VERDICTS, EVIDENCE_ROLES, LABELER_KINDS, PROJECT_ID_PATTERN, REF_RELATIONS,
     REF_STATUSES, RELEVANCES, THESIS_KINDS,
 )
+from src.contracts.verify import VERIFY_PROBLEMS, VERIFY_TARGET_KINDS, VERIFY_VERDICTS
 
 NAMING = {
     "ix": "ix_%(table_name)s_%(column_0_N_name)s",
@@ -85,7 +86,7 @@ class ApiKey(Base):
 
     __tablename__ = "api_key"
     __table_args__ = (
-        CheckConstraint("scopes <@ ARRAY['read','llm','write','admin']::text[]", name="scopes"),
+        CheckConstraint("scopes <@ ARRAY['read','llm','write','admin','verify']::text[]", name="scopes"),
         {"schema": "ops"},
     )
 
@@ -533,3 +534,38 @@ class Acquisition(_Provenance, Base):
     failure_reason: Mapped[str | None] = mapped_column(Text)
     priority: Mapped[int | None] = mapped_column(Integer)
     extra: Mapped[dict] = mapped_column(JSONB, default=dict)
+
+
+# ══ The human verification layer (migration 0006) ══════════════════════════════
+
+class HumanCheck(Base):
+    """One person's judgement of one piece of parsed or extracted data. Append-only (a trigger
+    refuses UPDATE and DELETE); a correction is a new row with ``supersedes``."""
+
+    __tablename__ = "human_check"
+    __table_args__ = (
+        CheckConstraint(_in("target_kind", VERIFY_TARGET_KINDS), name="target_kind"),
+        CheckConstraint(_in("verdict", VERIFY_VERDICTS), name="verdict"),
+        CheckConstraint(f"problem IS NULL OR {_in('problem', VERIFY_PROBLEMS)}", name="problem"),
+        CheckConstraint("labeler_kind = 'human'", name="labeler_kind"),
+        Index("ix_human_check_target", "target_kind", "target_id"),
+        Index("ix_human_check_paper", "paper_id"),
+        {"schema": "verify"},
+    )
+
+    check_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    target_kind: Mapped[str] = mapped_column(Text)
+    target_id: Mapped[str] = mapped_column(Text)
+    field: Mapped[str | None] = mapped_column(Text)
+    paper_id: Mapped[str | None] = mapped_column(Text)
+    project_id: Mapped[str | None] = mapped_column(Text)
+    verdict: Mapped[str] = mapped_column(Text)
+    problem: Mapped[str | None] = mapped_column(Text)
+    corrected: Mapped[dict | None] = mapped_column(JSONB)
+    note: Mapped[str | None] = mapped_column(Text)
+    shown: Mapped[dict | None] = mapped_column(JSONB)
+    labeler_kind: Mapped[str] = mapped_column(Text, server_default="human")
+    labeler: Mapped[str] = mapped_column(Text)
+    key_id: Mapped[str | None] = mapped_column(Text)
+    supersedes: Mapped[int | None] = mapped_column(ForeignKey("verify.human_check.check_id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

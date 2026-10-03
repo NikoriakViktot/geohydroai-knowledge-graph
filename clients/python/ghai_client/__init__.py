@@ -68,6 +68,7 @@ class GHAI:
         self.ontology = Ontology(self)
         self.search = Search(self)
         self.bib = Bib(self)
+        self.verify = Verify(self)
 
     @classmethod
     def from_env(cls, **kwargs) -> "GHAI":
@@ -182,6 +183,22 @@ class Papers(_Group):
     def tables(self, paper_id: str) -> dict:
         return self._api.get(f"papers/{paper_id}/tables")
 
+    def entities(self, paper_id: str) -> dict:
+        return self._api.get(f"papers/{paper_id}/entities")
+
+    def regions(self, paper_id: str) -> dict:
+        """Nougat regions with text, LaTeX and signed PNG crop links (for people)."""
+        return self._api.get(f"papers/{paper_id}/regions")
+
+    def links(self, paper_ids: list[str]) -> dict[str, dict]:
+        """paper_id → {pdf_url, doi_url}: signed browser links (append #page=N to pdf_url)."""
+        out: dict[str, dict] = {}
+        ids = list(dict.fromkeys(paper_ids))
+        for i in range(0, len(ids), 500):
+            for link in self._api.post("papers/links", {"paper_ids": ids[i:i + 500]})["links"]:
+                out[link["paper_id"]] = link
+        return out
+
 
 class Quotes(_Group):
     def verify(self, items: list[dict], *, project_id: str | None = None) -> dict:
@@ -222,7 +239,23 @@ class Quotes(_Group):
         return merged
 
 
+class Verify(_Group):
+    """The human verification layer. Writing needs a key with the 'verify' scope (people only)."""
+
+    def add(self, checks: list[dict]) -> dict:
+        return self._api.post("verifications", {"checks": checks})
+
+    def list(self, **filters) -> list[dict]:
+        return self._api.get("verifications", **filters)["items"]
+
+    def summary(self, project_id: str | None = None) -> dict:
+        return self._api.get("verifications/summary", project_id=project_id)
+
+
 class Theses(_Group):
+    def set(self, project_id: str) -> dict:
+        return self._api.get(f"theses/sets/{project_id}")
+
     def validate(self, kind: str, project_id: str, document: Any, authored_by: dict | None = None) -> dict:
         """kind: 'theses' | 'atomic_claims'. A 422 GHAIError carries `errors` with locations."""
         return self._api.post("theses/validate", {"kind": kind, "project_id": project_id, "document": document,

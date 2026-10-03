@@ -90,7 +90,8 @@ async def file_link(token: str):
         raise Problem("LINK_EXPIRED", "this file link has expired; ask GET /v1/locate for a new one") from exc
     except filelinks.InvalidLink as exc:
         raise Problem("INVALID_LINK", str(exc)) from exc
-    media = "application/pdf" if path.suffix.lower() == ".pdf" else "application/octet-stream"
+    media = {".pdf": "application/pdf", ".png": "image/png", ".jpg": "image/jpeg"}.get(path.suffix.lower(),
+                                                                                  "application/octet-stream")
     return FileResponse(path, media_type=media, filename=path.name, content_disposition_type="inline",
                         headers={"Cache-Control": "private, max-age=3600", "X-Robots-Tag": "noindex"})
 

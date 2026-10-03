@@ -85,3 +85,18 @@ async def theses_validate(request: Request, body: ThesesValidateRequest,
                       extra={"counts": dict(report.counts), "warnings": report.warnings})
     return ThesesValidateResponse(valid=True, counts=dict(report.counts), warnings=report.warnings,
                                   provenance=provenance(request))
+
+
+@router.get("/theses/sets/{project_id}", **route_doc("GET", "/theses/sets/{project_id}"))
+async def theses_set(request: Request, project_id: str, _=Depends(require_scope("read"))) -> dict:
+    from src.services import projects
+    known = await run_in_threadpool(projects.registered, project_id)
+    if known is None:
+        raise Problem("STORE_UNAVAILABLE", "postgres (project registry) unreachable", headers={"Retry-After": "30"})
+    if not known:
+        raise Problem("UNKNOWN_PROJECT", f"{project_id!r} is not registered (workbench init registers a paper)")
+    try:
+        body = await run_in_threadpool(projects.theses_set, project_id)
+    except Exception as exc:
+        raise Problem("STORE_UNAVAILABLE", f"postgres: {type(exc).__name__}", headers={"Retry-After": "30"}) from exc
+    return {**body, "provenance": provenance(request)}
