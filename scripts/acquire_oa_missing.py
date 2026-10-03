@@ -13,7 +13,7 @@ Unpaywall lists as open access (src/services/locate.py). Works without such a co
     .venv/bin/python3 scripts/acquire_oa_missing.py grobid   # TEI into grobid_xml/, links in xml_new/
     .venv/bin/python3 scripts/acquire_oa_missing.py all
 
-Run directory: data/acquisition/oa_<date>/ (``--run``). Priority = number of distinct corpus papers
+Run directory: ``--run`` (required), e.g. data/acquisition/oa_20261002/. Priority = number of distinct corpus papers
 that cite the work, then its global citation count. Each stage resumes: rows already done are skipped.
 After ``grobid``: pipeline_runner --xml-dir <run>/xml_new, then the usual post-pipeline steps
 (scripts/process_oa_batch.sh).
@@ -29,7 +29,6 @@ import logging
 import os
 import sys
 import time
-from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -358,7 +357,9 @@ def grobid_all(run: Path) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("stage", choices=["rank", "discover", "locate", "more", "download", "grobid", "all"])
-    ap.add_argument("--run", type=Path, default=ROOT / "data" / "acquisition" / f"oa_{date.today():%Y%m%d}")
+    # Required: a date default changed under a chain that crossed midnight, and its grobid stage
+    # looked into an empty new directory (2026-10-03).
+    ap.add_argument("--run", type=Path, required=True, help="run directory, e.g. data/acquisition/oa_20261002")
     ap.add_argument("--top", type=int, default=600)
     ap.add_argument("--min-citing", type=int, default=3)
     ap.add_argument("--queries", type=Path, help="discover: text file, one topic query per line")
