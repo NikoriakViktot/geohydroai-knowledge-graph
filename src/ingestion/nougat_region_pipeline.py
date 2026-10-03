@@ -55,6 +55,12 @@ from PIL import Image
 from src.actors.nougat_actor import NougatActor
 from src.analytics.parquet_schema import REGIONS_SCHEMA
 from src.document import pdf_io, tei_io
+from src.document.nougat_gate import FIGURE_FAMILY, assess_region, snap_bbox, token_budget
+
+# Figure-family regions are not sent to Nougat: it does not read graphics, it returns
+# the caption (which GROBID already has) and, on panels, hallucinated loops. Crops are
+# still rendered for a later figure/VLM layer. NOUGAT_FIGURES=1 restores inference.
+NOUGAT_FIGURES = os.getenv("NOUGAT_FIGURES", "0") == "1"
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PDF_DIR      = PROJECT_ROOT / "data/literature/pdf"
@@ -728,6 +734,7 @@ def _write_regions_parquet(
     for item in results:
         region      = item.get("region", {})
         nougat      = item.get("nougat_result") or {}
+        gate        = item.get("gate") or {}
         crop_abs    = item.get("crop_path")
         bbox        = region.get("bbox", {})
 
@@ -765,11 +772,16 @@ def _write_regions_parquet(
             "source_parser":  "HYBRID",  # GROBID coords + Nougat content
             "nougat_text":    nougat_text,
             "nougat_latex":   nougat_latex,
-            "confidence":     None,
+            "confidence":     gate.get("confidence"),
             "crop_path":      crop_rel,
             "merge_group_id": None,
             "pipeline_hash":  pipeline_hash,
             "created_at":     now,
+            "nougat_status":     gate.get("nougat_status"),
+            "nougat_flags":      gate.get("nougat_flags"),
+            "grounding_words":   gate.get("grounding_words"),
+            "grounding_numbers": gate.get("grounding_numbers"),
+            "crop_strategy":     region.get("crop_strategy"),
         })
 
     table   = pa.Table.from_pylist(rows, schema=REGIONS_SCHEMA)
@@ -822,10 +834,30 @@ class NougatRegionPipeline:
         results = []
         futures = []
         region_meta = []
+        page_words: dict[int, list | None] = {}
+
+        def words_of(page: int):
+            if page not in page_words:
+                try:
+                    page_words[page] = pdf_io.extract_page_words(pdf_path, page)
+                except Exception as exc:          # scanned page or broken stream
+                    log.debug("[words] %s p%d: %s", paper_id, page, exc)
+                    page_words[page] = None
+            return page_words[page]
 
         # 3. Render crops and dispatch to NougatActor (concurrent)
         for i, region in enumerate(regions, start=1):
             crop_path = crops_dir / f"{region.region_id}.png"
+
+            # Do not cut a text line at the top or bottom edge of a table/formula crop.
+            if region.crop_strategy != "full_page" and region.region_type not in FIGURE_FAMILY:
+                w = words_of(region.page)
+                if w:
+                    pad = _PADDING.get(region.region_type, _DEFAULT_PADDING)
+                    b = region.bbox
+                    nb = snap_bbox((b.x0, b.y0, b.x1, b.y1), w,
+                                   (pad["top"], pad["bottom"], pad["left"], pad["right"]))
+                    region.bbox = Bbox4(*nb)
 
             log.info(
                 "[REGION %d/%d] type=%-22s strategy=%-16s page=%d  bbox=(%.0f,%.0f,%.0f,%.0f)",
@@ -837,7 +869,20 @@ class NougatRegionPipeline:
             try:
                 image = get_render_image(pdf_path, region)
                 image.save(crop_path)
-                future = self.actor.parse_image.remote(image, region.region_id)
+                if region.region_type in FIGURE_FAMILY and not NOUGAT_FIGURES:
+                    futures.append(None)
+                    region_meta.append((region, str(crop_path)))
+                    results.append({
+                        "region":    region.to_json_dict(),
+                        "crop_path": str(crop_path),
+                        "gate":      assess_region(None, region.region_type).as_row(),
+                    })
+                    continue
+                b = region.bbox
+                future = self.actor.parse_image.remote(
+                    image, region.region_id,
+                    token_budget((b.x0, b.y0, b.x1, b.y1)) if region.crop_strategy != "full_page"
+                    else None)
                 futures.append(future)
                 region_meta.append((region, str(crop_path)))
             except Exception as exc:
@@ -846,6 +891,7 @@ class NougatRegionPipeline:
                     "region":     region.to_json_dict(),
                     "crop_path":  str(crop_path),
                     "error":      str(exc),
+                    "gate":       {"nougat_status": "failed", "nougat_flags": "RENDER_FAILURE"},
                 })
                 futures.append(None)
                 region_meta.append((region, str(crop_path)))
@@ -858,10 +904,24 @@ class NougatRegionPipeline:
                 continue
             try:
                 parsed = ray.get(future)
+                text = parsed.get("markdown_text") or parsed.get("visual_text") or ""
+                b = region.bbox
+                gbox = (0.0, 0.0, 1e5, 1e5) if region.crop_strategy == "full_page" \
+                    else (b.x0, b.y0, b.x1, b.y1)
+                verdict = assess_region(text, region.region_type, gbox, words_of(region.page))
+                if parsed.get("guard_stopped"):
+                    verdict.flags.append("GENERATION_LOOP_STOPPED")
+                    verdict.status = "rejected"
+                if parsed.get("hit_token_budget"):
+                    verdict.flags.append("TOKEN_BUDGET_EXHAUSTED")
+                    verdict.status = "rejected"
+                if parsed.get("error"):
+                    verdict.status = "failed"
                 results.append({
                     "region":       region.to_json_dict(),
                     "crop_path":    crop_path,
                     "nougat_result": parsed,
+                    "gate":         verdict.as_row(),
                 })
                 if parsed.get("error"):
                     log.warning("[REGION ERROR] %s  err=%s",
@@ -877,6 +937,7 @@ class NougatRegionPipeline:
                     "region":    region.to_json_dict(),
                     "crop_path": crop_path,
                     "error":     str(exc),
+                    "gate":      {"nougat_status": "failed", "nougat_flags": "ACTOR_FAILURE"},
                 })
 
         final = {
@@ -959,6 +1020,23 @@ def iter_pdf_pairs(
 
     if skipped:
         log.info("[SKIP pre-filter] %d already done (regions.parquet + manifest)", skipped)
+
+
+def iter_listed_pairs(list_file: Path) -> Iterable[tuple[Path, Path]]:
+    """(pdf, tei) for every paper_id listed in list_file; PDFs are looked up in all
+    corpus PDF folders. Missing PDFs or TEI are logged and skipped."""
+    pdf_dirs = [PDF_DIR, PROJECT_ROOT / "data/literature/pdf_oa",
+                PROJECT_ROOT / "data/literature/pdf_missing"]
+    for line in Path(list_file).read_text().splitlines():
+        pid = line.strip()
+        if not pid or pid.startswith("#"):
+            continue
+        pdf = next((d / f"{pid}.pdf" for d in pdf_dirs if (d / f"{pid}.pdf").exists()), None)
+        tei = TEI_DIR / f"{pid}.tei.xml"
+        if pdf is None or not tei.exists():
+            log.warning("[PAPER-LIST] %s: pdf=%s tei=%s — skipped", pid, pdf, tei.exists())
+            continue
+        yield pdf, tei
 
 
 def _run_sequential(pipeline: "NougatRegionPipeline", pairs) -> tuple[int, int]:
@@ -1044,6 +1122,11 @@ def main() -> None:
         "--workers", type=int, default=1,
         help="PDFs processed concurrently (>1 overlaps CPU+GPU work, raises GPU utilisation)",
     )
+    parser.add_argument(
+        "--paper-list", type=Path, default=None,
+        help="File with one paper_id per line: (re)process exactly these papers, "
+             "looking for the PDF in pdf/, pdf_oa/ and pdf_missing/ (implies --overwrite)",
+    )
     args = parser.parse_args()
 
     # Override module-level constants if flags given
@@ -1060,12 +1143,16 @@ def main() -> None:
 
     pipeline = NougatRegionPipeline()
 
-    pairs = iter_pdf_pairs(
-        limit=args.limit,
-        skip_done=not args.overwrite,
-        sodb_root=SODB_DIR,
-        pipeline_hash=pipeline.pipeline_hash,
-    )
+    if args.paper_list:
+        pairs = list(iter_listed_pairs(args.paper_list))[: args.limit]
+        log.info("[PAPER-LIST] %d papers from %s", len(pairs), args.paper_list)
+    else:
+        pairs = iter_pdf_pairs(
+            limit=args.limit,
+            skip_done=not args.overwrite,
+            sodb_root=SODB_DIR,
+            pipeline_hash=pipeline.pipeline_hash,
+        )
 
     if args.workers > 1:
         processed, errors = _run_parallel(pipeline, pairs, args.workers)

@@ -34,6 +34,7 @@ Usage::
 from __future__ import annotations
 
 import json
+import os
 import logging
 import re
 import sys
@@ -41,6 +42,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterator
 
+from src.document.nougat_gate import FIGURE_FAMILY
 from src.document.nougat_quality import score_nougat_output
 from src.graph.neo4j_writer import GraphWriter
 
@@ -320,7 +322,17 @@ def _process_region(region_entry: dict, paper_id: str) -> tuple[str, dict | None
     markdown     = _extract_markdown(nougat_result)
     quality      = score_nougat_output(markdown, region_type)
 
-    if quality.rejected:
+    # Nougat acceptance gate (src/document/nougat_gate.py): figure-family regions
+    # keep their node but never their Nougat text (it is the caption plus page
+    # text, or a hallucinated loop); tables and formulas need status "accepted".
+    status = (region_entry.get("gate") or {}).get("nougat_status")
+    if region_type in FIGURE_FAMILY:
+        markdown = None
+    elif status != "accepted":
+        log.debug("[skip] %s  gate=%s", region_id, status)
+        return "skip", None
+
+    if markdown is not None and quality.rejected:
         log.debug("[skip] %s  reason=%s  score=%.2f",
                   region_id, quality.reason, quality.score)
         return "skip", None
@@ -408,8 +420,24 @@ def _process_file(regions_json: Path) -> _LoadResult:
 
     total = skipped = figures = tables = equations = 0
 
+    # gate verdicts: in regions.json for new runs, in regions.parquet after a rescore
+    gates: dict[str, dict] = {}
+    pq_path = regions_json.parents[2] / "sodb" / paper_id / "regions.parquet"
+    if not pq_path.exists():
+        pq_path = Path(os.getenv("SODB_DIR", "data/sodb")) / paper_id / "regions.parquet"
+    try:
+        import pandas as pd
+        rdf = pd.read_parquet(pq_path)
+        if "nougat_status" in rdf.columns:
+            gates = {r.region_id: {"nougat_status": r.nougat_status} for r in rdf.itertuples()}
+    except Exception:
+        pass
+
     for entry in data.get("regions", []):
         total += 1
+        rid = (entry.get("region") or {}).get("region_id")
+        if "gate" not in entry and rid in gates:
+            entry = dict(entry, gate=gates[rid])
         node_type, row = _process_region(entry, paper_id)
 
         if node_type == "skip" or row is None:

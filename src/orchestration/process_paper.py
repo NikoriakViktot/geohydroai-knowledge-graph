@@ -128,9 +128,10 @@ def _nougat_supplement(regions: list[dict]) -> str | None:
     doc.markdown_text so build_paper_json can use it as a richer methods
     section source.
     """
+    from src.document.nougat_gate import usable_text
     parts: list[str] = []
     for r in regions:
-        text = r.get("nougat_latex") or r.get("nougat_text")
+        text = usable_text(r)          # only text the Nougat gate accepted
         if text and text.strip():
             parts.append(text.strip())
     return "\n\n".join(parts) if parts else None

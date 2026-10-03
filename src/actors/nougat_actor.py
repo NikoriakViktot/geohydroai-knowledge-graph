@@ -82,10 +82,17 @@ class NougatActor:
     def model_info(self) -> dict[str, Any]:
         return self._parser.model_info()
 
-    def parse_image(self, image, paper_id: str) -> dict[str, Any]:
+    def parse_image(self, image, paper_id: str,
+                    max_new_tokens: int | None = None) -> dict[str, Any]:
         try:
-            doc = self._parser.parse_image(image=image, paper_id=paper_id)
-            return _doc_to_dict(doc)
+            self._parser.last_guard_tripped = False
+            self._parser.last_hit_budget = False
+            doc = self._parser.parse_image(image=image, paper_id=paper_id,
+                                           max_new_tokens=max_new_tokens)
+            out = _doc_to_dict(doc)
+            out["guard_stopped"] = bool(getattr(self._parser, "last_guard_tripped", False))
+            out["hit_token_budget"] = bool(getattr(self._parser, "last_hit_budget", False))
+            return out
         except Exception as exc:
             log.error("[NougatActor] parse_image failed for %s: %s", paper_id, exc)
             return {

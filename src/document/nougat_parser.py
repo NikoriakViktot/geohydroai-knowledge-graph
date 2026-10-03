@@ -48,6 +48,38 @@ log = logging.getLogger(__name__)
 _MODEL_NAME      = os.getenv("NOUGAT_MODEL",          "facebook/nougat-base")
 _MAX_PAGES       = int(os.getenv("NOUGAT_MAX_PAGES",   "20"))
 _MAX_NEW_TOKENS  = int(os.getenv("NOUGAT_MAX_NEW_TOKENS", "4096"))
+
+# Region inference guard (2026-10-03 audit): Nougat collapses into repetition loops on
+# region crops (146 of 4,674 regions, up to 24,000 characters). Generation stops as
+# soon as the tail repeats, and the caller is told so the output can be rejected.
+# The version is part of the L1 cache key: outputs cached before the guard existed
+# must not be served again.
+REGION_GUARD_VERSION = "guard1"
+_LOOP_TAIL    = 24      # tokens compared
+_LOOP_SPAN    = 600     # look-back window
+_LOOP_HITS    = 3       # tail seen this many times → loop
+_LOOP_EVERY   = 16      # check every N generated tokens
+
+
+class _LoopStop:
+    """transformers StoppingCriteria: stop when the last _LOOP_TAIL tokens already
+    occurred _LOOP_HITS times in the last _LOOP_SPAN tokens."""
+
+    def __init__(self, prompt_len: int) -> None:
+        self.prompt_len = prompt_len
+        self.tripped = False
+
+    def __call__(self, input_ids, scores=None, **kwargs):
+        import torch
+        n = input_ids.shape[1] - self.prompt_len
+        if not self.tripped and n >= _LOOP_TAIL * _LOOP_HITS and n % _LOOP_EVERY == 0:
+            seq = input_ids[0, -_LOOP_SPAN:].tolist()
+            tail = seq[-_LOOP_TAIL:]
+            hits = sum(1 for i in range(len(seq) - _LOOP_TAIL + 1)
+                       if seq[i:i + _LOOP_TAIL] == tail)
+            self.tripped = hits >= _LOOP_HITS
+        return torch.full((input_ids.shape[0],), self.tripped, dtype=torch.bool,
+                          device=input_ids.device)
 _DEVICE_PREF     = os.getenv("NOUGAT_DEVICE",          "auto")
 _ENABLED         = os.getenv("NOUGAT_ENABLED",          "true").lower() not in {"0", "false", "no"}
 
@@ -407,6 +439,7 @@ class NougatParser:
             self,
             image,
             paper_id: str,
+            max_new_tokens: int | None = None,
     ) -> TEIDocument:
         """
         Run Nougat directly on PIL image crop, with L1 disk cache.
@@ -420,7 +453,9 @@ class NougatParser:
         img_bytes = buf.getvalue()
         del buf
 
-        key_src   = f"{self._model_name}:{self.parser_version}:".encode() + img_bytes
+        budget    = int(max_new_tokens or self._max_new_tokens)
+        key_src   = (f"{self._model_name}:{self.parser_version}:{REGION_GUARD_VERSION}:"
+                     f"{budget}:").encode() + img_bytes
         cache_key = hashlib.sha256(key_src).hexdigest()
         cache_path = _L1_CACHE_DIR / cache_key[:2] / f"{cache_key}.pkl"
 
@@ -449,15 +484,20 @@ class NougatParser:
 
         pixel_values = pixel_values.to(self._model.device)
 
+        from transformers import StoppingCriteriaList
+        guard = _LoopStop(prompt_len=1)
         with torch.inference_mode():
             outputs = self._model.generate(
                 pixel_values,
                 min_length=1,
-                max_new_tokens=self._max_new_tokens,
+                max_new_tokens=budget,
                 bad_words_ids=[
                     [self._processor.tokenizer.unk_token_id]
                 ],
+                stopping_criteria=StoppingCriteriaList([guard]),
             )
+        self.last_guard_tripped = guard.tripped
+        self.last_hit_budget = (outputs.shape[1] - 1) >= budget
 
         decoded = self._processor.batch_decode(
             outputs,

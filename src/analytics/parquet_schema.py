@@ -151,6 +151,13 @@ REGIONS_SCHEMA = pa.schema([
     pa.field("merge_group_id",  pa.string(),            nullable=True),   # reserved for future merge tracking
     pa.field("pipeline_hash",   pa.string(),            nullable=False),
     pa.field("created_at",      pa.timestamp("ms"),     nullable=False),
+    # Nougat acceptance gate (src/document/nougat_gate.py). Only "accepted" text may be
+    # used downstream; rows without a status predate the gate and are not usable.
+    pa.field("nougat_status",     pa.string(),          nullable=True),   # accepted|rejected|unverified|not_applicable|failed
+    pa.field("nougat_flags",      pa.string(),          nullable=True),   # comma-separated gate flags
+    pa.field("grounding_words",   pa.float32(),         nullable=True),   # share of output words on the crop's PDF text layer
+    pa.field("grounding_numbers", pa.float32(),         nullable=True),   # same for numbers
+    pa.field("crop_strategy",     pa.string(),          nullable=True),   # expanded_context|full_page
 ])
 
 FORMULAS_SCHEMA = pa.schema([

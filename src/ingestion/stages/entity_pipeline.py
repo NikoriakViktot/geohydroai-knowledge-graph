@@ -311,9 +311,15 @@ def _augment_metric_text_from_nougat(ctx: PipelineContext, paper_id: str) -> Non
         return
     try:
         import pandas as pd
-        rdf = pd.read_parquet(regions_file, columns=["region_type", "nougat_text"])
+        rdf = pd.read_parquet(regions_file)
+        if "nougat_status" not in rdf.columns:
+            # written before the Nougat gate: unchecked generative output is not a
+            # metric source (rescore with src.orchestration.rescore_nougat_regions)
+            log.debug("[nougat-bridge] %s: regions not gated, skipped", paper_id)
+            return
         mask = (
             rdf["region_type"].isin(["FORMULA_REGION", "TABLE_REGION"]) &
+            (rdf["nougat_status"] == "accepted") &
             rdf["nougat_text"].notna()
         )
         supplement = " ".join(rdf.loc[mask, "nougat_text"])

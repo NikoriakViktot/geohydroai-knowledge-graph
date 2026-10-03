@@ -57,7 +57,8 @@ _HALLUCINATION_PATTERNS: list[re.Pattern] = [
     re.compile(r'\[UNK\]',        re.IGNORECASE),
     re.compile(r'\\text\{[^}]{0,3}\}\s*\\text\{', re.IGNORECASE),  # cascading \text{}
     re.compile(r'(?:\.\.\.\s*){3,}'),    # excessive ellipsis
-    re.compile(r'(?:#+\s*){4,}'),        # run of empty headers
+    # run of ≥3 *empty* headers; a normal "#### 3.2.1 Title" heading is not one
+    re.compile(r'(?:^[ \t]*#+[ \t]*$\n?){3,}', re.MULTILINE),
 ]
 
 
