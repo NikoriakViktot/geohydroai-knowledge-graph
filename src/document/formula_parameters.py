@@ -449,7 +449,14 @@ def quantity_name(description: str) -> str | None:
     d = _QUANTITY_CUT.split(description or "", maxsplit=1)[0]
     d = re.sub(r"^(?:the|a|an)\s+", "", d.strip(), flags=re.I).lower()
     d = re.sub(r"\s+", " ", d).strip(" .")
+    d = re.sub(r"[’']s\b", "", d)                      # "manning's" → "manning"
+    d = re.sub(r"^(?:the|a|an|of|is|are)\b\s*", "", d).strip()
     words = d.split()
-    if not words or len(words) > 7 or not re.search(r"[a-z]{3}", d):
+    if not words or len(words) > 7 or not re.search(r"[a-z]{3}", d) or d in _NOT_NAMES:
         return None
     return d
+
+
+_NOT_NAMES = frozenset({"the", "this", "that", "these", "it", "its", "value", "values", "number",
+                        "parameter", "parameters", "variable", "variables", "coefficient", "constant",
+                        "function", "term", "index", "ratio", "factor", "same", "following", "above"})

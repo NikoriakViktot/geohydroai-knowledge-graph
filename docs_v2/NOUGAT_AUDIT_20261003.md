@@ -150,7 +150,8 @@ TEI. У Chroma і граф Nougat-текст не потрапляв.
 Запит «формули з параметром precipitation»:
 ```
 MATCH (q:Quantity {name:'precipitation'})<-[:QUANTIFIES]-(p:Parameter)<-[:HAS_PARAMETER]-(e:Equation)
-WHERE NOT p.stale RETURN e.paper_id, e.equation_number, e.latex, p.symbol, p.unit, e.image_path
+WHERE NOT p.stale AND p.quantity = q.name
+RETURN e.paper_id, e.equation_number, coalesce(e.latex, e.text_grobid), p.symbol, p.unit, e.image_path
 ```
 HAS_EQUATION з'являється лише для статей, що вже є вузлами Paper; завантажувач
 рівнянь треба запускати після `build_graph` (так у `scripts/process_oa_batch.sh`).
@@ -158,3 +159,11 @@ HAS_EQUATION з'являється лише для статей, що вже є 
 Тест (3 статті): 64 рівняння, 58 з параметрами, 164 параметри, усі з PNG; WaterGAP 2.2d —
 36 з 41 з визначеним призначенням. Слабко для статей зі зламаним текстом GROBID (Wiley:
 «5» замість «=», шрифтові символи) — там допомагає лише LaTeX Nougat.
+
+Корпус (2026-10-04, без перерахунку Nougat — лише TEI): 31 750 рівнянь у 3 624 статтях,
+15 245 (48 %) з параметрами, 29 036 параметрів (3 551 з одиницями), 7 426 з призначенням,
+PNG — усі. Граф: 28 313 рівнянь прив'язані до вузлів Paper, 6 184 зв'язки з методами,
+1 688 з метриками. Умова `p.quantity = q.name` відсікає зв'язки до старих назв величин,
+які лишаються після перейменування (граф пишеться лише через MERGE).
+Після GPU-прогону Nougat LaTeX з'явиться для більшості рівнянь, і частка параметрів зросте
+(на тестовій статті WaterGAP: 40 з 41 проти TEI-лише).

@@ -619,6 +619,7 @@ class GraphWriter:
             p.param_hash  = r.param_hash,
             p.formula_hash = r.formula_hash,
             p.paper_id    = r.paper_id,
+            p.quantity    = r.quantity,
             p.stale       = false
         MERGE (e)-[:HAS_PARAMETER]->(p)
         WITH p, r

@@ -47,10 +47,12 @@ def _methods_of(row: dict, extractor) -> list[tuple[str, str]]:
     text = " ".join(filter(None, [row.get("lead_in"), row.get("clause")]))
     if not text or extractor is None:
         return []
+    from src.normalization.ontology_matcher import normalize_entity
     out = []
     for m in extractor.extract_methods(text, strict=False):
-        cid = (m.get("kb_metadata") or {}).get("canonical_id") or m.get("canonical_id")
-        if cid:
+        n = normalize_entity(m.get("name", ""), "method", allow_semantic=False)
+        cid = n.get("canonical_id")
+        if cid and n.get("match_type") in ("alias", "exact") and n.get("confidence", 0) >= 0.9:
             out.append((cid, (m.get("evidence") or "")[:300]))
     return out
 
@@ -83,7 +85,9 @@ def load(paper_ids: list[str] | None = None, dry_run: bool = False) -> dict:
                 par_rows.append({
                     "eq_id": eq_id, "param_id": f"{eq_id}:{p['symbol']}", "paper_id": r["paper_id"],
                     "formula_hash": r["formula_hash"], **{k: p.get(k) for k in
-                    ("symbol", "symbol_tex", "description", "unit", "value", "source", "param_hash", "quantity")},
+                    ("symbol", "symbol_tex", "description", "unit", "value", "source", "param_hash")},
+                    # recomputed here so that a better quantity_name needs no record rebuild
+                    "quantity": quantity_name(p.get("description") or ""),
                 })
             for cid in _metric_of(r):
                 concept_rows.append({"eq_id": eq_id, "canonical_id": cid, "node_label": "Metric",
