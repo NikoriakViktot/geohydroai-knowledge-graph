@@ -125,3 +125,36 @@ TEI. У Chroma і граф Nougat-текст не потрапляв.
 
 Не зроблено: параметри з тексту GROBID для формул, яких Nougat не дав; символи,
 визначені раніше в статті (таблиця позначень, попередній розділ).
+
+## Записи рівнянь: параметри, призначення, хеші, PNG, граф (2026-10-04)
+
+Одиниця — кожне рівняння, яке GROBID позначає в TEI (`<formula>`), а не регіон Nougat.
+`src/document/equation_records.py` → `data/sodb/<id>/equation_records.parquet`
+(`EQUATION_RECORDS_SCHEMA`), PNG у `data/nougat_regions/<id>/equations/`.
+
+| Поле | Звідки |
+|---|---|
+| latex | розмітка сторінки Nougat: за номером рівняння, інакше за текстовим шаром PDF у рамці рівняння, інакше за порядком |
+| text_grobid | TEI |
+| parameters | абзац «where …» поруч (LaTeX Nougat або текст GROBID), речення перед рівнянням, потім глосарій статті: розділ/таблиця позначень (Nomenclature, Notation), визначення деінде в тексті. Символ, визначений у тексті двічі по-різному, з глосарія не береться; без LaTeX однолітерні символи беруться лише з власного пояснення |
+| lhs_symbol, purpose | ліва частина: «rate of change of canopy storage» для dS_c/dt; опис символу, інакше речення перед рівнянням |
+| section, mentions | заголовок розділу TEI; речення з «Eq. (2)», «Eqs. (2)–(5)» і посилання GROBID |
+| formula_hash | sha256[:16] канонічного LaTeX, або `tei:` + хеш тексту GROBID |
+| image_path, image_sha256 | PNG рамки рівняння (300 dpi) і його sha256 |
+| param_hash, quantity | у кожного параметра: sha256(formula_hash|symbol) і коротка назва величини |
+
+Граф (`python -m src.graph.equation_kg_loader`):
+`(Paper)-[:HAS_EQUATION]->(Equation)-[:HAS_PARAMETER]->(Parameter)-[:QUANTIFIES]->(Quantity)`,
+`(Equation)-[:COMPUTES]->(Quantity)`, `(Equation)-[:DEFINES_METRIC|EQUATION_GROUNDS_TO {formula_hash}]->(Metric|Method)`.
+Перезавантаження позначає параметри, що зникли, `stale = true` (лише MERGE/SET).
+Запит «формули з параметром precipitation»:
+```
+MATCH (q:Quantity {name:'precipitation'})<-[:QUANTIFIES]-(p:Parameter)<-[:HAS_PARAMETER]-(e:Equation)
+WHERE NOT p.stale RETURN e.paper_id, e.equation_number, e.latex, p.symbol, p.unit, e.image_path
+```
+HAS_EQUATION з'являється лише для статей, що вже є вузлами Paper; завантажувач
+рівнянь треба запускати після `build_graph` (так у `scripts/process_oa_batch.sh`).
+
+Тест (3 статті): 64 рівняння, 58 з параметрами, 164 параметри, усі з PNG; WaterGAP 2.2d —
+36 з 41 з визначеним призначенням. Слабко для статей зі зламаним текстом GROBID (Wiley:
+«5» замість «=», шрифтові символи) — там допомагає лише LaTeX Nougat.
