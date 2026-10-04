@@ -437,6 +437,10 @@ def process_paper(
         log.warning("[process_paper] entity grounding error (non-fatal): %s", exc)
 
     # ── 5. Layout-aware chunking → ChromaDB (while doc is still alive) ───
+    # A failed vector write is fatal for the paper: before 2026-10-04 it was logged as
+    # "non-fatal", paper.json was written anyway, and every later run skipped the paper,
+    # so it never reached search (VectorStoreActor died mid-batch on 2026-10-04).
+    _vector_error: Exception | None = None
     try:
         from src.document import LayoutAwareChunker
 
@@ -448,23 +452,33 @@ def process_paper(
             _log_mem("after_chunk_embeddings", xml_path.name)
             if vectorstore_actor is not None:
                 from src.orchestration.retry import retry_call
-                retry_call(
-                    lambda: ray_get(
-                        vectorstore_actor.upsert_document_chunks.remote(
-                            chunks, chunk_vecs.tolist()),
-                        label="VectorStoreActor.upsert"),
-                    label="vectorstore_upsert",
-                )
+                try:
+                    retry_call(
+                        lambda: ray_get(
+                            vectorstore_actor.upsert_document_chunks.remote(
+                                chunks, chunk_vecs.tolist()),
+                            label="VectorStoreActor.upsert"),
+                        label="vectorstore_upsert",
+                    )
+                except Exception as exc:
+                    _vector_error = exc
+                    raise
             else:
                 from src.vectorstore.chroma_store import VectorStore
                 _vs = VectorStore()
                 _log_mem("after_vectorstore_init", xml_path.name)
-                _vs.upsert_document_chunks(chunks, chunk_vecs)
+                try:
+                    _vs.upsert_document_chunks(chunks, chunk_vecs)
+                except Exception as exc:
+                    _vector_error = exc
+                    raise
             _log_mem("after_vectorstore_add", xml_path.name)
             log.info("[process_paper] chunked %d chunks → ChromaDB — %s",
                      len(chunks), xml_path.name)
     except Exception as exc:
-        log.warning("[process_paper] chunking/vectorstore error (non-fatal): %s", exc)
+        if _vector_error is not None:
+            raise RuntimeError(f"vector store write failed for {xml_path.name}: {exc}") from exc
+        log.warning("[process_paper] chunking error (non-fatal): %s", exc)
 
     # ── 6. Free TEIDocument + NER data — no longer needed ─────────────────
     del doc, ner_entities
