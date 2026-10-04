@@ -123,3 +123,15 @@ def test_quantity_name():
     assert quantity_name("throughfall, the fraction of P that reaches the soil") == "throughfall"
     assert quantity_name("the potential evapotranspiration calculated with Priestley–Taylor") == "potential evapotranspiration"
     assert plain_key("S c,max") == "S_c,max" and plain_key("µ") == "mu"
+
+
+# ── what an equation computes ─────────────────────────────────────────────────
+from src.document.equation_records import left_side  # noqa: E402
+
+
+def test_left_side_derivative_and_plain():
+    assert left_side(r"\[\frac{\text{d}S_{\text{c}}}{\text{d}t}=P-P_{\text{t}}-E_{\text{c}},\] (2)", "") == ("S_c", True)
+    assert left_side(r"\[S_{\text{c,max}}=m_{\text{c}}\cdot L\] (4)", "") == ("S_c,max", False)
+    assert left_side(None, "dS c dt = P -P t -E c ,(2)") == ("S_c", True)
+    assert left_side(None, "S c,max = m c • L (4)") == ("S_c,max", False)
+    assert left_side(r"\[\sum_i x_i\]", "") == (None, False)

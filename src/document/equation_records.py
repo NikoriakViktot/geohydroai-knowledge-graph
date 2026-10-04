@@ -73,6 +73,36 @@ def sha16(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
 
 
+# ── what an equation computes ─────────────────────────────────────────────────
+
+_TEX_DERIV = re.compile(r"\\frac\s*\{\s*(?:\\(?:text|mathrm|rm)\s*\{?\s*d\s*\}?|\{\\rm\s*d\}|d|\\partial)\s*"
+                        r"(?P<x>.+?)\}\s*\{\s*(?:\\(?:text|mathrm|rm)\s*\{?\s*d\s*\}?|\{\\rm\s*d\}|d|\\partial)\s*(?P<t>[a-z])\s*\}")
+
+
+def left_side(latex: str | None, text_grobid: str) -> tuple[str | None, bool]:
+    """(symbol computed by the equation, is it a time/space derivative)."""
+    from src.document.formula_parameters import equation_symbols
+    if latex:
+        body = re.sub(r"^\s*\\\[|\\\]\s*(?:\(\d+[a-z]?\))?\s*$", "", latex.strip())
+        if "=" not in body:
+            return None, False
+        lhs = body.split("=", 1)[0]
+        m = _TEX_DERIV.search(lhs)
+        if m:
+            syms = equation_symbols(m.group("x"))
+            return (sorted(syms, key=len)[-1] if syms else None), True
+        syms = equation_symbols(lhs)
+        return (next(iter(syms)) if len(syms) == 1 else None), False
+    if "=" not in text_grobid:
+        return None, False
+    lhs = text_grobid.split("=", 1)[0].strip()
+    m = re.match(r"^[d∂]\s*(\S+(?:\s[\w,]{1,8})?)\s+[d∂]\s*[a-z]$", lhs)
+    if m:
+        return plain_key(m.group(1)), True
+    toks = lhs.split()
+    return (plain_key(lhs) if 1 <= len(toks) <= 3 and len(lhs) <= 15 else None), False
+
+
 # ── TEI side ──────────────────────────────────────────────────────────────────
 
 def tei_equations(root) -> list[dict]:
@@ -89,15 +119,49 @@ def tei_equations(root) -> list[dict]:
         while nxt is not None and tei_io.localname(nxt) == "formula":
             nxt = nxt.getnext()
         lead = _text(prev) if prev is not None and tei_io.localname(prev) == "p" else ""
+        section = None
+        anc = f.getparent()
+        while anc is not None and section is None:
+            h = anc.find(f"{NS}head") if tei_io.localname(anc) == "div" else None
+            section = _text(h) or None if h is not None else None
+            anc = anc.getparent()
         out.append({
             "xml_id":   f.get("{http://www.w3.org/XML/1998/namespace}id") or "",
             "text":     body,
             "number":   num.group(1) if num else None,
             "page":     c[0] if c else None,
             "bbox":     c[1] if c else None,
-            "lead_in":  re.split(r"(?<=[.!?])\s+(?=[A-Z])", lead)[-1] if lead else "",
+            "lead_in":  re.split(r"(?<=[.!?])\s*(?=[A-Z][a-z ])", lead)[-1] if lead else "",
             "clause":   _text(nxt)[:1500] if nxt is not None and tei_io.localname(nxt) == "p" else "",
+            "section":  section,
         })
+    return out
+
+
+_EQ_MENTION = re.compile(r"\b(?:Eqs?|Equations?|equations?|eqs?)\.?\s*\(?\s*(\d+[a-z]?)\s*\)?"
+                         r"(?:\s*(?:[–—-]|to|and|,)\s*\(?\s*(\d+[a-z]?)\s*\)?)?")
+
+
+def tei_mentions(root, eqs: list[dict]) -> dict[str, list[str]]:
+    """Sentences of the paper that refer to each equation: GROBID's <ref type="formula">
+    links, and "Eq. (2)", "Eqs. (2)–(5)", "Equation 2" in the text."""
+    by_number = {e["number"]: e["xml_id"] for e in eqs if e["number"]}
+    out: dict[str, list[str]] = {e["xml_id"]: [] for e in eqs}
+    for p in root.iter(f"{NS}p"):
+        targets = {r.get("target", "").lstrip("#") for r in p.iter(f"{NS}ref") if r.get("type") == "formula"}
+        for sent in re.split(r"(?<=[.!?])\s*(?=[A-Z(][a-z ])", _text(p)):
+            hit = set()
+            for m in _EQ_MENTION.finditer(sent):
+                a, b = m.group(1), m.group(2)
+                hit.add(by_number.get(a))
+                if b and a.isdigit() and b.isdigit() and int(b) - int(a) < 20:
+                    hit.update(by_number.get(str(n)) for n in range(int(a), int(b) + 1))
+            for t in targets:
+                if t in out and re.search(r"\b" + re.escape(next((e["number"] or "") for e in eqs if e["xml_id"] == t) or "§") + r"\b", sent):
+                    hit.add(t)
+            for xid in hit - {None}:
+                if len(out[xid]) < 5 and sent not in out[xid] and len(sent) < 600:
+                    out[xid].append(sent)
     return out
 
 
@@ -193,6 +257,8 @@ def build_equation_records(paper_id: str, pdf_path: Path, tei_path: Path,
             by_layer[xid] = blocks[i]
             used.add(i)
 
+    mentions = tei_mentions(root, eqs)
+
     img_dir = out_dir / "equations"
     img_dir.mkdir(parents=True, exist_ok=True)
     now = datetime.now(timezone.utc)
@@ -245,6 +311,20 @@ def build_equation_records(paper_id: str, pdf_path: Path, tei_path: Path,
                 d["source"] = f"glossary:{g.source}"
                 found[k] = d
 
+        lhs, derivative = left_side(latex, e["text"])
+        lhs_desc = None
+        if lhs:
+            p_l = found.get(lhs) or (glossary.get(lhs).__dict__ if glossary.get(lhs) is not None else None)
+            lhs_desc = (p_l or {}).get("description") or None
+        purpose, purpose_source = None, None
+        if lhs_desc:
+            purpose, purpose_source = (f"rate of change of {lhs_desc}" if derivative else lhs_desc), "lhs_definition"
+        elif e["lead_in"] and lhs and (_plain_has(e["lead_in"], lhs.replace("_", " "))
+                                       or re.search(r"(?:as|by|follows|:)\s*$", e["lead_in"])):
+            purpose, purpose_source = e["lead_in"][:240], "lead_in_sentence"
+        elif derivative and lhs:
+            purpose, purpose_source = f"rate of change of {lhs}", "lhs_symbol"
+
         formula_hash = sha16(canonical_latex(latex)) if latex else "tei:" + sha16(re.sub(r"\s+", "", e["text"]))
         params = []
         for p in found.values():
@@ -281,6 +361,11 @@ def build_equation_records(paper_id: str, pdf_path: Path, tei_path: Path,
             "parameters":      json.dumps(params, ensure_ascii=False),
             "n_parameters":    len(params),
             "n_symbols":       len(symbols),
+            "lhs_symbol":      lhs,
+            "purpose":         purpose,
+            "purpose_source":  purpose_source,
+            "section":         e.get("section"),
+            "mentions":        json.dumps(mentions.get(e["xml_id"], []), ensure_ascii=False),
             "lead_in":         e["lead_in"] or None,
             "clause":          e["clause"] or None,
             "created_at":      now,

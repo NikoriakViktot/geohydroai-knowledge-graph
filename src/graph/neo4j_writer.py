@@ -573,12 +573,26 @@ class GraphWriter:
             e.image_path      = r.image_path,
             e.image_sha256    = r.image_sha256,
             e.n_parameters    = r.n_parameters,
-            e.context_text    = r.lead_in
+            e.context_text    = r.lead_in,
+            e.lhs_symbol      = r.lhs_symbol,
+            e.purpose         = r.purpose,
+            e.purpose_source  = r.purpose_source,
+            e.section         = r.section,
+            e.mentions        = r.mentions
         WITH e, r
         MATCH (p:Paper {paper_id: r.paper_id})
         MERGE (p)-[:HAS_EQUATION]->(e)
         """
         self._batch_write("Equation records", cypher, rows)
+        # what the equation computes: Equation -[:COMPUTES]-> Quantity
+        computes = [r for r in rows if r.get("computes")]
+        self._batch_write("Equation COMPUTES", """
+        UNWIND $rows AS r
+        MATCH (e:Equation {eq_id: r.eq_id})
+        MERGE (q:Quantity {name: r.computes})
+        MERGE (e)-[c:COMPUTES]->(q)
+        SET c.derivative = r.derivative
+        """, computes)
 
     def mark_equation_parameters_stale(self, eq_ids: list[str]) -> None:
         """Before a reload: flag every parameter of these equations stale; the reload

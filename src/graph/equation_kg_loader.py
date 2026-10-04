@@ -2,6 +2,7 @@
 equation_kg_loader.py — equation_records.parquet → Neo4j.
 
     (Paper)-[:HAS_EQUATION]->(Equation {formula_hash, latex, image_path, image_sha256})
+    (Equation)-[:COMPUTES {derivative}]->(Quantity)      ← what the equation calculates
     (Equation)-[:HAS_PARAMETER]->(Parameter {symbol, description, unit, value, param_hash})
     (Parameter)-[:QUANTIFIES]->(Quantity {name})          ← search formulas by quantity
     (Equation)-[:EQUATION_GROUNDS_TO {formula_hash}]->(Method)
@@ -24,6 +25,8 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+
+from src.document.formula_parameters import quantity_name
 
 log = logging.getLogger("geohydro.graph.equation_kg_loader")
 ROOT = Path(__file__).resolve().parents[2]
@@ -71,7 +74,11 @@ def load(paper_ids: list[str] | None = None, dry_run: bool = False) -> dict:
         for r in d.to_dict("records"):
             r = {k: (None if isinstance(v, float) and v != v else v) for k, v in r.items()}
             eq_id = r["equation_id"]
-            eq_rows.append({**r, "eq_id": eq_id})
+            pur = r.get("purpose") or ""
+            deriv = pur.startswith("rate of change of ")
+            core = pur[len("rate of change of "):] if deriv else pur
+            computes = quantity_name(core) if r.get("purpose_source") in ("lhs_definition",) else None
+            eq_rows.append({**r, "eq_id": eq_id, "computes": computes, "derivative": deriv})
             for p in json.loads(r.get("parameters") or "[]"):
                 par_rows.append({
                     "eq_id": eq_id, "param_id": f"{eq_id}:{p['symbol']}", "paper_id": r["paper_id"],
