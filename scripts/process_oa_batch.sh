@@ -12,6 +12,10 @@ RUN=${1:?run directory, e.g. data/acquisition/oa_20261002}
 WORKERS=${2:-2}
 PY=.venv/bin/python
 export TOKENIZERS_PARALLELISM=false RAYON_NUM_THREADS=1 OMP_NUM_THREADS=2
+# Ray's memory monitor misreads WSL memory (reported 24.5 of 25.2 GB "used" while the kernel
+# showed 19.9 GB available) and kills the Nougat actor mid-batch (2026-10-03 and 2026-10-04).
+# Real exhaustion is still caught by the kernel OOM killer.
+export RAY_memory_monitor_refresh_ms=0
 export OLLAMA_MODEL=${OLLAMA_MODEL:-mistral-nemo:12b} OLLAMA_URL=${OLLAMA_URL:-http://localhost:11434}
 export SPACY_MODEL=${SPACY_MODEL:-en_core_web_sm}
 set -a; [ -f .env ] && . ./.env; set +a
