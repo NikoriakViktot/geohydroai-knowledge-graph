@@ -829,7 +829,26 @@ def remap_from_pages(paper_id: str, pdf_path: Path, tei_path: Path, pipeline_has
     crop_of = {r.region_id: str(out_dir / "crops" / f"{r.region_id}.png") for r in regions}
     results = build_page_results(None, pdf_path, regions, page_md, page_meta, crop_of)
     _write_regions_parquet(results, paper_id, pipeline_hash)
-    return {"paper_id": paper_id, "regions": len(results)}
+    n_eq = write_equations(paper_id, pdf_path, tei_path, page_md)
+    return {"paper_id": paper_id, "regions": len(results), "equations": n_eq}
+
+
+def saved_pages(paper_id: str) -> dict[int, str]:
+    d = OUTPUT_DIR / paper_id / "pages"
+    return {int(f.stem[1:]): f.read_text(encoding="utf-8") for f in sorted(d.glob("p*.md"))} if d.exists() else {}
+
+
+def write_equations(paper_id: str, pdf_path: Path, tei_path: Path, page_md: dict[int, str]) -> int:
+    """equation_records.parquet + one PNG per equation (CPU only). Never raises."""
+    from src.document.equation_records import build_equation_records, write_equations_parquet
+    try:
+        rows = build_equation_records(paper_id, pdf_path, tei_path, page_md, OUTPUT_DIR / paper_id)
+        if rows:
+            write_equations_parquet(rows, paper_id, SODB_DIR)
+        return len(rows)
+    except Exception as exc:
+        log.warning("[EQUATIONS] %s: %s", paper_id, exc)
+        return 0
 
 
 # ── SODB regions.parquet writer ───────────────────────────────────────────────
@@ -1019,6 +1038,7 @@ class NougatRegionPipeline:
         with open(out_dir / "regions.json", "w", encoding="utf-8") as f:
             json.dump(final, f, indent=2, ensure_ascii=False)
         _write_regions_parquet(results, paper_id, self.pipeline_hash)
+        write_equations(paper_id, pdf_path, tei_path, page_md)
 
         if actor_failures:
             log.error("[INCOMPLETE] %s: %d page(s) failed in the Nougat actor; "
@@ -1383,11 +1403,37 @@ def main() -> None:
              "looking for the PDF in pdf/, pdf_oa/ and pdf_missing/ (implies --overwrite)",
     )
     parser.add_argument(
+        "--equations-only", action="store_true", default=False,
+        help="Write equation_records.parquet + equation PNGs from TEI (and saved Nougat pages, if "
+             "any) for --paper-list or every paper with TEI and PDF; no model, no GPU",
+    )
+    parser.add_argument(
         "--remap-only", action="store_true", default=False,
         help="With --paper-list: rebuild regions.parquet from saved page markdown "
              "(no model, no GPU) after changes to mapping, gate or formula parameters",
     )
     args = parser.parse_args()
+
+    if args.equations_only:
+        if args.paper_list:
+            pairs_eq = list(iter_listed_pairs(args.paper_list))
+        else:
+            pdf_dirs = [PDF_DIR, PROJECT_ROOT / "data/literature/pdf_oa", PROJECT_ROOT / "data/literature/pdf_missing"]
+            seen, pairs_eq = set(), []
+            for d in pdf_dirs:
+                for pdf in sorted(d.glob("*.pdf")):
+                    tei = TEI_DIR / f"{pdf.stem}.tei.xml"
+                    if pdf.stem not in seen and tei.exists():
+                        seen.add(pdf.stem)
+                        pairs_eq.append((pdf, tei))
+        pairs_eq = pairs_eq[: args.limit] if args.limit else pairs_eq
+        total = 0
+        for i, (pdf, tei) in enumerate(pairs_eq, 1):
+            total += write_equations(pdf.stem, pdf, tei, saved_pages(pdf.stem))
+            if i % 200 == 0:
+                log.info("[EQUATIONS] %d/%d papers, %d equations", i, len(pairs_eq), total)
+        log.info("[EQUATIONS] done: %d papers, %d equations", len(pairs_eq), total)
+        return
 
     if args.remap_only:
         if not args.paper_list:

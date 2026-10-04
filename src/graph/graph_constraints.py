@@ -29,6 +29,8 @@ CONSTRAINTS: list[str] = [
     "CREATE CONSTRAINT equation_id      IF NOT EXISTS FOR (n:Equation)         REQUIRE n.eq_id    IS UNIQUE",
     # Numeric facts (Stage 5c)
     "CREATE CONSTRAINT numeric_fact_id  IF NOT EXISTS FOR (n:NumericFact)      REQUIRE n.fact_id  IS UNIQUE",
+    "CREATE CONSTRAINT parameter_id     IF NOT EXISTS FOR (n:Parameter)   REQUIRE n.param_id       IS UNIQUE",
+    "CREATE CONSTRAINT quantity_name    IF NOT EXISTS FOR (n:Quantity)    REQUIRE n.name           IS UNIQUE",
 ]
 
 # ── Range indexes (for property lookups and ORDER BY) ─────────────────────────
@@ -39,6 +41,10 @@ INDEXES: list[str] = [
     # every Paper node (the full-text index below is not used by MERGE).
     "CREATE INDEX paper_title       IF NOT EXISTS FOR (n:Paper)   ON (n.title)",
     "CREATE INDEX paper_title_key   IF NOT EXISTS FOR (n:Paper)   ON (n.title_key)",
+    "CREATE INDEX eq_formula_hash   IF NOT EXISTS FOR (n:Equation)  ON (n.formula_hash)",
+    "CREATE INDEX eq_image_sha      IF NOT EXISTS FOR (n:Equation)  ON (n.image_sha256)",
+    "CREATE INDEX param_symbol      IF NOT EXISTS FOR (n:Parameter) ON (n.symbol)",
+    "CREATE INDEX param_hash        IF NOT EXISTS FOR (n:Parameter) ON (n.param_hash)",
     "CREATE INDEX paper_doi         IF NOT EXISTS FOR (n:Paper)   ON (n.doi)",
     "CREATE INDEX paper_citations   IF NOT EXISTS FOR (n:Paper)   ON (n.cited_by_count)",
     "CREATE INDEX paper_country     IF NOT EXISTS FOR (n:Paper)   ON (n.primary_country)",

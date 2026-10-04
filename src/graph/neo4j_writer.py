@@ -555,6 +555,81 @@ class GraphWriter:
         """
         self._batch_write("Equation→Method EQUATION_GROUNDS_TO", cypher, rows)
 
+    # ── Equation records (src/document/equation_records.py) ───────────────────
+
+    def write_equation_records(self, rows: list[dict]) -> None:
+        """Equation nodes keyed by paper_id:xml_id, with formula hash and PNG."""
+        cypher = """
+        UNWIND $rows AS r
+        MERGE (e:Equation {eq_id: r.eq_id})
+        SET e.paper_id        = r.paper_id,
+            e.xml_id          = r.xml_id,
+            e.equation_number = r.equation_number,
+            e.page            = r.page,
+            e.latex           = r.latex,
+            e.latex_raw       = coalesce(r.latex, r.text_grobid),
+            e.text_grobid     = r.text_grobid,
+            e.formula_hash    = r.formula_hash,
+            e.image_path      = r.image_path,
+            e.image_sha256    = r.image_sha256,
+            e.n_parameters    = r.n_parameters,
+            e.context_text    = r.lead_in
+        WITH e, r
+        MATCH (p:Paper {paper_id: r.paper_id})
+        MERGE (p)-[:HAS_EQUATION]->(e)
+        """
+        self._batch_write("Equation records", cypher, rows)
+
+    def mark_equation_parameters_stale(self, eq_ids: list[str]) -> None:
+        """Before a reload: flag every parameter of these equations stale; the reload
+        clears the flag on the ones it writes again (MERGE/SET only, no DELETE)."""
+        cypher = """
+        UNWIND $rows AS r
+        MATCH (:Equation {eq_id: r.eq_id})-[:HAS_PARAMETER]->(p:Parameter)
+        SET p.stale = true
+        """
+        self._batch_write("Equation parameters marked stale", cypher, [{"eq_id": e} for e in eq_ids])
+
+    def write_equation_parameters(self, rows: list[dict]) -> None:
+        """Equation -[:HAS_PARAMETER]-> Parameter -[:QUANTIFIES]-> Quantity."""
+        cypher = """
+        UNWIND $rows AS r
+        MATCH (e:Equation {eq_id: r.eq_id})
+        MERGE (p:Parameter {param_id: r.param_id})
+        SET p.symbol      = r.symbol,
+            p.symbol_tex  = r.symbol_tex,
+            p.description = r.description,
+            p.unit        = r.unit,
+            p.value       = r.value,
+            p.source      = r.source,
+            p.param_hash  = r.param_hash,
+            p.formula_hash = r.formula_hash,
+            p.paper_id    = r.paper_id,
+            p.stale       = false
+        MERGE (e)-[:HAS_PARAMETER]->(p)
+        WITH p, r
+        WHERE r.quantity IS NOT NULL
+        MERGE (q:Quantity {name: r.quantity})
+        MERGE (p)-[:QUANTIFIES]->(q)
+        """
+        self._batch_write("Equation parameters", cypher, rows)
+
+    def write_equation_concept_edges(self, rows: list[dict]) -> None:
+        """Equation -[:EQUATION_GROUNDS_TO]-> Method and -[:DEFINES_METRIC]-> Metric,
+        each edge carrying the formula hash."""
+        for label, rel in (("Method", "EQUATION_GROUNDS_TO"), ("Metric", "DEFINES_METRIC")):
+            subset = [r for r in rows if r["node_label"] == label]
+            if not subset:
+                continue
+            cypher = f"""
+            UNWIND $rows AS r
+            MATCH (e:Equation {{eq_id: r.eq_id}})
+            MERGE (t:{label} {{canonical_id: r.canonical_id}})
+            MERGE (e)-[rel:{rel}]->(t)
+            SET rel.formula_hash = r.formula_hash, rel.evidence = r.evidence
+            """
+            self._batch_write(f"Equation→{label} {rel}", cypher, subset)
+
     # ── NumericFact writers (Stage 5c) ────────────────────────────────────────
 
     def write_numeric_facts(self, rows: list[dict]) -> None:

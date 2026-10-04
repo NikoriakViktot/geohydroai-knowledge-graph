@@ -40,6 +40,11 @@ for f in glob.glob("data/sodb/*/regions.parquet"):
 print(f"Nougat check: {n} papers with new regions, {empty} with every region empty")
 PY
 
+step "equation records (TEI + Nougat pages → equation_records.parquet, one PNG per equation)"
+find "$RUN/xml_new" -name '*.tei.xml' -printf '%f\n' | sed 's/\.tei\.xml$//' > "$RUN/equation_papers.txt"
+$PY -m src.ingestion.nougat_region_pipeline --equations-only --paper-list "$RUN/equation_papers.txt" \
+  || echo "equation records failed; the pipeline continues"
+
 step "stop the API (one Chroma writer)"
 systemctl --user stop ghai-api
 trap 'systemctl --user start ghai-api; echo "API restarted"' EXIT
@@ -71,4 +76,6 @@ step "Neo4j graph (MERGE, no wipe)"
 $PY -m src.graph.build_graph --uri bolt://localhost:7687 --user neo4j --password "${NEO4J_PASSWORD:-python2024}" --identity postgres
 step "NumericFact loader"
 $PY -m src.graph.table_kg_loader
+step "Equation loader (Equation → Parameter → Quantity; needs the Paper nodes above)"
+$PY -m src.graph.equation_kg_loader --paper-list "$RUN/equation_papers.txt"
 step "done"

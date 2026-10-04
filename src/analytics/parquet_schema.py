@@ -163,6 +163,31 @@ REGIONS_SCHEMA = pa.schema([
     pa.field("formula_parameters", pa.string(),         nullable=True),
 ])
 
+# One row per equation GROBID marks in TEI (src/document/equation_records.py).
+# parameters: JSON list of {symbol, symbol_tex, description, unit, value, source,
+# param_hash, quantity}; source = after | before | after_tei | before_tei |
+# glossary:<nomenclature|nomenclature_table|paper_text>.
+EQUATION_RECORDS_SCHEMA = pa.schema([
+    pa.field("equation_id",     pa.string(),            nullable=False),  # paper_id:xml_id
+    pa.field("paper_id",        pa.string(),            nullable=False),
+    pa.field("xml_id",          pa.string(),            nullable=True),
+    pa.field("equation_number", pa.string(),            nullable=True),
+    pa.field("page",            pa.int32(),             nullable=True),
+    pa.field("bbox",            pa.string(),            nullable=True),   # JSON [x0, y0, x1, y1] pt
+    pa.field("text_grobid",     pa.string(),            nullable=True),
+    pa.field("latex",           pa.string(),            nullable=True),
+    pa.field("latex_source",    pa.string(),            nullable=True),   # nougat_page | None
+    pa.field("formula_hash",    pa.string(),            nullable=False),  # sha256[:16] of canonical LaTeX, or "tei:<…>"
+    pa.field("image_path",      pa.string(),            nullable=True),   # PNG of the equation box, 300 dpi
+    pa.field("image_sha256",    pa.string(),            nullable=True),
+    pa.field("parameters",      pa.string(),            nullable=True),
+    pa.field("n_parameters",    pa.int32(),             nullable=False),
+    pa.field("n_symbols",       pa.int32(),             nullable=False),
+    pa.field("lead_in",         pa.string(),            nullable=True),
+    pa.field("clause",          pa.string(),            nullable=True),
+    pa.field("created_at",      pa.timestamp("ms"),     nullable=False),
+])
+
 FORMULAS_SCHEMA = pa.schema([
     pa.field("formula_id",      pa.string(),            nullable=False),
     pa.field("paper_id",        pa.string(),            nullable=False),
