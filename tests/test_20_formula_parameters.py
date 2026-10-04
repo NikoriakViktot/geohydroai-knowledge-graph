@@ -135,3 +135,14 @@ def test_left_side_derivative_and_plain():
     assert left_side(None, "dS c dt = P -P t -E c ,(2)") == ("S_c", True)
     assert left_side(None, "S c,max = m c • L (4)") == ("S_c,max", False)
     assert left_side(r"\[\sum_i x_i\]", "") == (None, False)
+
+
+def test_unit_written_as_in_suffix_and_remarks_are_not_definitions():
+    from src.document.formula_parameters import describes_quantity
+    p = {x.symbol: x for x in parse_plain_clause("where Y is yield in t/ha and T r is transpiration in mm.",
+                                                  "Y = T r", "after_tei")}
+    assert p["Y"].unit == "t/ha" and p["Y"].description == "yield"
+    assert p["T_r"].unit == "mm"
+    assert not describes_quantity("applied on single altimeter tracks")
+    assert not describes_quantity("immediately available")
+    assert describes_quantity("the mean observed value")

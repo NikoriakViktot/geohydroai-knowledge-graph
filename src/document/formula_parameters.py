@@ -134,8 +134,15 @@ def is_unit(text: str) -> bool:
 _PAREN = re.compile(r"[\(\[]((?:\\\(.*?\\\)|[^()\[\]])*)[\)\]]")
 
 
+_IN_UNIT = re.compile(r"\s+(?:in|expressed in|measured in)\s+(?:units of\s+)?([^\s,;()]+(?:\s[^\s,;()]+){0,2})\s*[.,;]?\s*$")
+
+
 def _unit_and_desc(desc_tex: str) -> tuple[str, str | None]:
-    """Take the first parenthetical that is a unit out of a description."""
+    """Take the unit out of a description: a parenthetical "(mm d^-1)" or a trailing
+    "in t/ha"."""
+    for m in _IN_UNIT.finditer(desc_tex):
+        if is_unit(m.group(1)):
+            return desc_tex[: m.start()].strip(" ,;"), _clean(m.group(1))
     for m in _PAREN.finditer(desc_tex):
         inner = m.group(1).split(";")[0]
         if is_unit(inner):
@@ -368,6 +375,20 @@ def glossary_from_lines(lines: list[str], source: str) -> list[Parameter]:
     return out
 
 
+_NOT_A_QUANTITY = re.compile(
+    r"^(?:applied|used|available|shown|not|also|then|given|calculated|computed|obtained|immediately|"
+    r"very|more|less|most|important|necessary|possible|likely|able|due|based|considered|assumed|"
+    r"known|found|presented|described|discussed|selected|chosen|set|taken|located|"
+    r"[a-z]+ly)\b", re.I)
+
+
+def describes_quantity(description: str) -> bool:
+    """'the mean observed value' is a definition; 'applied on single altimeter tracks'
+    or 'immediately available' is a remark about the symbol, not what it is."""
+    d = re.sub(r"^(?:the|a|an)\s+", "", (description or "").strip(), flags=re.I)
+    return bool(d) and not _NOT_A_QUANTITY.match(d)
+
+
 def merge_glossary(*groups: list[Parameter]) -> dict[str, Parameter]:
     """First definition of a key wins; groups are given in priority order.
 
@@ -379,6 +400,8 @@ def merge_glossary(*groups: list[Parameter]) -> dict[str, Parameter]:
     for grp in groups:
         for p in grp:
             if not p.symbol or not (p.description or p.value):
+                continue
+            if p.source == "paper_text" and p.description and not describes_quantity(p.description):
                 continue
             if not p.source.startswith("nomenclature"):
                 seen.setdefault(p.symbol, set()).add(quantity_name(p.description) or p.value)
