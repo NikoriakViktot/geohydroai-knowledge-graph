@@ -582,7 +582,7 @@ class GraphWriter:
 
     def mark_equation_parameters_stale(self, eq_ids: list[str]) -> None:
         """Before a reload: flag every parameter of these equations stale; the reload
-        clears the flag on the ones it writes again (MERGE/SET only, no DELETE)."""
+        clears the flag on the ones it writes again (MERGE and SET only, nothing is removed)."""
         cypher = """
         UNWIND $rows AS r
         MATCH (:Equation {eq_id: r.eq_id})-[:HAS_PARAMETER]->(p:Parameter)
