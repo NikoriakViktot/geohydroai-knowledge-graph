@@ -7,6 +7,8 @@ equation_kg_loader.py — equation_records.parquet → Neo4j.
     (Parameter)-[:QUANTIFIES]->(Quantity {name})          ← search formulas by quantity
     (Equation)-[:HAS_STRUCTURE]->(FormulaStructure {structural_hash, canonical_expression})
                                                           ← EXACT equivalence (src/document/formula_structure.py)
+    (FormulaStructure)-[:ALGEBRAIC_EQUIVALENT {method, variable, mapping}]->(FormulaStructure)
+                                                          ← src/document/formula_algebra.py
     (Quantity)-[:NORMALIZED_TO {method, score}]->(QuantityConcept {canonical_id, dimension})
                                                           ← quantity ontology (src/ontology/quantities.json)
     (Equation)-[:EQUATION_GROUNDS_TO {formula_hash}]->(Method)
@@ -62,6 +64,16 @@ def _methods_of(row: dict, extractor) -> list[tuple[str, str]]:
         if cid and n.get("match_type") in ("alias", "exact") and n.get("confidence", 0) >= 0.9:
             out.append((cid, (m.get("evidence") or "")[:300]))
     return out
+
+
+def algebraic_rows() -> list[dict]:
+    """ALGEBRAIC verdicts of the current algebra version (empty if it has not been run)."""
+    from src.document.formula_algebra import OUT
+    if not OUT.exists():
+        return []
+    d = pd.read_parquet(OUT)
+    d = d[d["verdict"] == "ALGEBRAIC"]
+    return [{k: (None if isinstance(v, float) and v != v else v) for k, v in r.items()} for r in d.to_dict("records")]
 
 
 def quantity_rows(names: set[str]) -> tuple[list[dict], list[dict]]:
@@ -147,6 +159,9 @@ def load(paper_ids: list[str] | None = None, dry_run: bool = False) -> dict:
         gw.write_equation_parameters(par_rows)
         gw.write_equation_concept_edges(concept_rows)
         gw.write_quantity_concepts(concepts, links)
+        alg = algebraic_rows()
+        gw.write_algebraic_edges(alg)
+    stats["algebraic_edges"] = len(alg)
     return stats
 
 

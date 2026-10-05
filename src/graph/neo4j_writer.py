@@ -647,6 +647,18 @@ class GraphWriter:
         """
         self._batch_write("Equation parameters", cypher, rows)
 
+    def write_algebraic_edges(self, rows: list[dict]) -> None:
+        """(FormulaStructure)-[:ALGEBRAIC_EQUIVALENT {method, variable, mapping, domain}]->(FormulaStructure),
+        from src/document/formula_algebra.py (verdict ALGEBRAIC only)."""
+        self._batch_write("FormulaStructure ALGEBRAIC_EQUIVALENT", """
+        UNWIND $rows AS r
+        MATCH (a:FormulaStructure {structural_hash: r.structural_hash_a})
+        MATCH (b:FormulaStructure {structural_hash: r.structural_hash_b})
+        MERGE (a)-[e:ALGEBRAIC_EQUIVALENT]->(b)
+        SET e.method = r.method, e.variable = r.variable, e.mapping = r.mapping, e.domain = r.domain,
+            e.block = r.block, e.algebra_version = r.algebra_version
+        """, rows)
+
     def write_quantity_concepts(self, concepts: list[dict], links: list[dict]) -> None:
         """QuantityConcept nodes of the quantity ontology, and
         (Quantity {name})-[:NORMALIZED_TO {method, score, qualifiers}]->(QuantityConcept).

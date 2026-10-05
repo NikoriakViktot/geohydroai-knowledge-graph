@@ -42,7 +42,7 @@ import pandas as pd
 log = logging.getLogger("geohydro.document.formula_structure")
 ROOT = Path(__file__).resolve().parents[2]
 SODB = Path(os.getenv("SODB_DIR", str(ROOT / "data" / "sodb")))
-PARSER_VERSION = "struct5"
+PARSER_VERSION = "struct6"
 CACHE = ROOT / "data" / "equations" / f"structure_{PARSER_VERSION}.parquet"
 MAX_LEN = 1200
 
@@ -77,6 +77,8 @@ class Structure:
     symbols: list[str] = field(default_factory=list)
     n_ops: int | None = None
     error: str | None = None
+    kind: str | None = None          # equation | chain | relation | expression
+    srepr: str | None = None         # the canonical tree, for phase 3 (sympy.parse_expr(srepr, …))
 
 
 def _sha16(s: str) -> str:
@@ -296,8 +298,11 @@ def structure(latex: str | None, *, timeout: int = 5) -> Structure:
                         len(can.free_symbols) < 2 or sp.count_ops(can) == 0):
                     return Structure("trivial", sp.sstr(can))
                 key, text = sp.srepr(can), sp.sstr(can)
+            kind = ("chain" if key.startswith("chain:") else "equation" if isinstance(can, sp.Equality)
+                    else "relation" if isinstance(can, sp.core.relational.Relational) else "expression")
             out = Structure("ok", text, _sha16(key), sp.sstr(lhs) if lhs is not None else None,
-                            sorted({_norm_name(x.name) for x in can.free_symbols}), int(sp.count_ops(can)))
+                            sorted({_norm_name(x.name) for x in can.free_symbols}), int(sp.count_ops(can)),
+                            kind=kind, srepr=sp.srepr(can))
     except TimeoutError:
         return Structure("timeout")
     except Exception as exc:                                     # the grammar rejects it
