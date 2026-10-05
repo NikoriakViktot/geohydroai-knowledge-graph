@@ -42,7 +42,7 @@ import pandas as pd
 log = logging.getLogger("geohydro.document.formula_structure")
 ROOT = Path(__file__).resolve().parents[2]
 SODB = Path(os.getenv("SODB_DIR", str(ROOT / "data" / "sodb")))
-PARSER_VERSION = "struct6"
+PARSER_VERSION = "struct8"
 CACHE = ROOT / "data" / "equations" / f"structure_{PARSER_VERSION}.parquet"
 MAX_LEN = 1200
 
@@ -236,6 +236,25 @@ def _norm_name(name: str) -> str:
     return re.sub(r"[{}\s]", "", name)
 
 
+def _unnest_sums(expr):
+    """\\sum_i a \\sum_i b parses as Σ_i (a · Σ_i b) — a sum nested in a sum over the same index,
+    which nobody writes on purpose. It means (Σ_i a)(Σ_i b)."""
+    import sympy as sp
+
+    def fix(e):
+        if isinstance(e, sp.Sum) and len(e.limits) == 1 and isinstance(e.function, sp.Mul):
+            idx = e.limits[0][0]
+            inner = [f for f in e.function.args if isinstance(f, sp.Sum) and f.limits[0][0] == idx]
+            if inner:
+                rest = sp.Mul(*[f for f in e.function.args if f not in inner])
+                return sp.Mul(sp.Sum(fix(rest), e.limits[0]), *[fix(f) for f in inner])
+        if isinstance(e, sp.Basic) and e.args:
+            return e.func(*[fix(a) for a in e.args])
+        return e
+
+    return fix(expr) if expr.has(sp.Sum) else expr
+
+
 def canonical(expr):
     """Exact numbers, normalised symbol names, e → E, pi → π; sides of an equation sorted."""
     import sympy as sp
@@ -244,6 +263,13 @@ def canonical(expr):
         n = _norm_name(sym.name)
         rep[sym] = sp.E if n == "e" else sp.pi if n == "pi" else sp.Symbol(n)
     expr = expr.xreplace(rep)
+    # function names carry the same escapes and braces: q_{tilqxDxqe}(i, j) → q_tilde(i, j)
+    from sympy.core.function import AppliedUndef
+    funcs = {f: sp.Function(_norm_name(f.func.__name__))(*f.args) for f in expr.atoms(AppliedUndef)
+             if _norm_name(f.func.__name__) != f.func.__name__}
+    if funcs:
+        expr = expr.xreplace(funcs)
+    expr = _unnest_sums(expr)
     floats = {f: sp.Rational(str(f)) for f in expr.atoms(sp.Float)}
     if floats:
         expr = expr.xreplace(floats)

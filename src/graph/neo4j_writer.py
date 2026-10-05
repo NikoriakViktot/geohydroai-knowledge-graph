@@ -647,6 +647,16 @@ class GraphWriter:
         """
         self._batch_write("Equation parameters", cypher, rows)
 
+    def write_structure_code(self, rows: list[dict]) -> None:
+        """Python and Julia code on FormulaStructure (src/document/formula_code.py)."""
+        self._batch_write("FormulaStructure code", """
+        UNWIND $rows AS r
+        MATCH (s:FormulaStructure {structural_hash: r.structural_hash})
+        SET s.code_status = r.status, s.code_form = r.form, s.code_target = r.target,
+            s.code_args = r.args, s.code_python = r.python, s.code_julia = r.julia,
+            s.code_check = r.check, s.codegen_version = r.codegen_version
+        """, rows)
+
     def write_algebraic_edges(self, rows: list[dict]) -> None:
         """(FormulaStructure)-[:ALGEBRAIC_EQUIVALENT {method, variable, mapping, domain}]->(FormulaStructure),
         from src/document/formula_algebra.py (verdict ALGEBRAIC only)."""

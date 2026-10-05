@@ -7,6 +7,7 @@ equation_kg_loader.py — equation_records.parquet → Neo4j.
     (Parameter)-[:QUANTIFIES]->(Quantity {name})          ← search formulas by quantity
     (Equation)-[:HAS_STRUCTURE]->(FormulaStructure {structural_hash, canonical_expression})
                                                           ← EXACT equivalence (src/document/formula_structure.py)
+    FormulaStructure.code_python / code_julia / code_check   ← src/document/formula_code.py
     (FormulaStructure)-[:ALGEBRAIC_EQUIVALENT {method, variable, mapping}]->(FormulaStructure)
                                                           ← src/document/formula_algebra.py
     (Quantity)-[:NORMALIZED_TO {method, score}]->(QuantityConcept {canonical_id, dimension})
@@ -64,6 +65,16 @@ def _methods_of(row: dict, extractor) -> list[tuple[str, str]]:
         if cid and n.get("match_type") in ("alias", "exact") and n.get("confidence", 0) >= 0.9:
             out.append((cid, (m.get("evidence") or "")[:300]))
     return out
+
+
+def _rows_of(module: str) -> list[dict]:
+    """Rows of a module's versioned OUT parquet (empty if it has not been built)."""
+    import importlib
+    out = importlib.import_module(module).OUT
+    if not out.exists():
+        return []
+    d = pd.read_parquet(out)
+    return [{k: (None if isinstance(v, float) and v != v else v) for k, v in r.items()} for r in d.to_dict("records")]
 
 
 def algebraic_rows() -> list[dict]:
@@ -161,7 +172,10 @@ def load(paper_ids: list[str] | None = None, dry_run: bool = False) -> dict:
         gw.write_quantity_concepts(concepts, links)
         alg = algebraic_rows()
         gw.write_algebraic_edges(alg)
+        code = _rows_of("src.document.formula_code")
+        gw.write_structure_code(code)
     stats["algebraic_edges"] = len(alg)
+    stats["structures_with_code"] = len(code)
     return stats
 
 
