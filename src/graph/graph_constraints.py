@@ -31,12 +31,14 @@ CONSTRAINTS: list[str] = [
     "CREATE CONSTRAINT numeric_fact_id  IF NOT EXISTS FOR (n:NumericFact)      REQUIRE n.fact_id  IS UNIQUE",
     "CREATE CONSTRAINT parameter_id     IF NOT EXISTS FOR (n:Parameter)   REQUIRE n.param_id       IS UNIQUE",
     "CREATE CONSTRAINT quantity_name    IF NOT EXISTS FOR (n:Quantity)    REQUIRE n.name           IS UNIQUE",
+    "CREATE CONSTRAINT quantity_concept IF NOT EXISTS FOR (n:QuantityConcept) REQUIRE n.canonical_id IS UNIQUE",
 ]
 
 # ── Range indexes (for property lookups and ORDER BY) ─────────────────────────
 
 INDEXES: list[str] = [
     "CREATE INDEX paper_year        IF NOT EXISTS FOR (n:Paper)   ON (n.year)",
+    "CREATE INDEX parameter_quantity_id IF NOT EXISTS FOR (n:Parameter) ON (n.quantity_id)",
     # Title-only CITES stubs MERGE on title; without a range index each row scans
     # every Paper node (the full-text index below is not used by MERGE).
     "CREATE INDEX paper_title       IF NOT EXISTS FOR (n:Paper)   ON (n.title)",

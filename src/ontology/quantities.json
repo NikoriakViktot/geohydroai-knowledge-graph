@@ -1,0 +1,2500 @@
+{
+ "version": "quantities-v0.3",
+ "description": "Physical and statistical quantities with dimensions (L,M,T,Θ); seed for normalisation of equation parameters. Reviewed through the gold set.",
+ "quantities": [
+  {
+   "id": "quantity.length",
+   "label": "length",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "distance",
+    "reach length",
+    "channel length",
+    "flow length",
+    "length of the reach",
+    "longest flow path"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.width",
+   "label": "width",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "channel width",
+    "river width",
+    "top width",
+    "surface width",
+    "bottom width",
+    "flow width"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.water_depth",
+   "label": "water depth",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "flow depth",
+    "depth",
+    "depth of water",
+    "hydraulic depth",
+    "inundation depth",
+    "flood depth",
+    "depth of flow",
+    "normal depth",
+    "critical depth"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.water_level",
+   "label": "water level",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "water surface elevation",
+    "stage",
+    "water stage",
+    "river stage",
+    "gauge height",
+    "water elevation",
+    "surface elevation",
+    "free surface elevation"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.elevation",
+   "label": "elevation",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "ground elevation",
+    "bed elevation",
+    "bottom elevation",
+    "terrain elevation",
+    "altitude",
+    "height above sea level",
+    "bed level"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.height",
+   "label": "height",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "vegetation height",
+    "plant height",
+    "canopy height",
+    "wave height",
+    "obstacle height"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.area",
+   "label": "area",
+   "dimension": {
+    "L": "2"
+   },
+   "dimension_text": "L2",
+   "typical_unit": "m2",
+   "aliases": [
+    "cross-sectional area",
+    "flow area",
+    "wetted area",
+    "surface area",
+    "catchment area",
+    "drainage area",
+    "basin area",
+    "watershed area"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.volume",
+   "label": "volume",
+   "dimension": {
+    "L": "3"
+   },
+   "dimension_text": "L3",
+   "typical_unit": "m3",
+   "aliases": [
+    "storage",
+    "water volume",
+    "reservoir storage",
+    "storage volume",
+    "volume of water"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical",
+   "alt_dimensions": [
+    {
+     "dimension": {
+      "L": "1"
+     },
+     "dimension_text": "L"
+    }
+   ]
+  },
+  {
+   "id": "quantity.hydraulic_radius",
+   "label": "hydraulic radius",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "hydraulic mean depth"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.wetted_perimeter",
+   "label": "wetted perimeter",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "perimeter"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.slope",
+   "label": "slope",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "m/m",
+   "aliases": [
+    "bed slope",
+    "channel slope",
+    "friction slope",
+    "energy slope",
+    "water surface slope",
+    "hydraulic gradient",
+    "bottom slope",
+    "gradient",
+    "energy gradient"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.diameter",
+   "label": "diameter",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "grain size",
+    "particle diameter",
+    "median grain size",
+    "sediment diameter",
+    "pipe diameter"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.roughness_height",
+   "label": "roughness height",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "equivalent sand roughness",
+    "nikuradse roughness",
+    "roughness length",
+    "sand-grain roughness"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.discharge",
+   "label": "discharge",
+   "dimension": {
+    "L": "3",
+    "T": "-1"
+   },
+   "dimension_text": "L3 T-1",
+   "typical_unit": "m3 s-1",
+   "aliases": [
+    "flow",
+    "flow rate",
+    "streamflow",
+    "runoff rate",
+    "volumetric flow rate",
+    "river discharge",
+    "inflow",
+    "outflow",
+    "flow discharge",
+    "peak discharge",
+    "peak flow",
+    "base flow",
+    "baseflow",
+    "lateral inflow"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical",
+   "alt_dimensions": [
+    {
+     "dimension": {
+      "L": "2",
+      "T": "-1"
+     },
+     "dimension_text": "L2 T-1"
+    },
+    {
+     "dimension": {
+      "L": "1",
+      "T": "-1"
+     },
+     "dimension_text": "L T-1"
+    }
+   ]
+  },
+  {
+   "id": "quantity.unit_discharge",
+   "label": "unit discharge",
+   "dimension": {
+    "L": "2",
+    "T": "-1"
+   },
+   "dimension_text": "L2 T-1",
+   "typical_unit": "m2 s-1",
+   "aliases": [
+    "discharge per unit width",
+    "specific discharge per unit width",
+    "unit width discharge"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.velocity",
+   "label": "velocity",
+   "dimension": {
+    "L": "1",
+    "T": "-1"
+   },
+   "dimension_text": "L T-1",
+   "typical_unit": "m s-1",
+   "aliases": [
+    "flow velocity",
+    "mean velocity",
+    "depth-averaged velocity",
+    "velocity component",
+    "shear velocity",
+    "friction velocity",
+    "wave celerity",
+    "celerity",
+    "speed",
+    "wind speed",
+    "velocity vector",
+    "flow velocity vector"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.acceleration",
+   "label": "acceleration",
+   "dimension": {
+    "L": "1",
+    "T": "-2"
+   },
+   "dimension_text": "L T-2",
+   "typical_unit": "m s-2",
+   "aliases": [],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.gravitational_acceleration",
+   "label": "gravitational acceleration",
+   "dimension": {
+    "L": "1",
+    "T": "-2"
+   },
+   "dimension_text": "L T-2",
+   "typical_unit": "m s-2",
+   "aliases": [
+    "acceleration due to gravity",
+    "acceleration of gravity",
+    "gravity acceleration",
+    "gravity"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.manning_n",
+   "label": "manning roughness coefficient",
+   "dimension": {
+    "T": "1",
+    "L": "-1/3"
+   },
+   "dimension_text": "T L-1/3",
+   "typical_unit": "s m-1/3",
+   "aliases": [
+    "manning coefficient",
+    "manning's n",
+    "manning roughness",
+    "manning's roughness",
+    "roughness coefficient",
+    "manning's coefficient",
+    "manning friction coefficient",
+    "manning resistance coefficient"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.chezy_c",
+   "label": "chezy coefficient",
+   "dimension": {
+    "L": "1/2",
+    "T": "-1"
+   },
+   "dimension_text": "L1/2 T-1",
+   "typical_unit": "m1/2 s-1",
+   "aliases": [
+    "chézy coefficient",
+    "chezy roughness coefficient",
+    "chezy's coefficient"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.darcy_f",
+   "label": "darcy-weisbach friction factor",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "friction factor",
+    "darcy friction factor",
+    "darcy-weisbach coefficient",
+    "friction coefficient",
+    "bed friction coefficient"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.drag_coefficient",
+   "label": "drag coefficient",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "bulk drag coefficient"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.froude_number",
+   "label": "froude number",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.reynolds_number",
+   "label": "reynolds number",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.shear_stress",
+   "label": "shear stress",
+   "dimension": {
+    "M": "1",
+    "L": "-1",
+    "T": "-2"
+   },
+   "dimension_text": "M L-1 T-2",
+   "typical_unit": "Pa",
+   "aliases": [
+    "bed shear stress",
+    "boundary shear stress",
+    "critical shear stress",
+    "wall shear stress"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.pressure",
+   "label": "pressure",
+   "dimension": {
+    "M": "1",
+    "L": "-1",
+    "T": "-2"
+   },
+   "dimension_text": "M L-1 T-2",
+   "typical_unit": "Pa",
+   "aliases": [
+    "atmospheric pressure",
+    "hydrostatic pressure",
+    "vapour pressure",
+    "vapor pressure",
+    "saturation vapour pressure",
+    "actual vapour pressure"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.density",
+   "label": "density",
+   "dimension": {
+    "M": "1",
+    "L": "-3"
+   },
+   "dimension_text": "M L-3",
+   "typical_unit": "kg m-3",
+   "aliases": [
+    "water density",
+    "density of water",
+    "fluid density",
+    "air density",
+    "sediment density",
+    "bulk density",
+    "density of air"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.kinematic_viscosity",
+   "label": "kinematic viscosity",
+   "dimension": {
+    "L": "2",
+    "T": "-1"
+   },
+   "dimension_text": "L2 T-1",
+   "typical_unit": "m2 s-1",
+   "aliases": [
+    "viscosity",
+    "eddy viscosity",
+    "turbulent viscosity"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.diffusivity",
+   "label": "diffusion coefficient",
+   "dimension": {
+    "L": "2",
+    "T": "-1"
+   },
+   "dimension_text": "L2 T-1",
+   "typical_unit": "m2 s-1",
+   "aliases": [
+    "diffusivity",
+    "dispersion coefficient",
+    "longitudinal dispersion coefficient",
+    "hydraulic diffusivity",
+    "diffusion coefficient"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.force",
+   "label": "force",
+   "dimension": {
+    "M": "1",
+    "L": "1",
+    "T": "-2"
+   },
+   "dimension_text": "M L T-2",
+   "typical_unit": "N",
+   "aliases": [
+    "drag force"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.momentum_coefficient",
+   "label": "momentum correction coefficient",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "boussinesq coefficient",
+    "energy coefficient",
+    "coriolis coefficient"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.weighting_coefficient",
+   "label": "weighting coefficient",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "preissmann weighting coefficient",
+    "weighting factor",
+    "muskingum weighting factor"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "model"
+  },
+  {
+   "id": "quantity.muskingum_k",
+   "label": "muskingum storage constant",
+   "dimension": {
+    "T": "1"
+   },
+   "dimension_text": "T",
+   "typical_unit": "h",
+   "aliases": [
+    "storage constant",
+    "travel time constant",
+    "wave travel time",
+    "muskingum k"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.precipitation",
+   "label": "precipitation",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "mm",
+   "aliases": [
+    "rainfall",
+    "rainfall depth",
+    "precipitation depth",
+    "total precipitation",
+    "daily precipitation",
+    "effective precipitation",
+    "net rainfall",
+    "excess rainfall",
+    "snowfall",
+    "throughfall"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical",
+   "alt_dimensions": [
+    {
+     "dimension": {
+      "L": "1",
+      "T": "-1"
+     },
+     "dimension_text": "L T-1"
+    }
+   ]
+  },
+  {
+   "id": "quantity.rainfall_intensity",
+   "label": "rainfall intensity",
+   "dimension": {
+    "L": "1",
+    "T": "-1"
+   },
+   "dimension_text": "L T-1",
+   "typical_unit": "mm h-1",
+   "aliases": [
+    "precipitation intensity",
+    "rain rate",
+    "intensity",
+    "precipitation rate",
+    "rainfall rate"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.runoff_depth",
+   "label": "runoff depth",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "mm",
+   "aliases": [
+    "direct runoff",
+    "runoff",
+    "surface runoff",
+    "excess runoff",
+    "effective rainfall",
+    "rainfall excess",
+    "quick flow"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical",
+   "alt_dimensions": [
+    {
+     "dimension": {
+      "L": "1",
+      "T": "-1"
+     },
+     "dimension_text": "L T-1"
+    },
+    {
+     "dimension": {
+      "M": "1",
+      "L": "-2",
+      "T": "-1"
+     },
+     "dimension_text": "M L-2 T-1"
+    }
+   ]
+  },
+  {
+   "id": "quantity.evapotranspiration",
+   "label": "evapotranspiration",
+   "dimension": {
+    "L": "1",
+    "T": "-1"
+   },
+   "dimension_text": "L T-1",
+   "typical_unit": "mm d-1",
+   "aliases": [
+    "potential evapotranspiration",
+    "actual evapotranspiration",
+    "reference evapotranspiration",
+    "evaporation",
+    "transpiration",
+    "evaporation rate",
+    "pet",
+    "aet"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical",
+   "alt_dimensions": [
+    {
+     "dimension": {
+      "L": "1"
+     },
+     "dimension_text": "L"
+    }
+   ]
+  },
+  {
+   "id": "quantity.infiltration_rate",
+   "label": "infiltration rate",
+   "dimension": {
+    "L": "1",
+    "T": "-1"
+   },
+   "dimension_text": "L T-1",
+   "typical_unit": "mm h-1",
+   "aliases": [
+    "infiltration capacity",
+    "infiltration"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical",
+   "alt_dimensions": [
+    {
+     "dimension": {
+      "L": "1"
+     },
+     "dimension_text": "L"
+    },
+    {
+     "dimension": {
+      "M": "1",
+      "L": "-2",
+      "T": "-1"
+     },
+     "dimension_text": "M L-2 T-1"
+    }
+   ]
+  },
+  {
+   "id": "quantity.cumulative_infiltration",
+   "label": "cumulative infiltration",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "mm",
+   "aliases": [
+    "infiltration depth",
+    "cumulative infiltration depth",
+    "infiltrated depth",
+    "cumulative infiltration volume"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.hydraulic_conductivity",
+   "label": "hydraulic conductivity",
+   "dimension": {
+    "L": "1",
+    "T": "-1"
+   },
+   "dimension_text": "L T-1",
+   "typical_unit": "m s-1",
+   "aliases": [
+    "saturated hydraulic conductivity",
+    "permeability coefficient",
+    "conductivity"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.soil_moisture",
+   "label": "soil moisture content",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "m3 m-3",
+   "aliases": [
+    "soil water content",
+    "volumetric water content",
+    "moisture content",
+    "water content",
+    "soil moisture",
+    "residual water content",
+    "saturated water content",
+    "field capacity",
+    "wilting point"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical",
+   "alt_dimensions": [
+    {
+     "dimension": {
+      "L": "1"
+     },
+     "dimension_text": "L"
+    },
+    {
+     "dimension": {
+      "M": "1",
+      "L": "-2"
+     },
+     "dimension_text": "M L-2"
+    }
+   ]
+  },
+  {
+   "id": "quantity.soil_water_storage",
+   "label": "soil water storage",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "mm",
+   "aliases": [
+    "soil storage",
+    "soil water",
+    "available water capacity"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical",
+   "alt_dimensions": [
+    {
+     "dimension": {},
+     "dimension_text": "1"
+    }
+   ]
+  },
+  {
+   "id": "quantity.suction_head",
+   "label": "suction head",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "wetting front suction head",
+    "matric potential",
+    "pressure head",
+    "capillary head",
+    "soil suction"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.potential_retention",
+   "label": "potential maximum retention",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "mm",
+   "aliases": [
+    "maximum retention",
+    "maximum potential retention",
+    "retention parameter",
+    "potential maximum soil moisture retention"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.initial_abstraction",
+   "label": "initial abstraction",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "mm",
+   "aliases": [
+    "initial loss"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.curve_number",
+   "label": "curve number",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "scs curve number",
+    "cn"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "model"
+  },
+  {
+   "id": "quantity.runoff_coefficient",
+   "label": "runoff coefficient",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "rational runoff coefficient"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "model"
+  },
+  {
+   "id": "quantity.recharge",
+   "label": "groundwater recharge",
+   "dimension": {
+    "L": "1",
+    "T": "-1"
+   },
+   "dimension_text": "L T-1",
+   "typical_unit": "mm d-1",
+   "aliases": [
+    "recharge",
+    "recharge rate",
+    "percolation"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.hydraulic_head",
+   "label": "hydraulic head",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "head",
+    "piezometric head",
+    "groundwater level",
+    "water table",
+    "water table depth",
+    "groundwater head"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.transmissivity",
+   "label": "transmissivity",
+   "dimension": {
+    "L": "2",
+    "T": "-1"
+   },
+   "dimension_text": "L2 T-1",
+   "typical_unit": "m2 s-1",
+   "aliases": [],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.storativity",
+   "label": "storage coefficient",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "storativity",
+    "specific yield"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.time_of_concentration",
+   "label": "time of concentration",
+   "dimension": {
+    "T": "1"
+   },
+   "dimension_text": "T",
+   "typical_unit": "h",
+   "aliases": [
+    "concentration time",
+    "lag time",
+    "time to peak",
+    "basin lag",
+    "response time",
+    "travel time"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.snow_water_equivalent",
+   "label": "snow water equivalent",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "mm",
+   "aliases": [
+    "swe",
+    "snow storage",
+    "snowmelt",
+    "melt rate"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical",
+   "alt_dimensions": [
+    {
+     "dimension": {
+      "L": "1",
+      "T": "-1"
+     },
+     "dimension_text": "L T-1"
+    },
+    {
+     "dimension": {
+      "M": "1",
+      "L": "-2",
+      "T": "-1"
+     },
+     "dimension_text": "M L-2 T-1"
+    }
+   ]
+  },
+  {
+   "id": "quantity.degree_day_factor",
+   "label": "degree-day factor",
+   "dimension": {
+    "L": "1",
+    "T": "-1",
+    "Θ": "-1"
+   },
+   "dimension_text": "L T-1 Θ-1",
+   "typical_unit": "mm d-1 °C-1",
+   "aliases": [
+    "melt factor",
+    "degree day factor"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.sediment_load",
+   "label": "sediment transport rate",
+   "dimension": {
+    "M": "1",
+    "T": "-1"
+   },
+   "dimension_text": "M T-1",
+   "typical_unit": "kg s-1",
+   "aliases": [
+    "sediment load",
+    "sediment discharge",
+    "bed load",
+    "suspended load",
+    "sediment flux",
+    "sediment yield"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.concentration",
+   "label": "concentration",
+   "dimension": {
+    "M": "1",
+    "L": "-3"
+   },
+   "dimension_text": "M L-3",
+   "typical_unit": "kg m-3",
+   "aliases": [
+    "sediment concentration",
+    "suspended sediment concentration",
+    "solute concentration"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.return_period",
+   "label": "return period",
+   "dimension": {
+    "T": "1"
+   },
+   "dimension_text": "T",
+   "typical_unit": "yr",
+   "aliases": [
+    "recurrence interval"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.catchment_slope",
+   "label": "catchment slope",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "m/m",
+   "aliases": [
+    "basin slope",
+    "watershed slope",
+    "average slope"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.temperature",
+   "label": "temperature",
+   "dimension": {
+    "Θ": "1"
+   },
+   "dimension_text": "Θ",
+   "typical_unit": "°C",
+   "aliases": [
+    "air temperature",
+    "temperature",
+    "mean air temperature",
+    "daily temperature",
+    "water temperature",
+    "surface temperature",
+    "dew point temperature",
+    "freezing temperature",
+    "threshold temperature"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.net_radiation",
+   "label": "net radiation",
+   "dimension": {
+    "M": "1",
+    "T": "-3"
+   },
+   "dimension_text": "M T-3",
+   "typical_unit": "W m-2",
+   "aliases": [
+    "solar radiation",
+    "shortwave radiation",
+    "longwave radiation",
+    "incoming radiation",
+    "global radiation",
+    "radiation",
+    "net radiation flux",
+    "radiation flux"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical",
+   "alt_dimensions": [
+    {
+     "dimension": {
+      "L": "1",
+      "T": "-1"
+     },
+     "dimension_text": "L T-1"
+    }
+   ]
+  },
+  {
+   "id": "quantity.heat_flux",
+   "label": "heat flux",
+   "dimension": {
+    "M": "1",
+    "T": "-3"
+   },
+   "dimension_text": "M T-3",
+   "typical_unit": "W m-2",
+   "aliases": [
+    "soil heat flux",
+    "sensible heat flux",
+    "latent heat flux",
+    "ground heat flux"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.latent_heat",
+   "label": "latent heat of vaporization",
+   "dimension": {
+    "L": "2",
+    "T": "-2"
+   },
+   "dimension_text": "L2 T-2",
+   "typical_unit": "J kg-1",
+   "aliases": [
+    "latent heat",
+    "latent heat of vaporisation",
+    "latent heat of fusion"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.specific_heat",
+   "label": "specific heat",
+   "dimension": {
+    "L": "2",
+    "T": "-2",
+    "Θ": "-1"
+   },
+   "dimension_text": "L2 T-2 Θ-1",
+   "typical_unit": "J kg-1 K-1",
+   "aliases": [
+    "specific heat capacity",
+    "heat capacity"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.psychrometric_constant",
+   "label": "psychrometric constant",
+   "dimension": {
+    "M": "1",
+    "L": "-1",
+    "T": "-2",
+    "Θ": "-1"
+   },
+   "dimension_text": "M L-1 T-2 Θ-1",
+   "typical_unit": "kPa °C-1",
+   "aliases": [
+    "psychometric constant"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.vapour_pressure_slope",
+   "label": "slope of the saturation vapour pressure curve",
+   "dimension": {
+    "M": "1",
+    "L": "-1",
+    "T": "-2",
+    "Θ": "-1"
+   },
+   "dimension_text": "M L-1 T-2 Θ-1",
+   "typical_unit": "kPa °C-1",
+   "aliases": [
+    "slope of saturation vapour pressure curve",
+    "slope of the vapour pressure curve",
+    "slope of the saturation vapor pressure-temperature relationship",
+    "slope of the saturation vapour pressure function",
+    "slope of the saturation vapor pressure curve",
+    "slope of vapour pressure curve",
+    "slope of saturation vapor pressure curve",
+    "slope of the saturation vapor pressure function",
+    "slope of the saturation vapour pressure versus temperature curve"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.relative_humidity",
+   "label": "relative humidity",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "%",
+   "aliases": [
+    "humidity"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.albedo",
+   "label": "albedo",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "surface albedo"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.leaf_area_index",
+   "label": "leaf area index",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "m2 m-2",
+   "aliases": [
+    "lai",
+    "one-side leaf area index"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.aerodynamic_resistance",
+   "label": "aerodynamic resistance",
+   "dimension": {
+    "T": "1",
+    "L": "-1"
+   },
+   "dimension_text": "T L-1",
+   "typical_unit": "s m-1",
+   "aliases": [
+    "surface resistance",
+    "canopy resistance",
+    "stomatal resistance"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.time",
+   "label": "time",
+   "dimension": {
+    "T": "1"
+   },
+   "dimension_text": "T",
+   "typical_unit": "s",
+   "aliases": [
+    "time step",
+    "duration",
+    "time interval",
+    "computational time step",
+    "period",
+    "rainfall duration",
+    "storm duration",
+    "time lag"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.frequency",
+   "label": "frequency",
+   "dimension": {
+    "T": "-1"
+   },
+   "dimension_text": "T-1",
+   "typical_unit": "Hz",
+   "aliases": [],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.backscatter",
+   "label": "backscatter coefficient",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "dB",
+   "aliases": [
+    "backscattering coefficient",
+    "sigma nought",
+    "radar backscatter"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.reflectance",
+   "label": "reflectance",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "surface reflectance",
+    "spectral reflectance",
+    "band reflectance"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.wavelength",
+   "label": "wavelength",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.incidence_angle",
+   "label": "incidence angle",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "rad",
+   "aliases": [
+    "look angle",
+    "zenith angle",
+    "solar zenith angle",
+    "azimuth",
+    "azimuth angle"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.pixel_size",
+   "label": "spatial resolution",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "aliases": [
+    "pixel size",
+    "grid size",
+    "cell size",
+    "grid spacing",
+    "spatial step",
+    "mesh size"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "physical"
+  },
+  {
+   "id": "quantity.sample_size",
+   "label": "number of observations",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "sample size",
+    "number of samples",
+    "number of data points",
+    "total number of observations",
+    "number of data",
+    "number of years",
+    "number of events",
+    "number of time steps",
+    "number of stations",
+    "number of points"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.mean",
+   "label": "mean",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "aliases": [
+    "mean value",
+    "average",
+    "arithmetic mean",
+    "sample mean",
+    "mean of observations",
+    "mean observed value"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.standard_deviation",
+   "label": "standard deviation",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "aliases": [
+    "sd",
+    "sample standard deviation"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.variance",
+   "label": "variance",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "aliases": [
+    "sample variance"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.correlation_coefficient",
+   "label": "correlation coefficient",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "pearson correlation coefficient",
+    "linear correlation coefficient",
+    "coefficient of correlation"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.probability",
+   "label": "probability",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "exceedance probability",
+    "non-exceedance probability",
+    "probability of exceedance",
+    "cumulative probability",
+    "probability of occurrence"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.location_parameter",
+   "label": "location parameter",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "aliases": [
+    "location"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.scale_parameter",
+   "label": "scale parameter",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "aliases": [
+    "scale"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.shape_parameter",
+   "label": "shape parameter",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "aliases": [
+    "shape",
+    "shape parameters"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.significance_level",
+   "label": "significance level",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "confidence level",
+    "level of significance",
+    "alpha level"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.observed_value",
+   "label": "observed value",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "aliases": [
+    "observation",
+    "observed",
+    "observed data",
+    "measured value",
+    "observations",
+    "observed values"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.simulated_value",
+   "label": "simulated value",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "aliases": [
+    "simulated",
+    "predicted value",
+    "modelled value",
+    "model output",
+    "forecast",
+    "estimated value",
+    "computed value"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.weight",
+   "label": "weight",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [
+    "weights",
+    "connection weight",
+    "synaptic weight"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "model"
+  },
+  {
+   "id": "quantity.bias_term",
+   "label": "bias",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "aliases": [
+    "bias term"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "model"
+  },
+  {
+   "id": "quantity.learning_rate",
+   "label": "learning rate",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "aliases": [],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "model"
+  },
+  {
+   "id": "quantity.regression_coefficient",
+   "label": "regression coefficient",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "aliases": [
+    "coefficients",
+    "model parameters",
+    "empirical coefficient",
+    "empirical coefficients",
+    "empirical constant",
+    "calibration parameter"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "model"
+  },
+  {
+   "id": "quantity.error",
+   "label": "error",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "aliases": [
+    "residual",
+    "residuals",
+    "error term",
+    "random error",
+    "noise"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05",
+   "kind": "statistical"
+  },
+  {
+   "id": "quantity.von_karman_constant",
+   "label": "von karman constant",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "physical",
+   "aliases": [
+    "von kármán constant",
+    "karman constant",
+    "von karman's constant"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.erosivity_factor",
+   "label": "rainfall erosivity factor",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "model",
+   "aliases": [
+    "rainfall-runoff erosivity factor",
+    "erosivity factor",
+    "r factor",
+    "rainfall erosivity"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.soil_erodibility",
+   "label": "soil erodibility factor",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "model",
+   "aliases": [
+    "erodibility factor",
+    "k factor",
+    "soil erodibility"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.cover_factor",
+   "label": "cover management factor",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "model",
+   "aliases": [
+    "c factor",
+    "crop management factor",
+    "cover factor"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.volume_fraction",
+   "label": "volume fraction",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "physical",
+   "aliases": [
+    "volume fraction of the vegetation",
+    "solid volume fraction",
+    "frontal area per unit volume"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.porosity",
+   "label": "porosity",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "physical",
+   "aliases": [
+    "void ratio",
+    "total porosity",
+    "soil porosity",
+    "effective porosity",
+    "soil total porosity"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.frequency_factor",
+   "label": "frequency factor",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "statistical",
+   "aliases": [
+    "frequency factor for return period"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.consistency_index",
+   "label": "consistency index",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "statistical",
+   "aliases": [
+    "consistency ratio",
+    "random index",
+    "random consistency index"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.cdf",
+   "label": "cumulative distribution function",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "statistical",
+   "aliases": [
+    "cdf",
+    "distribution function",
+    "cumulative probability distribution"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.pdf",
+   "label": "probability density function",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "statistical",
+   "aliases": [
+    "pdf",
+    "density function",
+    "probability density"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.confusion_count",
+   "label": "confusion matrix count",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "statistical",
+   "aliases": [
+    "true positive",
+    "true negative",
+    "false positive",
+    "false negative",
+    "true positives",
+    "false positives",
+    "true negatives",
+    "false negatives",
+    "number of correctly classified pixels"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.number_of_classes",
+   "label": "count of items (classes, clusters, variables)",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "statistical",
+   "aliases": [
+    "number of classes",
+    "number of clusters",
+    "number of categories",
+    "number of bins",
+    "number of hidden neurons",
+    "number of neurons",
+    "number of hidden nodes",
+    "number of layers",
+    "number of variables",
+    "number of inputs",
+    "number of features"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.degrees_of_freedom",
+   "label": "degrees of freedom",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "statistical",
+   "aliases": [],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.percentile",
+   "label": "percentile",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "statistical",
+   "aliases": [
+    "quantile",
+    "exceedance percentile"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.skewness",
+   "label": "skewness coefficient",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "statistical",
+   "aliases": [
+    "coefficient of skewness",
+    "skewness",
+    "skew coefficient"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.coefficient_of_variation",
+   "label": "coefficient of variation",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "statistical",
+   "aliases": [
+    "cv"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.l_moment",
+   "label": "l-moment",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "statistical",
+   "aliases": [
+    "l moments",
+    "lh-moments",
+    "probability weighted moments",
+    "l-moments"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.lagrange_multiplier",
+   "label": "lagrange multiplier",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "mathematical",
+   "aliases": [
+    "lagrange multipliers"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.activation_function",
+   "label": "activation function",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "model",
+   "aliases": [
+    "transfer function",
+    "sigmoid function",
+    "sigmoid activation function",
+    "hyperbolic tangent function",
+    "relu"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.kernel_function",
+   "label": "kernel function",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "model",
+   "aliases": [
+    "radial basis function",
+    "rbf kernel"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.loss_function",
+   "label": "loss function",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "model",
+   "aliases": [
+    "objective function",
+    "cost function",
+    "fitness function",
+    "error function"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.membership_function",
+   "label": "membership function",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "model",
+   "aliases": [
+    "fuzzy membership function",
+    "membership degree",
+    "degree of membership"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.identity_matrix",
+   "label": "identity matrix",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "mathematical",
+   "aliases": [],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.matrix",
+   "label": "matrix",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "mathematical",
+   "aliases": [
+    "covariance matrix",
+    "jacobian matrix",
+    "weight matrix",
+    "transition matrix",
+    "state vector"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.index_variable",
+   "label": "index",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "mathematical",
+   "aliases": [
+    "space and time indices",
+    "indices",
+    "subscript",
+    "time index",
+    "node index",
+    "index of the time step",
+    "counter"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.scaling_factor",
+   "label": "scaling factor",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "model",
+   "aliases": [
+    "scale factor",
+    "multiplication factor",
+    "adjustment factor",
+    "correction factor",
+    "calibration factor",
+    "conversion factor"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.exponent",
+   "label": "exponent",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "model",
+   "aliases": [
+    "empirical exponent",
+    "exponent parameter"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.threshold_value",
+   "label": "threshold",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "model",
+   "aliases": [
+    "threshold value",
+    "critical value"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.courant_number",
+   "label": "courant number",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "physical",
+   "aliases": [
+    "cfl number",
+    "courant-friedrichs-lewy number"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.lag",
+   "label": "lag",
+   "dimension": {
+    "T": "1"
+   },
+   "dimension_text": "T",
+   "typical_unit": "h",
+   "kind": "physical",
+   "aliases": [
+    "delay"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.energy",
+   "label": "energy",
+   "dimension": {
+    "M": "1",
+    "L": "2",
+    "T": "-2"
+   },
+   "dimension_text": "M L2 T-2",
+   "typical_unit": "J",
+   "kind": "physical",
+   "aliases": [
+    "specific energy",
+    "kinetic energy",
+    "potential energy"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.power",
+   "label": "power",
+   "dimension": {
+    "M": "1",
+    "L": "2",
+    "T": "-3"
+   },
+   "dimension_text": "M L2 T-3",
+   "typical_unit": "W",
+   "kind": "physical",
+   "aliases": [
+    "stream power",
+    "hydropower"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.head_loss",
+   "label": "head loss",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "kind": "physical",
+   "aliases": [
+    "energy loss",
+    "friction loss",
+    "local loss",
+    "head losses"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.relative_submergence",
+   "label": "relative submergence",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "physical",
+   "aliases": [
+    "submergence ratio",
+    "relative depth",
+    "depth ratio",
+    "relative roughness"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.stem_density",
+   "label": "stem density",
+   "dimension": {
+    "L": "-2"
+   },
+   "dimension_text": "L-2",
+   "typical_unit": "m-2",
+   "kind": "physical",
+   "aliases": [
+    "number of stems per unit area",
+    "plant density",
+    "stem number density"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.stem_diameter",
+   "label": "stem diameter",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "kind": "physical",
+   "aliases": [
+    "vegetation diameter",
+    "cylinder diameter",
+    "plant diameter"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.flexural_rigidity",
+   "label": "flexural rigidity",
+   "dimension": {
+    "M": "1",
+    "L": "3",
+    "T": "-2"
+   },
+   "dimension_text": "M L3 T-2",
+   "typical_unit": "N m2",
+   "kind": "physical",
+   "aliases": [
+    "bending stiffness",
+    "flexural stiffness"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.elastic_modulus",
+   "label": "modulus of elasticity",
+   "dimension": {
+    "M": "1",
+    "L": "-1",
+    "T": "-2"
+   },
+   "dimension_text": "M L-1 T-2",
+   "typical_unit": "Pa",
+   "kind": "physical",
+   "aliases": [
+    "young's modulus",
+    "elastic modulus"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.population",
+   "label": "population",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "model",
+   "aliases": [
+    "number of people",
+    "number of inhabitants"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.damage",
+   "label": "damage",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "model",
+   "aliases": [
+    "flood damage",
+    "damage ratio",
+    "vulnerability",
+    "damage function",
+    "depth-damage function"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.cost",
+   "label": "cost",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "",
+   "kind": "model",
+   "aliases": [
+    "price",
+    "economic loss",
+    "investment cost"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.angle",
+   "label": "angle",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "rad",
+   "kind": "physical",
+   "aliases": [
+    "slope angle",
+    "friction angle",
+    "angle of repose",
+    "internal friction angle",
+    "bed angle",
+    "inclination angle",
+    "contact angle"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.dynamic_viscosity",
+   "label": "dynamic viscosity",
+   "dimension": {
+    "M": "1",
+    "L": "-1",
+    "T": "-1"
+   },
+   "dimension_text": "M L-1 T-1",
+   "typical_unit": "Pa s",
+   "kind": "physical",
+   "aliases": [
+    "absolute viscosity",
+    "viscosity of water",
+    "dynamic viscosity of water"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.discharge_coefficient",
+   "label": "discharge coefficient",
+   "dimension": {},
+   "dimension_text": "1",
+   "typical_unit": "-",
+   "kind": "physical",
+   "aliases": [
+    "coefficient of discharge",
+    "weir coefficient",
+    "weir discharge coefficient",
+    "sluice gate coefficient",
+    "contraction coefficient",
+    "sluice gate coefficient of discharge"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  },
+  {
+   "id": "quantity.specific_catchment_area",
+   "label": "specific catchment area",
+   "dimension": {
+    "L": "1"
+   },
+   "dimension_text": "L",
+   "typical_unit": "m",
+   "kind": "physical",
+   "aliases": [
+    "upslope contributing area per unit contour length",
+    "specific contributing area"
+   ],
+   "status": "seed",
+   "source": "curated 2026-10-05"
+  }
+ ]
+}

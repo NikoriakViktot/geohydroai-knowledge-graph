@@ -5,6 +5,8 @@ equation_kg_loader.py — equation_records.parquet → Neo4j.
     (Equation)-[:COMPUTES {derivative}]->(Quantity)      ← what the equation calculates
     (Equation)-[:HAS_PARAMETER]->(Parameter {symbol, description, unit, value, param_hash})
     (Parameter)-[:QUANTIFIES]->(Quantity {name})          ← search formulas by quantity
+    (Quantity)-[:NORMALIZED_TO {method, score}]->(QuantityConcept {canonical_id, dimension})
+                                                          ← quantity ontology (src/ontology/quantities.json)
     (Equation)-[:EQUATION_GROUNDS_TO {formula_hash}]->(Method)
     (Equation)-[:DEFINES_METRIC {formula_hash}]->(Metric)  ← NSE = 1 − …, KGE = …
 
@@ -27,6 +29,8 @@ from pathlib import Path
 import pandas as pd
 
 from src.document.formula_parameters import quantity_name
+from src.ontology.quantities import check_dimension, ontology
+from src.ontology.quantity_map import resolve
 
 log = logging.getLogger("geohydro.graph.equation_kg_loader")
 ROOT = Path(__file__).resolve().parents[2]
@@ -57,6 +61,22 @@ def _methods_of(row: dict, extractor) -> list[tuple[str, str]]:
     return out
 
 
+def quantity_rows(names: set[str]) -> tuple[list[dict], list[dict]]:
+    """QuantityConcept rows for the whole ontology and NORMALIZED_TO rows for the names that match."""
+    o = ontology()
+    concepts = [{"canonical_id": q["id"], "label": q["label"], "kind": q.get("kind"),
+                 "dimension_text": q.get("dimension_text"), "typical_unit": q.get("typical_unit"),
+                 "alt_dimensions": [a["dimension_text"] for a in q.get("alt_dimensions", [])],
+                 "ontology_version": o["version"]} for q in o["by_id"].values()]
+    links = []
+    for n in sorted(names):
+        m = resolve(n)
+        if m.quantity_id:
+            links.append({"name": n, "canonical_id": m.quantity_id, "method": m.method, "score": m.score,
+                          "qualifiers": m.qualifiers, "ontology_version": o["version"]})
+    return concepts, links
+
+
 def load(paper_ids: list[str] | None = None, dry_run: bool = False) -> dict:
     files = sorted(SODB.glob("*/equation_records.parquet"))
     if paper_ids is not None:
@@ -82,12 +102,16 @@ def load(paper_ids: list[str] | None = None, dry_run: bool = False) -> dict:
             computes = quantity_name(core) if r.get("purpose_source") in ("lhs_definition",) else None
             eq_rows.append({**r, "eq_id": eq_id, "computes": computes, "derivative": deriv})
             for p in json.loads(r.get("parameters") or "[]"):
+                qname = quantity_name(p.get("description") or "")
+                qid = resolve(qname).quantity_id if qname else None
                 par_rows.append({
                     "eq_id": eq_id, "param_id": f"{eq_id}:{p['symbol']}", "paper_id": r["paper_id"],
                     "formula_hash": r["formula_hash"], **{k: p.get(k) for k in
                     ("symbol", "symbol_tex", "description", "unit", "value", "source", "param_hash")},
                     # recomputed here so that a better quantity_name needs no record rebuild
-                    "quantity": quantity_name(p.get("description") or ""),
+                    "quantity": qname,
+                    "quantity_id": qid,
+                    "dimension_check": check_dimension(qid, p.get("unit")) if p.get("unit") else None,
                 })
             for cid in _metric_of(r):
                 concept_rows.append({"eq_id": eq_id, "canonical_id": cid, "node_label": "Metric",
@@ -96,17 +120,22 @@ def load(paper_ids: list[str] | None = None, dry_run: bool = False) -> dict:
                 if cid.startswith("method."):
                     concept_rows.append({"eq_id": eq_id, "canonical_id": cid, "node_label": "Method",
                                          "formula_hash": r["formula_hash"], "evidence": ev})
+    concepts, links = quantity_rows({r["quantity"] for r in par_rows if r["quantity"]}
+                                    | {r["computes"] for r in eq_rows if r["computes"]})
     stats = {"papers": len(files), "equations": len(eq_rows), "parameters": len(par_rows),
-             "concept_edges": len(concept_rows)}
+             "concept_edges": len(concept_rows), "quantity_links": len(links),
+             "dimension_mismatch": sum(r["dimension_check"] == "mismatch" for r in par_rows)}
     log.info("equation records: %s", stats)
     if dry_run:
         return stats
     from src.graph.neo4j_writer import GraphWriter
     with GraphWriter() as gw:
+        gw.create_constraints()                    # IF NOT EXISTS: QuantityConcept, parameter index
         gw.mark_equation_parameters_stale([r["eq_id"] for r in eq_rows])
         gw.write_equation_records(eq_rows)
         gw.write_equation_parameters(par_rows)
         gw.write_equation_concept_edges(concept_rows)
+        gw.write_quantity_concepts(concepts, links)
     return stats
 
 

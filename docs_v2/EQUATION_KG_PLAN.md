@@ -79,3 +79,47 @@ vs локальні + глосарій. Втрати по ланцюжку PDF �
 | 4 | Реєстр 15–20 законів, EQUATION_INSTANCE_OF з оцінкою доказів | 1, 3 |
 | 5 | API/MCP: equations, quantities, laws, chains | 1–4 |
 | 6 | Оцінка на gold set, QA-експеримент, стаття | 0–5 |
+
+## Етап 1 — онтологія величин (зроблено 2026-10-05)
+
+- `src/ontology/quantities.json` (версія `quantities-v0.3`): 138 канонічних величин, `quantity.*`,
+  розмірність над L, M, T, Θ, типова одиниця, `kind` (physical / statistical / model /
+  mathematical), псевдоніми, `alt_dimensions` для гідрологічних конвенцій (запас у мм шару,
+  опади мм/добу, витрата на одиницю ширини). Статистичні величини з розмірністю змінної
+  (середнє, СКВ, спостережене значення) мають `typical_unit: ""` і розмірність не перевіряють.
+- `src/ontology/quantities.py`: `normalise(name)`; методи exact → stripped (кваліфікатори
+  observed/maximum/…, локатори "at node i") → head (іменникова група, не більше двох слів
+  модифікатора, без речень і загальних слів типу constant/factor) → embedding (bge-large,
+  поріг 0,88, відрив 0,03). Сміття ("the", "number of", "observed and") дістає метод
+  `not_a_quantity` і не входить у знаменник покриття.
+- Перевірка розмірності: `check_dimension` → ok / ok_convention / mismatch / unknown.
+  Читає "m s 21" (мінус у PDF прочитано як "2"), відокремлені степені, нотацію [L T-1] і L3/T,
+  дробові степені Маннінга. Одиниця "t" у Q(t) — аргумент, не тонни.
+- `src/ontology/quantity_map.py` будує `data/ontology_maps/quantity_map_<версія>.parquet`
+  (ніколи не перезаписується). Завантажувач графа читає мапу, модель ембедингів не вантажить.
+- Граф: `(Quantity {name})-[:NORMALIZED_TO {method, score, qualifiers}]->(QuantityConcept
+  {canonical_id, dimension, kind})`; у `Parameter` з'явились `quantity_id` і `dimension_check`.
+  Поверхнева назва лишається. Запит: `MATCH (p:Parameter) WHERE NOT p.stale AND
+  p.quantity_id = 'quantity.discharge'`.
+
+Попередній прогін (на записах до кінця корпусного Nougat, 30 370 входжень назв):
+
+| | частка |
+|---|---|
+| exact | 20,6 % |
+| stripped | 10,2 % |
+| head | 14,4 % |
+| embedding | 3,4 % |
+| не знайдено | 51,4 % |
+
+Перевірка розмірності, 3 802 параметри з одиницею: ok 1 818, ok_convention 112,
+mismatch 182, unknown 1 690. Решта mismatch — справжні сигнали: помилки зіставлення
+(тиск пари "slope" → нахил), помилки в одиницях статті або парсингу ("ms^-1" для g),
+коефіцієнт Стриклера, названий коефіцієнтом Маннінга.
+
+Не знайдено переважно: загальні слова моделей (input vector, weight vector, state equations),
+довгі речення замість назв, рідкісні величини. Наступний крок для покриття — перевірка
+людиною на сторінці «Еталон рівнянь» (quantity_name) і поповнення псевдонімів за частотою.
+
+Офіційна мапа будується після корпусного прогону: `data/acquisition/after_corpus_20261005.sh`
+(мапа → перезавантаження рівнянь у граф → заморожування gold set v1).

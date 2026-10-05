@@ -620,6 +620,8 @@ class GraphWriter:
             p.formula_hash = r.formula_hash,
             p.paper_id    = r.paper_id,
             p.quantity    = r.quantity,
+            p.quantity_id = r.quantity_id,
+            p.dimension_check = r.dimension_check,
             p.stale       = false
         MERGE (e)-[:HAS_PARAMETER]->(p)
         WITH p, r
@@ -628,6 +630,26 @@ class GraphWriter:
         MERGE (p)-[:QUANTIFIES]->(q)
         """
         self._batch_write("Equation parameters", cypher, rows)
+
+    def write_quantity_concepts(self, concepts: list[dict], links: list[dict]) -> None:
+        """QuantityConcept nodes of the quantity ontology, and
+        (Quantity {name})-[:NORMALIZED_TO {method, score, qualifiers}]->(QuantityConcept).
+        The surface Quantity keeps its name; the edge says how it was matched."""
+        self._batch_write("QuantityConcept nodes", """
+        UNWIND $rows AS r
+        MERGE (c:QuantityConcept {canonical_id: r.canonical_id})
+        SET c.label = r.label, c.kind = r.kind, c.dimension = r.dimension_text,
+            c.alt_dimensions = r.alt_dimensions, c.typical_unit = r.typical_unit,
+            c.ontology_version = r.ontology_version
+        """, concepts)
+        self._batch_write("Quantity NORMALIZED_TO", """
+        UNWIND $rows AS r
+        MATCH (q:Quantity {name: r.name})
+        MATCH (c:QuantityConcept {canonical_id: r.canonical_id})
+        MERGE (q)-[n:NORMALIZED_TO]->(c)
+        SET n.method = r.method, n.score = r.score, n.qualifiers = r.qualifiers,
+            n.ontology_version = r.ontology_version
+        """, links)
 
     def write_equation_concept_edges(self, rows: list[dict]) -> None:
         """Equation -[:EQUATION_GROUNDS_TO]-> Method and -[:DEFINES_METRIC]-> Metric,
