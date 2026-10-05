@@ -15,10 +15,13 @@ from pydantic import BaseModel, ConfigDict, Field
 from src.contracts.api import Provenance
 
 TargetKind = Literal["paper", "section", "region", "formula", "table", "figure", "metric_fact", "entity_edge",
-                     "claim_evidence", "thesis", "reference", "location"]
+                     "claim_evidence", "thesis", "reference", "location",
+                     # equation gold set (docs_v2/EQUATION_KG_PLAN.md, migration 0007)
+                     "equation", "parameter", "quantity_name", "equation_pair", "qa_item"]
 Verdict = Literal["correct", "incorrect", "partial", "unsure"]
 Problem = Literal["text_missing", "text_garbled", "table_broken", "formula_broken", "crop_wrong", "value_wrong",
-                  "unit_wrong", "entity_wrong", "location_wrong", "metadata_wrong", "evidence_not_supporting", "other"]
+                  "unit_wrong", "entity_wrong", "location_wrong", "metadata_wrong", "evidence_not_supporting", "other",
+                  "definition_wrong", "quantity_wrong"]
 
 VERIFY_TARGET_KINDS: tuple[str, ...] = get_args(TargetKind)
 VERIFY_VERDICTS: tuple[str, ...] = get_args(Verdict)

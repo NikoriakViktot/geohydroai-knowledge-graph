@@ -29,6 +29,7 @@ pages = {
     "Перевірка": [
         st.Page("views/paper.py", title="Стаття: парсинг", icon="🔬"),
         st.Page("views/truth.py", title="Шар правди", icon="🛡️"),
+        st.Page("views/gold.py", title="Еталон рівнянь", icon="🥇"),
     ],
 }
 sidebar()

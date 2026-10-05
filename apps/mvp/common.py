@@ -101,6 +101,7 @@ PROBLEMS = {"": "—", "text_missing": "текст не розпізнано", "
             "value_wrong": "неправильне значення", "unit_wrong": "неправильна одиниця",
             "entity_wrong": "неправильна сутність", "location_wrong": "неправильне місце",
             "metadata_wrong": "неправильні метадані", "evidence_not_supporting": "доказ не підтримує тезу",
+            "definition_wrong": "неправильне визначення символу", "quantity_wrong": "неправильна величина",
             "other": "інше"}
 BADGE = {"correct": "✅", "partial": "🟡", "incorrect": "❌", "unsure": "❔"}
 
