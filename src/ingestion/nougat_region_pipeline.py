@@ -50,6 +50,9 @@ from typing import Iterable
 
 import pyarrow as pa
 import pyarrow.parquet as pq
+import threading
+import time
+
 import ray
 from PIL import Image
 
@@ -958,6 +961,44 @@ class NougatRegionPipeline:
         self.pipeline_hash = "sha256:" + hashlib.sha256(_hash_src).hexdigest()[:16]
         log.info("[PIPELINE_HASH] %s", self.pipeline_hash)
 
+    # ── actor recovery ────────────────────────────────────────────────────────
+    # The kernel OOM killer picks Ray workers first (oom_score_adj 1000), and other
+    # jobs share the WSL VM. A killed NougatActor is not always restarted by Ray, and
+    # every queued page then fails at once (2026-10-05: 290 incomplete papers in 20 min).
+    # So a page whose actor died is re-rendered and sent again, to a new actor if needed.
+    _actor_lock = threading.Lock()
+
+    def _ensure_actor(self) -> None:
+        with self._actor_lock:
+            try:
+                ray.get(self.actor.model_info.remote(), timeout=180)
+                return
+            except Exception:
+                pass
+            log.warning("[ACTOR] Nougat actor unavailable — starting a new one")
+            try:
+                ray.kill(self.actor, no_restart=True)
+            except Exception:
+                pass
+            self.actor = NougatActor.remote()
+            ray.get(self.actor.model_info.remote(), timeout=900)
+            log.warning("[ACTOR] new Nougat actor ready")
+
+    def _infer_page(self, pdf_path: Path, page: int, label: str, fut):
+        actor_errors = tuple(e for e in (getattr(ray.exceptions, "RayActorError", None),
+                                         getattr(ray.exceptions, "ActorUnavailableError", None),
+                                         getattr(ray.exceptions, "ActorDiedError", None)) if e)
+        for attempt in range(3):
+            try:
+                return ray.get(fut)
+            except actor_errors as exc:
+                log.warning("[PAGE RETRY] %s attempt %d after %s", label, attempt + 1, type(exc).__name__)
+                time.sleep(10 * (attempt + 1))
+                self._ensure_actor()
+                image = pdf_io.render_page_image(pdf_path, page, dpi=PAGE_DPI)
+                fut = self.actor.parse_image.remote(image, label)
+        return ray.get(fut)
+
     def process_pdf(self, pdf_path: Path, tei_path: Path) -> dict:
         if NOUGAT_MODE == "page":
             return self.process_pdf_pages(pdf_path, tei_path)
@@ -1018,7 +1059,7 @@ class NougatRegionPipeline:
                 meta["render_failure"] = True
             else:
                 try:
-                    parsed = ray.get(fut)
+                    parsed = self._infer_page(pdf_path, page, f"{paper_id}_p{page}", fut)
                     md = parsed.get("markdown_text") or ""
                     meta["guard_stopped"] = bool(parsed.get("guard_stopped"))
                     meta["hit_token_budget"] = bool(parsed.get("hit_token_budget"))
