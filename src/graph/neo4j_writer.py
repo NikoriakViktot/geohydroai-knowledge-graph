@@ -647,6 +647,42 @@ class GraphWriter:
         """
         self._batch_write("Equation parameters", cypher, rows)
 
+    def write_laws(self, laws: list[dict], involves: list[dict], concepts: list[dict], links: list[dict]) -> None:
+        """PhysicalLaw nodes from src/ontology/laws.yaml (reference forms and verified code),
+        (PhysicalLaw)-[:INVOLVES {symbol}]->(QuantityConcept), (PhysicalLaw)-[:RELATES_TO]->(Method|Metric),
+        (Equation)-[:EQUATION_INSTANCE_OF {score, status, s_quantity, s_math, s_text, s_concept, …}]->(PhysicalLaw)."""
+        self._batch_write("PhysicalLaw nodes", """
+        UNWIND $rows AS r
+        MERGE (l:PhysicalLaw {law_id: r.law_id})
+        SET l.name = r.name, l.kind = r.kind, l.reference = r.reference, l.forms = r.forms,
+            l.variants = r.variants, l.code_python = r.code_python, l.code_julia = r.code_julia,
+            l.code_check = r.code_check, l.laws_version = r.laws_version
+        """, laws)
+        self._batch_write("PhysicalLaw INVOLVES", """
+        UNWIND $rows AS r
+        MATCH (l:PhysicalLaw {law_id: r.law_id})
+        MERGE (c:QuantityConcept {canonical_id: r.quantity_id})
+        MERGE (l)-[i:INVOLVES {symbol: r.symbol}]->(c)
+        """, involves)
+        for label in ("Method", "Metric"):
+            subset = [r for r in concepts if r["label"] == label]
+            if subset:
+                self._batch_write(f"PhysicalLaw RELATES_TO {label}", f"""
+                UNWIND $rows AS r
+                MATCH (l:PhysicalLaw {{law_id: r.law_id}})
+                MERGE (t:{label} {{canonical_id: r.canonical_id}})
+                MERGE (l)-[:RELATES_TO]->(t)
+                """, subset)
+        self._batch_write("Equation EQUATION_INSTANCE_OF", """
+        UNWIND $rows AS r
+        MATCH (e:Equation {eq_id: r.eq_id})
+        MATCH (l:PhysicalLaw {law_id: r.law_id})
+        MERGE (e)-[x:EQUATION_INSTANCE_OF]->(l)
+        SET x.score = r.score, x.status = r.status, x.variant = r.variant, x.capped = r.capped,
+            x.s_quantity = r.s_quantity, x.s_math = r.s_math, x.s_text = r.s_text, x.s_concept = r.s_concept,
+            x.math_method = r.math_method, x.mapping = r.mapping, x.laws_version = r.laws_version
+        """, links)
+
     def write_structure_code(self, rows: list[dict]) -> None:
         """Python and Julia code on FormulaStructure (src/document/formula_code.py)."""
         self._batch_write("FormulaStructure code", """

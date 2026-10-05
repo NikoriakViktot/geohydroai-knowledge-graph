@@ -33,6 +33,7 @@ CONSTRAINTS: list[str] = [
     "CREATE CONSTRAINT quantity_name    IF NOT EXISTS FOR (n:Quantity)    REQUIRE n.name           IS UNIQUE",
     "CREATE CONSTRAINT quantity_concept IF NOT EXISTS FOR (n:QuantityConcept) REQUIRE n.canonical_id IS UNIQUE",
     "CREATE CONSTRAINT formula_structure IF NOT EXISTS FOR (n:FormulaStructure) REQUIRE n.structural_hash IS UNIQUE",
+    "CREATE CONSTRAINT physical_law     IF NOT EXISTS FOR (n:PhysicalLaw) REQUIRE n.law_id IS UNIQUE",
 ]
 
 # ── Range indexes (for property lookups and ORDER BY) ─────────────────────────

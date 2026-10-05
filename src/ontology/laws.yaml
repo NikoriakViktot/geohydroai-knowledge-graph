@@ -1,0 +1,224 @@
+# Registry of physical laws, empirical relations, metrics and indices (docs_v2/EQUATION_KG_PLAN.md, phase 4b).
+# Chosen by how many corpus papers name them next to an equation (2026-10-05 count); written by hand,
+# never by an LLM. An equation becomes EQUATION_INSTANCE_OF a law by evidence score (src/ontology/laws.py).
+#
+#   forms      reference LaTeX, parsed by src/document/formula_structure.py; "variant" names a variant
+#   variables  symbol of the forms → quantity concept (src/ontology/quantities.json) or null
+#   text       regular expressions for the lead-in sentence, purpose, section and citing sentences
+#   concepts   Method/Metric canonical ids the equation may already be linked to in the graph
+version: laws-v0.3
+laws:
+- id: law.nse
+  name: Nash–Sutcliffe efficiency
+  kind: metric
+  reference: Nash & Sutcliffe (1970), J. Hydrol. 10(3)
+  text: ['nash', '\bnse\b', '\bns\b efficiency', 'nash.sutcliffe', 'model efficiency']
+  concepts: [metric.nse]
+  variables: {NSE: null, O: quantity.observed_value, S: quantity.simulated_value, O_bar: quantity.mean}
+  forms:
+  - latex: '\mathrm{NSE}=1-\frac{\sum_{i=1}^{n}(O_{i}-S_{i})^{2}}{\sum_{i=1}^{n}(O_{i}-\bar{O})^{2}}'
+- id: law.rmse
+  name: root mean square error
+  kind: metric
+  reference: standard
+  text: ['\brmse\b', 'root.mean.squar']
+  concepts: [metric.rmse]
+  variables: {RMSE: null, O: quantity.observed_value, S: quantity.simulated_value}
+  forms:
+  - latex: '\mathrm{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}(O_{i}-S_{i})^{2}}'
+- id: law.kge
+  name: Kling–Gupta efficiency
+  kind: metric
+  reference: Gupta et al. (2009), J. Hydrol. 377
+  text: ['\bkge\b', 'kling.gupta']
+  concepts: [metric.kge]
+  variables: {KGE: null, r: quantity.correlation_coefficient, alpha: null, beta: null}
+  forms:
+  - latex: '\mathrm{KGE}=1-\sqrt{(r-1)^{2}+(\alpha-1)^{2}+(\beta-1)^{2}}'
+- id: law.pbias
+  name: percent bias
+  kind: metric
+  reference: Gupta et al. (1999); Moriasi et al. (2007)
+  text: ['pbias', 'percent(age)? bias']
+  concepts: [metric.pbias]
+  variables: {PBIAS: null, O: quantity.observed_value, S: quantity.simulated_value}
+  forms:
+  - latex: '\mathrm{PBIAS}=100\frac{\sum_{i=1}^{n}(O_{i}-S_{i})}{\sum_{i=1}^{n}O_{i}}'
+  - latex: '\mathrm{PBIAS}=100\frac{\sum_{i=1}^{n}(S_{i}-O_{i})}{\sum_{i=1}^{n}O_{i}}'
+    variant: simulated_minus_observed
+- id: law.r2
+  name: coefficient of determination
+  kind: metric
+  reference: standard
+  text: ['coefficient of determination', '\br\^?2\b', 'r.squared']
+  concepts: [metric.r2]
+  variables: {R: null, O: quantity.observed_value, S: quantity.simulated_value, O_bar: quantity.mean, S_bar: quantity.mean}
+  forms:
+  - latex: 'R^{2}=\frac{(\sum_{i=1}^{n}(O_{i}-\bar{O})(S_{i}-\bar{S}))^{2}}{\sum_{i=1}^{n}(O_{i}-\bar{O})^{2}\sum_{i=1}^{n}(S_{i}-\bar{S})^{2}}'
+    variant: squared_correlation
+- id: law.pearson_r
+  name: Pearson correlation coefficient
+  kind: metric
+  reference: Pearson (1895)
+  text: ['pearson', 'correlation coefficient']
+  concepts: []
+  variables: {r: quantity.correlation_coefficient, x: null, y: null, x_bar: quantity.mean, y_bar: quantity.mean}
+  forms:
+  - latex: 'r=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})(y_{i}-\bar{y})}{\sqrt{\sum_{i=1}^{n}(x_{i}-\bar{x})^{2}\sum_{i=1}^{n}(y_{i}-\bar{y})^{2}}}'
+- id: law.manning
+  name: Manning equation
+  kind: empirical_relation
+  reference: Manning (1891)
+  text: ['manning', 'gauckler', 'strickler']
+  concepts: []
+  variables: {V: quantity.velocity, Q: quantity.discharge, A: quantity.area, R: quantity.hydraulic_radius,
+              S: quantity.slope, n: quantity.manning_n}
+  forms:
+  - latex: 'V=\frac{1}{n}R^{2/3}S^{1/2}'
+    variant: velocity
+  - latex: 'Q=\frac{1}{n}AR^{2/3}S^{1/2}'
+    variant: discharge
+- id: law.continuity_q_av
+  name: discharge as area times velocity
+  kind: physical_law
+  reference: continuity of flow
+  text: ['continuity', 'cross.sectional area .{0,40}velocity', 'velocity .{0,40}cross.sectional area']
+  concepts: []
+  variables: {Q: quantity.discharge, A: quantity.area, V: quantity.velocity}
+  forms:
+  - latex: 'Q=AV'
+- id: law.water_balance
+  name: water balance (storage change)
+  kind: physical_law
+  reference: conservation of mass
+  text: ['water balance', 'mass balance', 'continuity equation', 'storage equation', 'conservation of mass', 'budget']
+  concepts: []
+  variables: {S: quantity.volume, I: quantity.discharge, O: quantity.discharge, t: quantity.time}
+  forms:
+  - latex: '\frac{dS}{dt}=I-O'
+- id: law.scs_cn_runoff
+  name: SCS curve number runoff equation
+  kind: empirical_relation
+  reference: USDA-SCS (1972), NEH-4
+  text: ['curve number', '\bscs\b', '\bnrcs\b', 'scs.cn']
+  concepts: [method.scs_cn]
+  variables: {Q: quantity.runoff_depth, P: quantity.precipitation, S: quantity.potential_retention,
+              I_a: quantity.initial_abstraction}
+  forms:
+  - latex: 'Q=\frac{(P-0.2S)^{2}}{P+0.8S}'
+    variant: lambda_0.2
+  - latex: 'Q=\frac{(P-0.05S)^{2}}{P+0.95S}'
+    variant: lambda_0.05
+  - latex: 'Q=\frac{(P-I_{a})^{2}}{P-I_{a}+S}'
+    variant: general
+- id: law.scs_cn_retention
+  name: SCS curve number potential retention
+  kind: empirical_relation
+  reference: USDA-SCS (1972), NEH-4
+  text: ['curve number', '\bscs\b', '\bnrcs\b', 'retention']
+  concepts: [method.scs_cn]
+  variables: {S: quantity.potential_retention, CN: quantity.curve_number}
+  forms:
+  - latex: 'S=\frac{25400}{CN}-254'
+    variant: mm
+  - latex: 'S=\frac{1000}{CN}-10'
+    variant: inch
+- id: law.saint_venant_momentum
+  name: Saint-Venant momentum equation (1D)
+  kind: physical_law
+  reference: de Saint-Venant (1871)
+  text: ['saint.venant', 'shallow water', 'momentum equation', 'dynamic wave']
+  concepts: []
+  variables: {Q: quantity.discharge, A: quantity.area, h: quantity.water_depth, g: quantity.gravitational_acceleration,
+              S_0: quantity.slope, S_f: quantity.slope, t: quantity.time, x: quantity.length}
+  forms:
+  - latex: '\frac{\partial Q}{\partial t}+\frac{\partial}{\partial x}(\frac{Q^{2}}{A})+g\cdot A\frac{\partial h}{\partial x}=g\cdot A\cdot(S_{0}-S_{f})'
+- id: law.rating_curve
+  name: stage–discharge rating curve (power law)
+  kind: empirical_relation
+  reference: standard hydrometry
+  text: ['rating curve', 'stage.discharge']
+  concepts: []
+  variables: {Q: quantity.discharge, h: quantity.water_level, h_0: quantity.water_level, a: null, b: quantity.exponent}
+  forms:
+  - latex: 'Q=a\cdot(h-h_{0})^{b}'
+- id: law.muskingum_storage
+  name: Muskingum storage equation
+  kind: empirical_relation
+  reference: McCarthy (1938)
+  text: ['muskingum']
+  concepts: [method.muskingum, method.muskingum_routing]
+  variables: {S: quantity.volume, K: quantity.muskingum_k, x: quantity.weighting_coefficient,
+              I: quantity.discharge, O: quantity.discharge}
+  forms:
+  - latex: 'S=K\cdot(xI+(1-x)O)'
+- id: law.ndvi
+  name: normalized difference vegetation index
+  kind: index
+  reference: Rouse et al. (1974)
+  text: ['ndvi', 'vegetation index']
+  concepts: []
+  variables: {NDVI: null, NIR: quantity.reflectance, RED: quantity.reflectance}
+  forms:
+  - latex: 'NDVI=\frac{NIR-RED}{NIR+RED}'
+- id: law.ndwi
+  name: normalized difference water index
+  kind: index
+  reference: McFeeters (1996); Xu (2006) for MNDWI
+  text: ['ndwi', 'mndwi', 'water index']
+  concepts: []
+  variables: {NDWI: null, MNDWI: null, GREEN: quantity.reflectance, NIR: quantity.reflectance, SWIR: quantity.reflectance}
+  forms:
+  - latex: 'NDWI=\frac{GREEN-NIR}{GREEN+NIR}'
+    variant: mcfeeters
+  - latex: 'MNDWI=\frac{GREEN-SWIR}{GREEN+SWIR}'
+    variant: mndwi
+- id: law.twi
+  name: topographic wetness index
+  kind: index
+  reference: Beven & Kirkby (1979)
+  text: ['wetness index', '\btwi\b', 'topographic index']
+  concepts: []
+  variables: {TWI: null, a: quantity.specific_catchment_area, beta: quantity.angle}
+  forms:
+  - latex: 'TWI=\ln(\frac{a}{\tan\beta})'
+- id: law.gumbel_cdf
+  name: Gumbel (EV1) distribution
+  kind: distribution
+  reference: Gumbel (1941)
+  text: ['gumbel', '\bev1\b', 'extreme value type i']
+  concepts: []
+  variables: {F: quantity.cdf, x: null, mu: quantity.location_parameter, beta: quantity.scale_parameter}
+  forms:
+  - latex: 'F=\exp(-\exp(-\frac{x-\mu}{\beta}))'
+- id: law.gev_cdf
+  name: generalized extreme value distribution
+  kind: distribution
+  reference: Jenkinson (1955)
+  text: ['generalized extreme value', 'generalised extreme value', '\bgev\b']
+  concepts: []
+  variables: {F: quantity.cdf, x: null, mu: quantity.location_parameter, sigma: quantity.scale_parameter,
+              xi: quantity.shape_parameter}
+  forms:
+  - latex: 'F=\exp(-(1+\xi\frac{x-\mu}{\sigma})^{-1/\xi})'
+- id: law.ahp_consistency
+  name: AHP consistency ratio
+  kind: index
+  reference: Saaty (1980)
+  text: ['consistency ratio', 'consistency index', '\bahp\b', 'analytic(al)? hierarchy']
+  concepts: []
+  variables: {CR: null, CI: quantity.consistency_index, RI: quantity.consistency_index, lambda_max: null, n: null}
+  forms:
+  - latex: '\mathrm{CR}=\frac{\mathrm{CI}}{\mathrm{RI}}'
+    variant: ratio
+  - latex: '\mathrm{CI}=\frac{\lambda_{max}-n}{n-1}'
+    variant: index
+- id: law.backscatter_db
+  name: backscatter in decibels
+  kind: index
+  reference: radar convention
+  text: ['decibel', '\bdb\b', 'logarithmic scale', '10\s*log']
+  concepts: []
+  variables: {sigma_dB: quantity.backscatter, sigma: quantity.backscatter}
+  forms:
+  - latex: '\sigma_{dB}=10\log_{10}(\sigma)'

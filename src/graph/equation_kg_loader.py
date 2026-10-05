@@ -8,6 +8,8 @@ equation_kg_loader.py — equation_records.parquet → Neo4j.
     (Equation)-[:HAS_STRUCTURE]->(FormulaStructure {structural_hash, canonical_expression})
                                                           ← EXACT equivalence (src/document/formula_structure.py)
     FormulaStructure.code_python / code_julia / code_check   ← src/document/formula_code.py
+    (Equation)-[:EQUATION_INSTANCE_OF {score, status, s_*}]->(PhysicalLaw)   ← src/ontology/laws.py
+    (PhysicalLaw)-[:INVOLVES {symbol}]->(QuantityConcept); (PhysicalLaw)-[:RELATES_TO]->(Method|Metric)
     (FormulaStructure)-[:ALGEBRAIC_EQUIVALENT {method, variable, mapping}]->(FormulaStructure)
                                                           ← src/document/formula_algebra.py
     (Quantity)-[:NORMALIZED_TO {method, score}]->(QuantityConcept {canonical_id, dimension})
@@ -75,6 +77,31 @@ def _rows_of(module: str) -> list[dict]:
         return []
     d = pd.read_parquet(out)
     return [{k: (None if isinstance(v, float) and v != v else v) for k, v in r.items()} for r in d.to_dict("records")]
+
+
+def law_rows() -> tuple[list[dict], list[dict], list[dict], list[dict]]:
+    """The law registry (nodes with reference forms and code) and the equation links of its version."""
+    from src.ontology.laws import forms, out_path, registry
+    reg = registry()
+    fms = forms()
+    laws, involves, concepts = [], [], []
+    for law in reg["laws"]:
+        own = [f for f in fms if f.law_id == law["id"]]
+        laws.append({"law_id": law["id"], "name": law["name"], "kind": law.get("kind"),
+                     "reference": law.get("reference"), "forms": [f.latex for f in own],
+                     "variants": [f.variant or "" for f in own],
+                     "code_python": [f.code.get("python") or "" for f in own],
+                     "code_julia": [f.code.get("julia") or "" for f in own],
+                     "code_check": [f.code.get("check") or "" for f in own], "laws_version": reg["version"]})
+        involves += [{"law_id": law["id"], "symbol": sym, "quantity_id": q}
+                     for sym, q in (law.get("variables") or {}).items() if q]
+        concepts += [{"law_id": law["id"], "canonical_id": c, "label": "Metric" if c.startswith("metric.") else "Method"}
+                     for c in law.get("concepts") or []]
+    links = []
+    if out_path().exists():
+        d = pd.read_parquet(out_path())
+        links = [{k: (None if isinstance(v, float) and v != v else v) for k, v in r.items()} for r in d.to_dict("records")]
+    return laws, involves, concepts, links
 
 
 def algebraic_rows() -> list[dict]:
@@ -174,8 +201,11 @@ def load(paper_ids: list[str] | None = None, dry_run: bool = False) -> dict:
         gw.write_algebraic_edges(alg)
         code = _rows_of("src.document.formula_code")
         gw.write_structure_code(code)
+        laws, involves, concepts_l, law_links = law_rows()
+        gw.write_laws(laws, involves, concepts_l, law_links)
     stats["algebraic_edges"] = len(alg)
     stats["structures_with_code"] = len(code)
+    stats["law_links"] = len(law_links)
     return stats
 
 
