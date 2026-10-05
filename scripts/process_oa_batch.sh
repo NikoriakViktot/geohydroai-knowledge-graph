@@ -76,6 +76,8 @@ step "identity (Postgres)"
 $PY -m src.etl.identity
 step "parquet layer"
 $PY -m src.enrichment.build_parquet_layer
+step "analytics tables (data/analytics: build_graph reads papers/methods/metrics from here)"
+$PY -m src.analytics.parquet_builder --overwrite
 step "Neo4j graph (MERGE, no wipe)"
 $PY -m src.graph.build_graph --uri bolt://localhost:7687 --user neo4j --password "${NEO4J_PASSWORD:-python2024}" --identity postgres
 step "NumericFact loader"
