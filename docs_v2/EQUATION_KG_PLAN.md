@@ -123,3 +123,46 @@ mismatch 182, unknown 1 690. Решта mismatch — справжні сигна
 
 Офіційна мапа будується після корпусного прогону: `data/acquisition/after_corpus_20261005.sh`
 (мапа → перезавантаження рівнянь у граф → заморожування gold set v1).
+
+## Етап 2 — текстовий і структурний хеш (зроблено 2026-10-05)
+
+- **FORMULA_TEXT_HASH** = наявний `formula_hash` (sha256[:16] LaTeX без форматування; для тексту
+  GROBID — `tei:<…>`). Не змінювався: від нього залежать `param_hash` і назви PNG.
+- **FORMULA_STRUCTURAL_HASH** — `src/document/formula_structure.py`: LaTeX → SymPy
+  (`parse_latex`, ANTLR, **strict**: без strict ANTLR мовчки відкидав хвіст, `a = b ]` → `a = b`)
+  → канонічне дерево → sha256[:16] від `srepr`. Канонізація: дроби з десяткових (0,2 = 1/5),
+  сторони рівності в сталому порядку, ланцюжки `a = b = c` як впорядкований набір, імена
+  символів нормалізовані, `e` → E, `\pi` → π.
+- Підготовка LaTeX: `\over` → `\frac`; `\text/\rm/\mathrm{слово}` → одне ім'я; акценти
+  (`\bar{Q}_{i}`, `\overline{Q_{obs}}`) → `Q_{bari}`; `Y_i^{obs}` → `Y_{iobs}`; `x^{o}_{i}` → `x_{i}^{o}`
+  (граматика губила нижній індекс після верхнього); штрихи й ± у імені; `\Sigma_` → `\sum_`;
+  сума без меж — по i від 1 до n; відомі назви (NSE, KGE, NIR, GREEN, …) — одне ім'я.
+  У `\mathit{…}` літера d і цифри екрануються (лексер читає «d+літера» як диференціал).
+- Статуси: ok, no_latex (текст GROBID), multiline, multiple («a = b and c = d»), too_long,
+  parse_error, timeout, trivial (самотній символ, без хешу), degenerate (SymPy скоротив до 0 або
+  True/False — Nougat загубив позначку, що розрізняла два символи).
+- Кеш: `data/equations/structure_<PARSER_VERSION>.parquet` за `formula_hash`, доповнюється.
+- Граф: `Equation.formula_text_hash`, `formula_structural_hash`, `canonical_expression`,
+  `structure_status`, `structure_symbols`; `(Equation)-[:HAS_STRUCTURE]->(FormulaStructure
+  {structural_hash, canonical_expression})`. Вузол класу замість попарних ребер EQUIVALENT
+  {level: EXACT}: формула у 200 статтях дала б 19 900 ребер. EXACT-пари:
+  `MATCH (a:Equation)-[:HAS_STRUCTURE]->(s)<-[:HAS_STRUCTURE]-(b) WHERE a.formula_structural_hash = s.structural_hash`.
+- Поза хешем навмисно: перейменування символів і перестановки (Q = AV ↔ V = Q/A,
+  `25400/CN − 254` ↔ `(25400 − 254·CN)/CN`) — це етап 3, ALGEBRAIC.
+
+Прогін на 7 724 різних LaTeX-формулах (до кінця корпусного Nougat):
+
+| статус | формул |
+|---|---|
+| ok | 4 508 (58 %) |
+| parse_error | 2 412 |
+| multiline | 576 |
+| multiple | 141 |
+| degenerate | 73 |
+| trivial | 14 |
+
+4 457 структурних класів; 92 текстово різні формули збіглися структурно. Приклади класів, що
+об'єднують статті: коефіцієнт узгодженості AHP `CR = CI/RI` (8 статей), NDVI, NDWI, KGE,
+SCS-CN `S = 25400/CN − 254`, USLE `A = RKLSCP`. Решта parse_error — переважно обмеження й
+умови (`\leq`, `\in`, `\ldots`), інтеграли, функції від імен (`\mathit{Vid}(t)`) і зіпсований Nougat.
+25 517 рівнянь мають лише текст GROBID — для них лише текстовий хеш.

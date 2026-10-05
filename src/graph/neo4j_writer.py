@@ -578,12 +578,28 @@ class GraphWriter:
             e.purpose         = r.purpose,
             e.purpose_source  = r.purpose_source,
             e.section         = r.section,
-            e.mentions        = r.mentions
+            e.mentions        = r.mentions,
+            e.formula_text_hash       = r.formula_hash,
+            e.formula_structural_hash = r.structural_hash,
+            e.canonical_expression    = r.canonical_expression,
+            e.structure_status        = r.structure_status,
+            e.structure_symbols       = r.structure_symbols
         WITH e, r
         MATCH (p:Paper {paper_id: r.paper_id})
         MERGE (p)-[:HAS_EQUATION]->(e)
         """
         self._batch_write("Equation records", cypher, rows)
+        # EXACT equivalence class: Equation -[:HAS_STRUCTURE]-> FormulaStructure. A class node, not
+        # pairwise edges (a formula in 200 papers would need 19,900). After a parser change an
+        # old edge may remain: match on s.structural_hash = e.formula_structural_hash.
+        self._batch_write("Equation HAS_STRUCTURE", """
+        UNWIND $rows AS r
+        MATCH (e:Equation {eq_id: r.eq_id})
+        MERGE (s:FormulaStructure {structural_hash: r.structural_hash})
+        SET s.canonical_expression = r.canonical_expression, s.parser_version = r.parser_version
+        MERGE (e)-[h:HAS_STRUCTURE]->(s)
+        SET h.parser_version = r.parser_version
+        """, [r for r in rows if r.get("structural_hash")])
         # what the equation computes: Equation -[:COMPUTES]-> Quantity
         computes = [r for r in rows if r.get("computes")]
         self._batch_write("Equation COMPUTES", """

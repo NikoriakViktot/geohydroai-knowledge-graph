@@ -36,3 +36,7 @@ fastapi==0.141.0          # 0.142+ requires opentelemetry-api>=1.44, which break
 python-multipart>=0.0.9
 uvicorn>=0.30
 mcp==2.2.0                # MCP adapter at /mcp (src/api/mcp.py); 2.x API: mcp.server.mcpserver.MCPServer
+
+# ── Equation KG (docs_v2/EQUATION_KG_PLAN.md) ──────────────────────────────────
+sympy>=1.13
+antlr4-python3-runtime==4.11.*   # sympy.parsing.latex (antlr backend) for formula_structure.py

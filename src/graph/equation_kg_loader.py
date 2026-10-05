@@ -5,6 +5,8 @@ equation_kg_loader.py — equation_records.parquet → Neo4j.
     (Equation)-[:COMPUTES {derivative}]->(Quantity)      ← what the equation calculates
     (Equation)-[:HAS_PARAMETER]->(Parameter {symbol, description, unit, value, param_hash})
     (Parameter)-[:QUANTIFIES]->(Quantity {name})          ← search formulas by quantity
+    (Equation)-[:HAS_STRUCTURE]->(FormulaStructure {structural_hash, canonical_expression})
+                                                          ← EXACT equivalence (src/document/formula_structure.py)
     (Quantity)-[:NORMALIZED_TO {method, score}]->(QuantityConcept {canonical_id, dimension})
                                                           ← quantity ontology (src/ontology/quantities.json)
     (Equation)-[:EQUATION_GROUNDS_TO {formula_hash}]->(Method)
@@ -29,6 +31,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.document.formula_parameters import quantity_name
+from src.document.formula_structure import PARSER_VERSION, load_cache
 from src.ontology.quantities import check_dimension, ontology
 from src.ontology.quantity_map import resolve
 
@@ -91,6 +94,7 @@ def load(paper_ids: list[str] | None = None, dry_run: bool = False) -> dict:
     except Exception as exc:                     # the graph still gets equations and parameters
         log.warning("method extractor unavailable: %s", exc)
         extractor = None
+    structures = load_cache()
     for f in files:
         d = pd.read_parquet(f)
         for r in d.to_dict("records"):
@@ -100,7 +104,13 @@ def load(paper_ids: list[str] | None = None, dry_run: bool = False) -> dict:
             deriv = pur.startswith("rate of change of ")
             core = pur[len("rate of change of "):] if deriv else pur
             computes = quantity_name(core) if r.get("purpose_source") in ("lhs_definition",) else None
-            eq_rows.append({**r, "eq_id": eq_id, "computes": computes, "derivative": deriv})
+            st = structures.get(r["formula_hash"]) or {}
+            eq_rows.append({**r, "eq_id": eq_id, "computes": computes, "derivative": deriv,
+                            "structure_status": st.get("status") or ("no_latex" if not r.get("latex") else None),
+                            "structural_hash": st.get("structural_hash"),
+                            "canonical_expression": st.get("canonical_expression"),
+                            "structure_symbols": st.get("symbols"),
+                            "parser_version": PARSER_VERSION if st else None})
             for p in json.loads(r.get("parameters") or "[]"):
                 qname = quantity_name(p.get("description") or "")
                 qid = resolve(qname).quantity_id if qname else None
@@ -124,7 +134,8 @@ def load(paper_ids: list[str] | None = None, dry_run: bool = False) -> dict:
                                     | {r["computes"] for r in eq_rows if r["computes"]})
     stats = {"papers": len(files), "equations": len(eq_rows), "parameters": len(par_rows),
              "concept_edges": len(concept_rows), "quantity_links": len(links),
-             "dimension_mismatch": sum(r["dimension_check"] == "mismatch" for r in par_rows)}
+             "dimension_mismatch": sum(r["dimension_check"] == "mismatch" for r in par_rows),
+             "with_structure": sum(bool(r["structural_hash"]) for r in eq_rows)}
     log.info("equation records: %s", stats)
     if dry_run:
         return stats

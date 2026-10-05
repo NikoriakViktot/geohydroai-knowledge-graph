@@ -32,6 +32,7 @@ CONSTRAINTS: list[str] = [
     "CREATE CONSTRAINT parameter_id     IF NOT EXISTS FOR (n:Parameter)   REQUIRE n.param_id       IS UNIQUE",
     "CREATE CONSTRAINT quantity_name    IF NOT EXISTS FOR (n:Quantity)    REQUIRE n.name           IS UNIQUE",
     "CREATE CONSTRAINT quantity_concept IF NOT EXISTS FOR (n:QuantityConcept) REQUIRE n.canonical_id IS UNIQUE",
+    "CREATE CONSTRAINT formula_structure IF NOT EXISTS FOR (n:FormulaStructure) REQUIRE n.structural_hash IS UNIQUE",
 ]
 
 # ── Range indexes (for property lookups and ORDER BY) ─────────────────────────
@@ -39,6 +40,8 @@ CONSTRAINTS: list[str] = [
 INDEXES: list[str] = [
     "CREATE INDEX paper_year        IF NOT EXISTS FOR (n:Paper)   ON (n.year)",
     "CREATE INDEX parameter_quantity_id IF NOT EXISTS FOR (n:Parameter) ON (n.quantity_id)",
+    "CREATE INDEX equation_text_hash IF NOT EXISTS FOR (n:Equation) ON (n.formula_text_hash)",
+    "CREATE INDEX equation_structural_hash IF NOT EXISTS FOR (n:Equation) ON (n.formula_structural_hash)",
     # Title-only CITES stubs MERGE on title; without a range index each row scans
     # every Paper node (the full-text index below is not used by MERGE).
     "CREATE INDEX paper_title       IF NOT EXISTS FOR (n:Paper)   ON (n.title)",
