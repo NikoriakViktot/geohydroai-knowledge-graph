@@ -17,7 +17,9 @@ from src.contracts.api import Provenance
 TargetKind = Literal["paper", "section", "region", "formula", "table", "figure", "metric_fact", "entity_edge",
                      "claim_evidence", "thesis", "reference", "location",
                      # equation gold set (docs_v2/EQUATION_KG_PLAN.md, migration 0007)
-                     "equation", "parameter", "quantity_name", "equation_pair", "qa_item"]
+                     "equation", "parameter", "quantity_name", "equation_pair", "qa_item",
+                     # evaluation (migration 0008)
+                     "law_link", "qa_answer"]
 Verdict = Literal["correct", "incorrect", "partial", "unsure"]
 Problem = Literal["text_missing", "text_garbled", "table_broken", "formula_broken", "crop_wrong", "value_wrong",
                   "unit_wrong", "entity_wrong", "location_wrong", "metadata_wrong", "evidence_not_supporting", "other",

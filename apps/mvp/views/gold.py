@@ -21,7 +21,16 @@ RELATIONS = {"EXACT": "той самий запис (EXACT)", "ALGEBRAIC": "ал
              "DIFFERENT": "різні (DIFFERENT)", "UNCERTAIN": "не можу визначити (UNCERTAIN)"}
 SETS = {"Рівняння": ("equations.jsonl", "equation"), "Параметри": ("parameters.jsonl", "parameter"),
         "Назви величин": ("quantity_names.jsonl", "quantity_name"), "Пари рівнянь": ("equation_pairs.jsonl", "equation_pair"),
-        "Факти метрик": ("metric_facts.jsonl", "metric_fact"), "Питання (QA)": ("qa_items.jsonl", "qa_item")}
+        "Факти метрик": ("metric_facts.jsonl", "metric_fact"), "Закони": ("law_links.jsonl", "law_link"),
+        "Питання (QA)": ("qa_items.jsonl", "qa_item"), "Відповіді (QA)": ("", "qa_answer")}
+OTHER = "— немає в онтології —"
+
+
+@st.cache_data(show_spinner=False)
+def concepts() -> dict[str, str]:
+    """quantity_id → 'label (dimension)' from src/ontology/quantities.json."""
+    data = json.loads((ROOT / "src" / "ontology" / "quantities.json").read_text())
+    return {q["id"]: f"{q['label']} ({q.get('dimension_text') or '—'})" for q in data["quantities"]}
 
 st.title("🥇 Еталонний набір рівнянь")
 st.caption("Розмічає лише людина. Кожна позначка — новий запис у шарі правди; виправлення — нова позначка. "
@@ -113,6 +122,16 @@ if kind == "qa_item":
         st.error(f"{exc.status} {exc.code}: {exc.detail}")
     st.stop()
 
+# ── answers of the QA systems: judged blind (the system is not shown) ──────────
+if kind == "qa_answer":
+    runs = sorted((GOLD / ver / "qa_runs").glob("*/answers.jsonl"))
+    if not runs:
+        st.info("Відповідей ще немає: `python -m src.evaluation.qa_experiment --gold <версія>` після того, "
+                "як додано питання.")
+        st.stop()
+    run = st.selectbox("Прогін", runs, format_func=lambda x: x.parent.name, index=len(runs) - 1)
+    items = [json.loads(line) for line in run.open()]
+
 if not items:
     st.info("У цій версії набір порожній.")
     st.stop()
@@ -180,11 +199,16 @@ elif kind == "quantity_name":
     st.caption(check_badge(prev))
     with st.form(f"q:{tid}"):
         v = st.radio("Це назва фізичної/наукової величини?", list(VERDICTS), format_func=VERDICTS.get, horizontal=True)
-        canon = st.text_input("Канонічна назва величини (англ., як в онтології)", tid)
+        opts = [OTHER] + sorted(concepts(), key=lambda k: concepts()[k])
+        qid = st.selectbox("Поняття величини в онтології", opts,
+                           format_func=lambda k: k if k == OTHER else f"{concepts()[k]} · {k}")
+        canon = st.text_input("Якщо немає в онтології: канонічна назва (англ.)", "")
         dim = st.text_input("Розмірність, напр. L3 T-1 (або 1 для безрозмірної)", "")
         unit = st.text_input("Типова одиниця, напр. m3 s-1", "")
         if st.form_submit_button("Зберегти", type="primary"):
-            save(kind, tid, "canonical", v, corrected={"quantity": canon, "dimension": dim, "unit": unit},
+            save(kind, tid, "canonical", v,
+                 corrected={"quantity_id": None if qid == OTHER else qid, "quantity": canon or None,
+                            "dimension": dim, "unit": unit},
                  problem=None if v == "correct" else "quantity_wrong", prev=prev)
 
 elif kind == "equation_pair":
@@ -205,6 +229,50 @@ elif kind == "equation_pair":
             save(kind, tid, "relation", "correct" if sure and rel != "UNCERTAIN" else "unsure",
                  corrected={"relation": rel}, note=note, shown={"a": it["a"]["equation_id"], "b": it["b"]["equation_id"]},
                  prev=prev)
+
+elif kind == "law_link":
+    show_equation(it["equation"])
+    law = it["law"]
+    st.markdown(f"### Чи це рівняння — екземпляр закону «{law['name']}»?")
+    st.caption(f"{law.get('kind')} · {law.get('reference')}")
+    for f in law["forms"]:
+        st.latex(f["latex"])
+        if f.get("variant"):
+            st.caption(f"варіант: {f['variant']}")
+    prev = checks.get((tid, "instance"))
+    st.caption(check_badge(prev) + (f" · {(prev.get('corrected') or {}).get('instance')}" if prev else ""))
+    with st.form(f"law:{tid}"):
+        inst = st.radio("Відповідь", ["yes", "no", "unsure"],
+                        format_func={"yes": "так, екземпляр (можливо, в інших позначеннях)",
+                                     "no": "ні", "unsure": "не можу визначити"}.get)
+        variants = [f.get("variant") for f in law["forms"] if f.get("variant")]
+        var = st.selectbox("Варіант (якщо так)", ["—"] + variants + ["інший"]) if variants else "—"
+        note = st.text_input("Нотатка (напр. «модифікована форма», «лише згадка»)", "")
+        if st.form_submit_button("Зберегти", type="primary"):
+            save(kind, tid, "instance", "correct" if inst != "unsure" else "unsure",
+                 corrected={"instance": inst, "variant": None if var == "—" else var}, note=note, paper_id=pid,
+                 shown={"law_id": law["law_id"]}, prev=prev)
+
+elif kind == "qa_answer":
+    st.markdown(f"### Питання\n{it['question']}")
+    with st.expander("Еталонна відповідь і докази"):
+        st.write(it.get("reference_answer"))
+        st.caption("; ".join(it.get("reference_evidence") or []))
+    st.markdown("#### Відповідь системи")
+    st.write(it.get("answer"))
+    for c in it.get("citations") or []:
+        st.caption(f"· {c}")
+    prev = checks.get((tid, "answer"))
+    st.caption(check_badge(prev))
+    with st.form(f"qa:{tid}"):
+        cor = st.radio("Відповідь правильна?", ["yes", "partly", "no"], horizontal=True)
+        cit = st.radio("Цитування підтверджують відповідь?", ["yes", "partly", "no"], horizontal=True)
+        comp = st.radio("Докази повні?", ["yes", "partly", "no"], horizontal=True)
+        note = st.text_input("Нотатка", "")
+        if st.form_submit_button("Зберегти", type="primary"):
+            v = {"yes": "correct", "partly": "partial", "no": "incorrect"}[cor]
+            save(kind, tid, "answer", v, corrected={"correct": cor, "citations_correct": cit, "evidence_complete": comp},
+                 note=note, shown={"run": run.parent.name}, prev=prev)
 
 elif kind == "metric_fact":
     sysv = it.get("system") or {}

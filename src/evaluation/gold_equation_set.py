@@ -8,6 +8,9 @@ Writes data/gold/equation_kg_<version>/:
     parameters.jsonl      the parameters of those equations (capped at 800)
     quantity_names.jsonl  200 surface quantity names: 100 most frequent + 100 from the tail
     equation_pairs.jsonl  150 pairs: 50 likely equivalent, 50 random, 50 hard negatives
+    law_links.jsonl       150 equation–law pairs: 60 accepted links, 60 candidates, 30 equations whose
+                          text names a law without a link (recall); the annotator sees neither score
+                          nor category (both are in the manifest)
     metric_facts.jsonl    150 NumericFacts, stratified by metric
     qa_items.jsonl        empty template: questions are written by a person
     MANIFEST.json         seed, source snapshot, sha256 of every file
@@ -43,6 +46,7 @@ SEED = 20261005
 
 N_EQUATIONS, N_PARAMS, N_QNAMES, N_FACTS = 300, 800, 200, 150
 N_PAIRS = {"likely_equivalent": 50, "random": 50, "hard_negative": 50}
+N_LAW_LINKS = {"accepted": 60, "candidate": 60, "unlinked_cue": 30}
 FAMILIES = {   # keyword families for hard negatives: near formulas of different laws
     "flow_resistance": r"manning|chezy|ch[ée]zy|darcy|weisbach|roughness|friction",
     "infiltration":    r"green.?ampt|horton|philip|infiltration",
@@ -164,6 +168,58 @@ def sample_pairs(d: pd.DataFrame, rng: random.Random) -> list[dict]:
     return pairs
 
 
+def _round_robin(groups: dict[str, list], n: int, rng: random.Random) -> list:
+    """Up to n items taking one from each group in turn (so one frequent law cannot fill the stratum)."""
+    pools = {k: v[:] for k, v in groups.items()}
+    for v in pools.values():
+        rng.shuffle(v)
+    out, keys = [], sorted(pools)
+    while len(out) < n and any(pools.values()):
+        for k in keys:
+            if pools[k] and len(out) < n:
+                out.append(pools[k].pop())
+    return out
+
+
+def sample_law_links(d: pd.DataFrame, rng: random.Random) -> tuple[list[dict], dict]:
+    """Equation–law pairs for calibrating the law score (src/ontology/laws.py), and the size of each
+    stratum's population (the evaluator weights by it to estimate corpus-wide precision and recall)."""
+    from src.ontology.laws import out_path, registry, s_text
+    if not out_path().exists():
+        print(f"law links skipped: {out_path()} not built", file=sys.stderr)
+        return [], {}
+    links = pd.read_parquet(out_path())
+    eq_ids = set(d.equation_id)
+    links = links[links.eq_id.isin(eq_ids)]
+    picked = []
+    for status in ("accepted", "candidate"):
+        groups: dict[str, list] = collections.defaultdict(list)
+        for r in links[links.status == status].itertuples():
+            groups[r.law_id].append((r.eq_id, r.law_id))
+        picked += [(e, l, status) for e, l in _round_robin(groups, N_LAW_LINKS[status], rng)]
+    linked = set(zip(links.eq_id, links.law_id))
+    groups = collections.defaultdict(list)
+    cols = ["equation_id", "lead_in", "purpose", "section", "mentions", "clause"]
+    for r in d[cols].itertuples(index=False):
+        row = {k: (v if isinstance(v, str) else None) for k, v in zip(cols, r)}
+        for law in registry()["laws"]:
+            if (row["equation_id"], law["id"]) not in linked and s_text(law["id"], row) >= 0.6:
+                groups[law["id"]].append((row["equation_id"], law["id"]))
+    picked += [(e, l, "unlinked_cue") for e, l in _round_robin(groups, N_LAW_LINKS["unlinked_cue"], rng)]
+    population = {"accepted": int((links.status == "accepted").sum()), "candidate": int((links.status == "candidate").sum()),
+                  "unlinked_cue": int(sum(len(v) for v in groups.values()))}
+    return [{"eq": e, "law": l, "category": c} for e, l, c in picked], population
+
+
+def law_item(eq_snapshot: dict, law_id: str) -> dict:
+    from src.ontology.laws import registry
+    law = next(x for x in registry()["laws"] if x["id"] == law_id)
+    return {"target_kind": "law_link", "target_id": f"{eq_snapshot['equation_id']}||{law_id}",
+            "paper_id": eq_snapshot["paper_id"], "equation": eq_snapshot,
+            "law": {"law_id": law_id, "name": law["name"], "kind": law.get("kind"), "reference": law.get("reference"),
+                    "forms": [{"latex": f["latex"], "variant": f.get("variant")} for f in law["forms"]]}}
+
+
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -211,6 +267,10 @@ def main(argv: list[str] | None = None) -> int:
                    "a": snapshot(by_id.loc[p["a"]]), "b": snapshot(by_id.loc[p["b"]])} for p in pairs]
     rng.shuffle(pair_items)
 
+    law_links, law_population = sample_law_links(d, rng)
+    law_items = [law_item(snapshot(by_id.loc[x["eq"]]), x["law"]) for x in law_links]
+    rng.shuffle(law_items)
+
     facts = []
     try:
         from neo4j import GraphDatabase
@@ -234,6 +294,7 @@ def main(argv: list[str] | None = None) -> int:
     summary = {
         "equations": len(equations), "parameters": len(params), "quantity_names": len(qnames),
         "equation_pairs": dict(collections.Counter(p["category"] for p in pairs)), "metric_facts": len(facts),
+        "law_links": dict(collections.Counter(x["category"] for x in law_links)),
         "equation_strata": eq.groupby(["publisher", "source", "has_params"]).size().to_dict(),
     }
     print(json.dumps({k: (v if k != "equation_strata" else {"|".join(map(str, kk)): vv for kk, vv in v.items()})
@@ -257,8 +318,11 @@ def main(argv: list[str] | None = None) -> int:
         freeze_png(it["equation"])
     for it in pair_items:
         freeze_png(it["a"]); freeze_png(it["b"])
+    for it in law_items:
+        freeze_png(it["equation"])
     files = {"equations.jsonl": equations, "parameters.jsonl": params, "quantity_names.jsonl": qnames,
-             "equation_pairs.jsonl": pair_items, "metric_facts.jsonl": facts, "qa_items.jsonl": []}
+             "equation_pairs.jsonl": pair_items, "metric_facts.jsonl": facts, "law_links.jsonl": law_items,
+             "qa_items.jsonl": []}
     for name, rows in files.items():
         with open(out / name, "w") as fh:
             for r in rows:
@@ -268,6 +332,8 @@ def main(argv: list[str] | None = None) -> int:
         "version": args.version, "seed": SEED, "created_at": datetime.now(timezone.utc).isoformat(),
         "git_commit": commit, "source": {"equations_total": len(d), "papers": int(d.paper_id.nunique())},
         "pair_categories": {f"{p['a']}||{p['b']}": p["category"] for p in pairs},
+        "law_link_categories": {f"{x['eq']}||{x['law']}": x["category"] for x in law_links},
+        "law_link_population": law_population,
         "files": {name: sha256(out / name) for name in files},
     }
     (out / "MANIFEST.json").write_text(json.dumps(manifest, indent=1, ensure_ascii=False))
