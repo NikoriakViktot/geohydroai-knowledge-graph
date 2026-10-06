@@ -68,6 +68,14 @@ The workbench step `init` writes `.mcp.json` and a section of the repository's `
 | `papers_with_entity` | `{label, canonical_id, year_from?, year_to?, min_confidence?, role?, grounded?, limit?, cursor?}` | papers + evidence | `GET /graph/entities/{label}/{canonical_id}/papers` |
 | `graph_queries` | `{}` | catalogue of named read-only queries | `GET /graph/queries` |
 | `run_graph_query` | `{name, params?, limit?}` | rows | `POST /graph/queries/{name}` |
+| `find_equations` | `{quantity?, law?, law_status?, paper?, structural_hash?, q?, has_code?, limit?, cursor?}` | `EquationSummary[]` | `GET /equations/search` |
+| `get_equation` | `{eq_id, include?}` | equation, parameters, laws, equivalents, code | `GET /equations/{eq_id}` |
+| `equation_chain` | `{eq_id}` | paper → parameters → quantities → laws → metric → reported values | `GET /equations/{eq_id}/chain` |
+| `quantity_concepts` | `{q?, kind?, limit?}` | quantity concepts with dimensions | `GET /quantities` |
+| `get_quantity` | `{quantity_id}` | surface names, units, laws | `GET /quantities/{quantity_id}` |
+| `normalize_quantities` | `{items: [{name, unit?}] ≤ 200}` | concept + dimension check | `POST /quantities/normalize` |
+| `list_laws` | `{}` | law registry with counts | `GET /laws` |
+| `get_law` | `{law_id, status?, limit?, cursor?}` | forms, code, instances with evidence | `GET /laws/{law_id}` |
 
 All of them are marked read-only. `locate_paper`, `resolve_doi`, `verify_bib_entries`, `format_bib` and `audit_bib` may ask the registries (Crossref, DataCite, OpenAlex, Unpaywall) through the API's cache.
 

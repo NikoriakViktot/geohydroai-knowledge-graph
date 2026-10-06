@@ -199,8 +199,9 @@ def prepare(latex: str) -> tuple[str | None, str]:
 
 @contextmanager
 def _time_limit(seconds: int):
-    if seconds <= 0 or not hasattr(signal, "SIGALRM"):
-        yield
+    import threading
+    if seconds <= 0 or not hasattr(signal, "SIGALRM") or threading.current_thread() is not threading.main_thread():
+        yield                       # SIGALRM works only in the main thread (API requests run in a pool)
         return
 
     def _raise(*_):

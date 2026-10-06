@@ -81,6 +81,11 @@ def symbol_key(sym: str | None) -> str:
     """Parameter symbol → the name formula_structure gives it: N_{h,max} → N_hmax, l(\\theta) → l."""
     s = re.sub(r"\(.*\)$", "", sym or "")
     s = re.sub(r"\\(?:mathrm|text|rm|mathit)\s*", "", s)
+    # accents as formula_structure names them: \bar{O} → O_bar, \hat{y}_{i} → y_hati
+    acc = re.match(r"\\(bar|overline|hat|widehat|tilde|widetilde|dot)\s*\{?\s*(\\?[A-Za-z]+)\s*\}?(?:_\s*\{?([^{}]*)\}?)?$", s.strip())
+    if acc:
+        kind = {"overline": "bar", "widehat": "hat", "widetilde": "tilde"}.get(acc.group(1), acc.group(1))
+        return acc.group(2).lstrip("\\") + "_" + kind + re.sub(r"[{}\s\\,]", "", acc.group(3) or "")
     return re.sub(r"[{}\s\\,]", "", s)
 
 

@@ -73,6 +73,14 @@ TOOL_ENDPOINTS: dict[str, tuple[str, str]] = {
     "papers_with_entity": ("GET", "/graph/entities/{label}/{canonical_id}/papers"),
     "graph_queries": ("GET", "/graph/queries"),
     "run_graph_query": ("POST", "/graph/queries/{name}"),
+    "find_equations": ("GET", "/equations/search"),
+    "get_equation": ("GET", "/equations/{eq_id}"),
+    "equation_chain": ("GET", "/equations/{eq_id}/chain"),
+    "quantity_concepts": ("GET", "/quantities"),
+    "get_quantity": ("GET", "/quantities/{quantity_id}"),
+    "normalize_quantities": ("POST", "/quantities/normalize"),
+    "list_laws": ("GET", "/laws"),
+    "get_law": ("GET", "/laws/{law_id}"),
 }
 LOCAL_HOSTS = ["127.0.0.1:*", "localhost:*", "[::1]:*"]
 LOCAL_ORIGINS = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"]
@@ -489,6 +497,71 @@ def build_server(api: Any) -> MCPServer:
                               limit: Annotated[int, Field(ge=1, le=1000)] = 100) -> dict[str, Any]:
         """Run one named graph query from graph_queries."""
         return await rest(ctx, "POST", f"graph/queries/{name}", body={"params": params or {}, "limit": limit})
+
+    # ── equations, quantities, laws ───────────────────────────────────────────
+    @server.tool(annotations=READ)
+    async def find_equations(ctx: Context,
+                             quantity: Annotated[str | None, Field(description="concept id (quantity.discharge) or a name")] = None,
+                             law: Annotated[str | None, Field(description="law id from list_laws, e.g. law.manning")] = None,
+                             law_status: Literal["accepted", "candidate", "any"] = "accepted",
+                             paper: str | None = None, structural_hash: str | None = None,
+                             q: Annotated[str | None, Field(description="text in the equation's purpose, lead-in or section")] = None,
+                             has_code: bool = False, limit: Annotated[int, Field(ge=1, le=500)] = 50,
+                             cursor: str | None = None) -> dict[str, Any]:
+        """Equations by the quantity a parameter measures, the law they instantiate, the paper, the structure or
+        text. Machine links (R-SCI-6); count papers, not equations, with the denominator (R-SCI-7)."""
+        return await rest(ctx, "GET", "equations/search",
+                          params={"quantity": quantity, "law": law, "law_status": law_status, "paper": paper,
+                                  "structural_hash": structural_hash, "q": q, "has_code": has_code or None,
+                                  "limit": limit, "cursor": cursor})
+
+    @server.tool(annotations=READ)
+    async def get_equation(ctx: Context, eq_id: Annotated[str, Field(description="paper_id:xml_id")],
+                           include: str | None = None) -> dict[str, Any]:
+        """One equation: raw LaTeX and the PNG of its box, parameters with units, quantity concepts and dimension
+        checks, structure and equivalents, law links with evidence, and Python/Julia code annotated for it.
+        The code translates the extracted formula; check the PNG before quoting the formula."""
+        return await rest(ctx, "GET", f"equations/{eq_id}", params={"include": include})
+
+    @server.tool(annotations=READ)
+    async def equation_chain(ctx: Context, eq_id: Annotated[str, Field(description="paper_id:xml_id")]) -> dict[str, Any]:
+        """The provenance chain of an equation: paper and page → parameters → quantity concepts → laws →
+        method/metric → values the same paper reports for that metric (table, page, cell)."""
+        return await rest(ctx, "GET", f"equations/{eq_id}/chain")
+
+    @server.tool(annotations=READ)
+    async def quantity_concepts(ctx: Context, q: str | None = None,
+                                kind: Literal["physical", "statistical", "model", "mathematical"] | None = None,
+                                limit: Annotated[int, Field(ge=1, le=500)] = 200) -> dict[str, Any]:
+        """The quantity concepts with dimensions (L, M, T, Θ), typical units and how many parameters use them."""
+        return await rest(ctx, "GET", "quantities", params={"q": q, "kind": kind, "limit": limit})
+
+    @server.tool(annotations=READ)
+    async def get_quantity(ctx: Context, quantity_id: str) -> dict[str, Any]:
+        """One quantity concept: surface names that map to it, units seen with their dimension check, laws."""
+        return await rest(ctx, "GET", f"quantities/{quantity_id}")
+
+    @server.tool(annotations=READ)
+    async def normalize_quantities(ctx: Context,
+                                   items: Annotated[list[dict[str, str | None]],
+                                                    Field(min_length=1, max_length=200,
+                                                          description='[{"name": "flow depth", "unit": "m"}]')]
+                                   ) -> dict[str, Any]:
+        """Map quantity names (and units) to concepts and check each unit's dimension."""
+        return await rest(ctx, "POST", "quantities/normalize", body={"items": items})
+
+    @server.tool(annotations=READ)
+    async def list_laws(ctx: Context) -> dict[str, Any]:
+        """The law registry (metrics, hydraulic and hydrological relations, indices, distributions) with the number
+        of linked equations and papers, the score weights and thresholds."""
+        return await rest(ctx, "GET", "laws")
+
+    @server.tool(annotations=READ)
+    async def get_law(ctx: Context, law_id: str, status: Literal["accepted", "candidate", "any"] = "accepted",
+                      limit: Annotated[int, Field(ge=1, le=500)] = 50, cursor: str | None = None) -> dict[str, Any]:
+        """One law: reference forms and variants with verified Python and Julia code, its quantities, and the
+        equations linked to it with every evidence component."""
+        return await rest(ctx, "GET", f"laws/{law_id}", params={"status": status, "limit": limit, "cursor": cursor})
 
     # ── resources: the documentation, as served at /v1/docs/pages ─────────────
     for page in docs_loader.page_names():
