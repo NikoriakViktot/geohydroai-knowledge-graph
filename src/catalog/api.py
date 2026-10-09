@@ -141,8 +141,8 @@ def create_app(snapshot: Snapshot | None = None, key_hashes: set[str] | None = N
     @app.get("/llms.txt", response_class=PlainTextResponse)
     def llms_txt() -> str:
         return ("# GeoHydroAI paper catalog\n\n> Links to papers and a short, quality-filtered analysis of each.\n\n"
-                "- [Agent guide](/agent-guide): authentication, endpoints, card fields, citation rules\n"
-                "- [OpenAPI](/openapi.json)\n")
+                "- [Agent guide](agent-guide): authentication, endpoints, card fields, citation rules\n"
+                "- [OpenAPI](openapi.json)\n")
 
     @app.get("/v1/release", dependencies=v1)
     def release() -> dict:

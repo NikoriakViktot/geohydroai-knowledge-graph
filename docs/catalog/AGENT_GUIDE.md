@@ -37,15 +37,15 @@ The catalog serves one **card** per paper of the GeoHydroAI corpus (flood mappin
 
 | Item | Value |
 |---|---|
-| Base URL | given by the operator, e.g. `https://catalog.example.org` or `http://catalog:8095` on a private network |
+| Base URL | `https://geohydroai.org/catalog` (all paths below are relative to it: `https://geohydroai.org/catalog/v1/cards`) |
 | Auth | header `X-API-Key: <key>` on every `/v1/*` request, if the server has keys enabled. `/health`, `/agent-guide`, `/llms.txt`, `/openapi.json` are open |
 | Format | JSON, UTF-8. Read-only: there are only `GET` endpoints |
-| Machine description | `GET /openapi.json` (OpenAPI 3), interactive docs at `/docs` |
+| Machine description | `GET /openapi.json` (OpenAPI 3), interactive docs at `/docs`; requests are `GET` only |
 | Rate | no hard limit; keep ≤ 10 requests/s and page with `limit` ≤ 200 |
 
 **Where the key lives:**
 
-- Store it in an environment variable, e.g. `CATALOG_API_KEY`, and the base URL in `CATALOG_API_URL`.
+- Store it in an environment variable, e.g. `CATALOG_API_KEY`, and the base URL in `CATALOG_API_URL=https://geohydroai.org/catalog`.
 - **MUST NOT** print the key, write it into files under version control, or include it in answers.
 
 **First call** — check that the server is up and which snapshot it serves:

@@ -1,0 +1,30 @@
+# Catalog API next to geoai-nginx on the geoai server. No published port: nginx reaches it
+# as http://catalog-api:8095 over the existing docker network geoai_web.
+#
+#   CATALOG_HOME=/home/ubuntu/geoai-catalog docker compose -f deploy/catalog/docker-compose.yml up -d --build
+services:
+  catalog-api:
+    build:
+      context: ../..
+      dockerfile: deploy/catalog/Dockerfile
+    image: geoai-catalog:latest
+    container_name: catalog-api
+    restart: unless-stopped
+    # CATALOG_API_KEY_HASHES=<sha256>,<sha256> (mode 600); empty = open API
+    env_file: ${CATALOG_HOME:-/home/ubuntu/geoai-catalog}/catalog.env
+    volumes:
+      # data/current -> releases/<snapshot> (relative symlink, resolves inside the mount)
+      - ${CATALOG_HOME:-/home/ubuntu/geoai-catalog}/data:/data:ro
+    networks: [geoai_web]
+    read_only: true
+    tmpfs: [/tmp]
+    mem_limit: 768m
+    cpus: 1.0
+    security_opt: ["no-new-privileges:true"]
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+networks:
+  geoai_web:
+    external: true
