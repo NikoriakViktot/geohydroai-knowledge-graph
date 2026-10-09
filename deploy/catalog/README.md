@@ -48,15 +48,13 @@ docker exec geoai-nginx curl -s http://catalog-api:8095/health      # {"status":
 
 ### nginx (наявний `geoai-nginx`)
 
-1. Вставте [`nginx-catalog.conf`](nginx-catalog.conf) у блок `listen 443` домену `geohydroai.org` у `~/geoai/services/nginx/nginx.conf`. Це репозиторій `GeoHydroAI-V2`; закомітьте зміну там.
-2. Перевірте конфіг і перезавантажте nginx без простою:
+Маршрут `/catalog/` (лише GET/HEAD, `catalog-api:8095`, upstream через змінну) описано **тільки** в
+GeoHydroAI-V2 `services/nginx/nginx.conf` — єдиному джерелі правди для `geoai-nginx`. Сніпетів у цьому
+репозиторії немає. Правила й порядок змін: https://github.com/NikoriakViktot/GeoHydroAI-V2/blob/main/services/nginx/README.md.
 
 ```bash
-docker exec geoai-nginx nginx -t && docker exec geoai-nginx nginx -s reload
 curl -s https://geohydroai.org/catalog/health
 ```
-
-Апстрім задано змінною, а `resolver 127.0.0.11` уже є, тому nginx стартує, навіть коли `catalog-api` зупинено. Тоді `/catalog/` повертає 502.
 
 ---
 
