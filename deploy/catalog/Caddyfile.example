@@ -1,0 +1,9 @@
+# /etc/caddy/Caddyfile — public HTTPS in front of the API (skip when the server is reached over Tailscale only)
+catalog.example.org {
+    encode gzip
+    reverse_proxy 127.0.0.1:8095
+    header {
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options nosniff
+    }
+}

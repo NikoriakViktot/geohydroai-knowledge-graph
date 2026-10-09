@@ -1,0 +1,83 @@
+# Quality rules for the published paper catalog (src/catalog/quality.py).
+# Bump `version` whenever a rule changes: every snapshot records the version it was built with.
+version: catalog-rules-v1
+
+identity:
+  min_title_chars: 10
+  # a card without a DOI or an OpenAlex link is not published (the server holds links)
+  require_link: true
+  excluded_identity_statuses: [duplicate, not_a_paper]
+  # identity under doubt: the card is published, the DOI link is not
+  doubtful_identity_statuses: [title_doi_mismatch]
+  max_authors: 10
+
+entities:
+  # roles from the extractor; "mentioned" = named in passing, not used in the study
+  show_roles: [used, terrain_input]
+  min_final_score: 0.5
+  min_normalized_confidence: 0.6
+  # acronyms that collide with other senses ("ML" = machine learning / maximum likelihood, "CV" =
+  # coefficient of variation, "SCS" ≠ Spectral Correlation Similarity in a hydrology corpus): shown only
+  # when the concept's long form stands in the evidence. Chosen from entity_grounding.parquet, where the
+  # long form was found in < 70 % of grounded mentions or the sense is a common word (2026-10-09).
+  ambiguous_acronyms:
+    - method.ml
+    - method.cv
+    - method.nn
+    - method.rt
+    - method.dm
+    - method.lm
+    - method.ls
+    - method.cr
+    - method.scs
+    - method.sma
+    - method.sti
+    - method.pcc
+    - method.dt
+    - method.da
+    - method.vi
+    - method.et
+    - method.dss
+    - sensor.ali        # "Ali" is a frequent author name
+  long_form_min_chars: 5
+  max_per_kind: 12
+  # common words matched as ontology concepts (gamma distribution ≠ gamma correction, "to transform")
+  generic_ids:
+    - method.accuracy_assessment
+    - method.transform
+    - method.histogram
+    - method.gamma
+    - method.delta
+    - method.hydrological_model
+    - sensor.radar
+    - sensor.radiometer
+
+countries:
+  # "ner" picks up author names and software ("ArcGIS", "Congalton"): never shown
+  sources: [regex_study_text, ollama_judge]
+  require_name_in_evidence: true
+  # "United States Geological Survey" names an agency, not a study area
+  organisation_after_name: '\s+(Geological|Army|Department|National|Agency|Institute|Bureau|Environmental|Space|Air\s+Force)'
+  max: 8
+  author_country_min_confidence: 0.9
+
+labels:
+  # task / study_type come from keyword rules with a constant confidence (0.9) and are often wrong
+  # ("flow resistance with submerged vegetation" → flood_mapping_satellite). Not published until a
+  # human-checked sample shows they hold; the card says they were withheld.
+  publish: []          # e.g. [task, study_type]
+  min_confidence: 0.6
+  hidden_values: [unknown, other, none]
+
+topics:
+  min_score: 0.9
+  max: 3
+
+results:
+  min_confidence: 0.7
+  # the value must lie in the metric's known range (src/extraction/metric_ontology.METRIC_RANGES)
+  require_range_ok: true
+  # a metric with a physical unit (RMSE, MAE …) is hidden when the table gives no recognised unit
+  require_unit_for_dimensional: true
+  max_context_chars: 80
+  max: 12
